@@ -4,8 +4,8 @@ This is a Frontend for Ledja Job Matching Web application
 
 -   Make sure node and NPM are installed
 -   Clone the github repository
--   run **npm install** to install dependancies
--   run **npm run dev** to serve the application locally
+-   run _npm install_ to install dependancies
+-   run _npm run dev_ to serve the application locally
 
 ### Live Demo
 
