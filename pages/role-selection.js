@@ -17,12 +17,12 @@ export default function RoleSelection() {
                     <PrimaryBtn
                         className="mr-3"
                         text="I'm a job seeker"
-                        path="/register"
+                        path="/signup"
                     />
                     <PrimaryBtn
                         className="ml-3"
                         text="I'm a recruiter"
-                        path="/register"
+                        path="/signup"
                     />
                 </div>
             </div>
