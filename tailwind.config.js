@@ -21,6 +21,7 @@ module.exports = {
                 },
                 "my-gray": {
                     50: "#E7EDF2",
+                    70: "#66737F",
                 },
                 dark: {
                     50: "#050F19",

@@ -9,3 +9,30 @@ body {
 * {
     box-sizing: border-box;
 }
+
+.back-btn {
+    @apply w-max py-2 px-6 bg-white text-primary-70 text-lg cursor-pointer flex flex-nowrap justify-between items-center border border-primary-70 border-solid rounded-lg ml-20 mt-10;
+}
+
+.form {
+    @apply w-full  m-auto;
+}
+
+.form-title {
+    @apply w-full font-medium text-xl text-dark-50 text-center my-10;
+}
+
+.form-input-container {
+    @apply py-4;
+}
+.form-label {
+    @apply text-dark-50 font-semibold;
+}
+
+.form-input {
+    @apply text-dark-50 outline outline-1 outline-my-gray-50 focus:outline-primary-60 w-full px-4 py-2 placeholder:text-my-gray-70 rounded-sm mt-3;
+}
+
+.submit-btn {
+    @apply bg-primary-70 hover:bg-primary-60 text-white px-6 py-2 rounded-lg my-4 block mx-auto;
+}
