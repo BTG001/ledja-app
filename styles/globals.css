@@ -23,16 +23,37 @@ body {
 }
 
 .form-input-container {
-    @apply py-4;
+    @apply py-2;
 }
+
 .form-label {
     @apply text-dark-50 font-semibold;
 }
 
+.form-label-light {
+    @apply text-dark-50;
+}
+
+.form-label-required {
+    @apply after:content-['*'] after:ml-0.5 after:text-dark-50 block text-sm font-medium;
+}
+
 .form-input {
-    @apply text-dark-50 outline outline-1 outline-my-gray-50 focus:outline-primary-60 w-full px-4 py-2 placeholder:text-my-gray-70 rounded-sm mt-3;
+    @apply text-dark-50 outline outline-1 outline-my-gray-70 focus:outline-primary-60 w-full px-4 py-1 placeholder:text-my-gray-70 placeholder:text-sm rounded-sm mt-3;
+}
+
+.form-input-with-icon {
+    @apply outline-none border-none focus:outline-none focus:border-none text-dark-50  w-full px-4 py-1 placeholder:text-my-gray-70 placeholder:text-sm;
 }
 
 .submit-btn {
     @apply bg-primary-70 hover:bg-primary-60 text-white px-6 py-2 rounded-lg my-4 block mx-auto;
+}
+
+.submit-btn-left {
+    @apply bg-primary-70 hover:bg-primary-60 text-white px-6 py-2 rounded-lg my-4;
+}
+
+.submit-btn-secondary {
+    @apply bg-white text-primary-70 px-6 py-2 rounded-lg my-4 border border-solid border-primary-70 hover:border-primary-60 rounded-lg;
 }

@@ -44,6 +44,7 @@ module.exports = {
                 "30-screen": "30vh",
                 "20-screen": "20vh",
                 "10-screen": "10vh",
+                "1-px": "1px",
             },
             maxHeight: {
                 "90-screen": "90vh",

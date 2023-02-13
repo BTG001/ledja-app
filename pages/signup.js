@@ -8,6 +8,23 @@ import { useEffect } from "react";
 export default function login() {
     const router = useRouter();
 
+    const { role } = router.query;
+
+    useEffect(() => {
+        if (!role) {
+            router.back();
+        }
+    }, []);
+
+    const afterSubmit = (e) => {
+        e.preventDefault();
+        if (role == "recruiter") {
+            router.push("/recruiter/profile-setup/step1");
+        } else {
+            router.push("/job-seeker/profile-setup/step1");
+        }
+    };
+
     return (
         <>
             <LogoNavbar />
@@ -22,7 +39,7 @@ export default function login() {
             </p>
             <div className="w-4/5 md:w-1/2 lg:w-1/3 mx-auto my-5 min-h-80-screen mb-24">
                 <h3 className="form-title">Create your account</h3>
-                <form className="form">
+                <form className="form" onSubmit={afterSubmit}>
                     <div className="form-input-container">
                         <label className="form-label" for="email">
                             Email Address
@@ -65,7 +82,11 @@ export default function login() {
                         </p>
                     </div>
 
-                    <input className="submit-btn" type={"submit"} />
+                    <input
+                        className="submit-btn"
+                        type={"submit"}
+                        value="Sign up"
+                    />
                 </form>
                 <p className="text-center">
                     <span className="text-sm text-dark-50 mr-4">

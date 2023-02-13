@@ -45,7 +45,11 @@ export default function login() {
                         />
                     </div>
 
-                    <input className="submit-btn" type={"submit"} />
+                    <input
+                        className="submit-btn"
+                        type={"submit"}
+                        value="Login"
+                    />
                 </form>
                 <p className="text-center">
                     <span className="text-sm text-dark-50 mr-4">

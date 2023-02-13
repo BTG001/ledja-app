@@ -18,11 +18,13 @@ export default function RoleSelection() {
                         className="mr-3"
                         text="I'm a job seeker"
                         path="/signup"
+                        data={{ role: "job-seeker" }}
                     />
                     <PrimaryBtn
                         className="ml-3"
                         text="I'm a recruiter"
                         path="/signup"
+                        data={{ role: "recruiter" }}
                     />
                 </div>
             </div>
