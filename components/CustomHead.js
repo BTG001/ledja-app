@@ -20,7 +20,7 @@ const CustomHead = ({ title, keywords, description }) => {
                 crossorigin
             />
             <link
-                href="https://fonts.googleapis.com/css2?family=Work+Sans&family=Zilla+Slab&display=swap"
+                href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@200;300;400;500;600;700&family=Zilla+Slab:wght@300;400;500;600&display=swap"
                 rel="stylesheet"
             />
         </Head>
