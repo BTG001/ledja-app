@@ -1,7 +1,8 @@
 import Image from "next/image";
 import Link from "next/link";
+import { useState } from "react";
 
-export default function RecruiterNavbar() {
+export default function RecruiterNavbar({ active = "dashboard" }) {
     return (
         <>
             <div
@@ -33,18 +34,37 @@ export default function RecruiterNavbar() {
             items-center"
             >
                 <Link
-                    className="text-dark-60 font-semibold mx-3 p-2 border-b-2 border-dark-60 border-solid"
-                    href={"/recruiter-dashboard"}
+                    className={`text-dark-60  mx-3 p-2 ${
+                        active == "dashboard"
+                            ? " font-semibold border-b-2 border-dark-60 border-solid"
+                            : ""
+                    }`}
+                    href={"/recruiter/recruiter-dashboard"}
                 >
                     Dashboard
                 </Link>
                 <Link
-                    className="text-dark-50 mx-3 p-2"
+                    className={`text-dark-50 mx-3 p-2
+                    ${
+                        active == "progress-card"
+                            ? " font-semibold border-b-2 border-dark-60 border-solid"
+                            : ""
+                    }
+                    `}
                     href={"/recruiter/progress-card"}
                 >
                     Progress card
                 </Link>
-                <Link className="text-dark-60 mx-3 p-2  " href={"/message"}>
+                <Link
+                    className={`text-dark-60 mx-3 p-2
+                ${
+                    active == "message"
+                        ? " font-semibold border-b-2 border-dark-60 border-solid"
+                        : ""
+                }
+                `}
+                    href={"/message"}
+                >
                     Message
                 </Link>
             </div>

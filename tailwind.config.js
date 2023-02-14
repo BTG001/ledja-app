@@ -15,6 +15,7 @@ module.exports = {
             },
             colors: {
                 primary: {
+                    40: "#DAE0E5",
                     50: "#3399FF",
                     60: "#2877C7",
                     70: "#2163A6",
@@ -23,6 +24,7 @@ module.exports = {
                     40: "#F2F5F7",
                     50: "#E7EDF2",
                     70: "#66737F",
+                    80: "#5C6873",
                 },
                 dark: {
                     50: "#050F19",
@@ -69,6 +71,18 @@ module.exports = {
                 "30-screen": "30vh",
                 "20-screen": "20vh",
                 "10-screen": "10vh",
+            },
+            minWidth: {
+                "90-screen": "90vw",
+                "80-screen": "80vw",
+                "70-screen": "70vw",
+                "60-screen": "60vw",
+                "50-screen": "50vw",
+                "40-screen": "40vw",
+                "30-screen": "30vw",
+                "25-screen": "25vw",
+                "20-screen": "20vw",
+                "10-screen": "10vw",
             },
         },
     },

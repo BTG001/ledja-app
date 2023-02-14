@@ -89,7 +89,7 @@ export default function Profile() {
                         </label>
                         <div
                             className={
-                                "mt-4 px-4 py-1 border border-solid border-my-gray-70  rounded-sm flex flex-row flex-nowrap justify-start items-center"
+                                "mt-4 px-4 py-1 border border-solid border-my-gray-70  rounded-md flex flex-row flex-nowrap justify-start items-center"
                             }
                         >
                             <Image
@@ -106,7 +106,7 @@ export default function Profile() {
                         <label className="form-label-light">Education</label>
                         <div
                             className={
-                                "mt-4 px-4 py-1 border border-solid border-my-gray-70  rounded-sm flex flex-row flex-nowrap justify-start items-center"
+                                "mt-4 px-4 py-1 border border-solid border-my-gray-70  rounded-md flex flex-row flex-nowrap justify-start items-center"
                             }
                         >
                             <Image
@@ -123,7 +123,7 @@ export default function Profile() {
                         <label className="form-label-light">Skills</label>
                         <div
                             className={
-                                "mt-4 px-4 py-1 border border-solid border-my-gray-70  rounded-sm flex flex-row flex-nowrap justify-start items-center"
+                                "mt-4 px-4 py-1 border border-solid border-my-gray-70  rounded-md flex flex-row flex-nowrap justify-start items-center"
                             }
                         >
                             <Image
@@ -142,7 +142,7 @@ export default function Profile() {
                         </label>
                         <div
                             className={
-                                "mt-4 px-4 py-1 border border-solid border-my-gray-70  rounded-sm flex flex-row flex-nowrap justify-start items-center"
+                                "mt-4 px-4 py-1 border border-solid border-my-gray-70  rounded-md flex flex-row flex-nowrap justify-start items-center"
                             }
                         >
                             <Image
@@ -159,7 +159,7 @@ export default function Profile() {
                         <label className="form-label-light">Resume</label>
                         <div
                             className={
-                                "mt-4 px-4 py-1 border border-solid border-my-gray-70  rounded-sm flex flex-row flex-nowrap justify-start items-center"
+                                "mt-4 px-4 py-1 border border-solid border-my-gray-70  rounded-md flex flex-row flex-nowrap justify-start items-center"
                             }
                         >
                             <Image
