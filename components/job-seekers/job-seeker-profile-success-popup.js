@@ -11,6 +11,7 @@ export default function JobSeekerProfileSuccessPopup({ showPopup, onClose }) {
             document.body.style.overflowY = "visible";
         }
     }, [showPopup]);
+
     return (
         showPopup && (
             <>
@@ -31,7 +32,12 @@ export default function JobSeekerProfileSuccessPopup({ showPopup, onClose }) {
                     <p className="text-dark-50 font-medium text-md text-center my-3">
                         You can search and apply for jobs now
                     </p>
-                    <div className="flex flex-row flex-wrap justify-center items-center my-10 mx-auto">
+                    <div
+                        onClick={() => {
+                            document.body.style.overflowY = "visible";
+                        }}
+                        className="flex flex-row flex-wrap justify-center items-center my-10 mx-auto"
+                    >
                         <SecondaryBtn
                             text={"I’ll do it later"}
                             path="/job-seeker/profile"

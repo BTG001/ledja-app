@@ -34,7 +34,12 @@ export default function RecruiterProfileSuccessPopup({ showPopup, onClose }) {
                     <p className="text-dark-50 text-normal text-center my-3">
                         Or you can always post a job from your dashboard
                     </p>
-                    <div className="flex flex-row flex-wrap justify-center items-center my-10 mx-auto">
+                    <div
+                        onClick={() => {
+                            document.body.style.overflowY = "visible";
+                        }}
+                        className="flex flex-row flex-wrap justify-center items-center my-10 mx-auto"
+                    >
                         <SecondaryBtn
                             text={"I’ll do it later"}
                             path="/recruiter/recruiter-dashboard"
