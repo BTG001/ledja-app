@@ -45,7 +45,7 @@ export default function JobSeekerProfileSuccessPopup({ showPopup, onClose }) {
                         />
                         <PrimaryBtn
                             text={"Apply for a job"}
-                            path="/job-seeker/search-job"
+                            path="/job-seeker/job-search"
                             className={"my-5 mx-4 w-max"}
                         />
                     </div>
