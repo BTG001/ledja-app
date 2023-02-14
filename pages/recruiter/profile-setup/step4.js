@@ -3,13 +3,17 @@ import Link from "next/link";
 import Image from "next/image";
 import Footer from "../../../components/Footer";
 import { useRouter } from "next/router";
+import { useState } from "react";
+import RecruiterProfileSuccessPopup from "../../../components/recuriters/recuiter-profile-success-popup";
 
 export default function RecruiterProfileSetupStep4() {
     const router = useRouter();
 
+    const [showSuccessPopup, setShowSuccessPopup] = useState(false);
+
     const onNext = (e) => {
         e.preventDefault();
-        alert("success");
+        setShowSuccessPopup(true);
     };
 
     const onSaveAndExit = (e) => {
@@ -156,6 +160,12 @@ export default function RecruiterProfileSetupStep4() {
                 </form>
             </div>
             <Footer />
+            <RecruiterProfileSuccessPopup
+                showPopup={showSuccessPopup}
+                onClose={() => {
+                    setShowSuccessPopup(false);
+                }}
+            />
         </>
     );
 }

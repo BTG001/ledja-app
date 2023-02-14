@@ -20,6 +20,7 @@ module.exports = {
                     70: "#2163A6",
                 },
                 "my-gray": {
+                    40: "#F2F5F7",
                     50: "#E7EDF2",
                     70: "#66737F",
                 },
@@ -45,6 +46,7 @@ module.exports = {
                 "20-screen": "20vh",
                 "10-screen": "10vh",
                 "1-px": "1px",
+                "2-px": "2px",
             },
             maxHeight: {
                 "90-screen": "90vh",

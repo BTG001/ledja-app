@@ -4,19 +4,23 @@ import Image from "next/image";
 import Footer from "../../../components/Footer";
 import { useRouter } from "next/router";
 import { useState } from "react";
+import JobSeekerProfileSuccessPopup from "../../../components/job-seekers/job-seeker-profile-success-popup";
 
 export default function JobSeekerProfileSetupStep4() {
     const router = useRouter();
 
+    const [showSuccessPopup, setShowSuccessPopup] = useState(false);
+
     const onNext = (e) => {
         e.preventDefault();
-        alert("success");
+        setShowSuccessPopup(true);
     };
 
     const onSaveAndExit = (e) => {
         e.preventDefault();
         alert("save and exit");
     };
+
     return (
         <>
             <LogoNavbar />
@@ -113,6 +117,12 @@ export default function JobSeekerProfileSetupStep4() {
                 </form>
             </div>
             <Footer />
+            <JobSeekerProfileSuccessPopup
+                showPopup={showSuccessPopup}
+                onClose={() => {
+                    setShowSuccessPopup(false);
+                }}
+            />
         </>
     );
 }
