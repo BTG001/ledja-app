@@ -2,18 +2,23 @@ import JobPostNavbar from "../../../components/navbars/JobPostNavbar";
 import Footer from "../../../components/Footer";
 import Image from "next/image";
 import { useRouter } from "next/router";
+import { useState } from "react";
+import RecruiterJobSuccessPopup from "../../../components/recuriters/recruiter-job-success-popup";
 
 export default function () {
     const router = useRouter();
-    const onNext = (e) => {
-        e.preventDefault();
-        alert("Completed");
-    };
 
+    const [showSuccessPopup, setShowSuccessPopup] = useState(false);
     const onBack = (e) => {
         e.preventDefault();
         router.back();
     };
+
+    const onNext = (e) => {
+        e.preventDefault();
+        setShowSuccessPopup(true);
+    };
+
     return (
         <>
             <JobPostNavbar currentStepText={"Step 6 of 6 - Job post review"} />
@@ -256,7 +261,12 @@ export default function () {
                     />
                 </div>
             </div>
-
+            <RecruiterJobSuccessPopup
+                showPopup={showSuccessPopup}
+                onClose={() => {
+                    setShowSuccessPopup(false);
+                }}
+            />
             <Footer />
         </>
     );

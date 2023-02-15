@@ -4,8 +4,32 @@ import LeftCaretSelect from "../../components/LeftCaretSelect";
 import LeftIconLocationInput from "../../components/navbars/LeftIconLocationInput";
 import LeftIconSearch from "../../components/LeftIconSearch";
 import Image from "next/image";
+import ApplyPopup from "../../components/job-seekers/apply-popup";
+import { useState } from "react";
+import ApplySuccessPopup from "../../components/job-seekers/apply-success-popup";
 
 export default function JobSearch() {
+    const [showApplyPopup, setShowApplyPopup] = useState(false);
+    const [showSuccessPopup, setShowSuccessPopup] = useState(false);
+
+    const onApply = (e) => {
+        e.preventDefault();
+        setShowApplyPopup(true);
+    };
+
+    const onCloseApplyPopup = () => {
+        setShowApplyPopup(false);
+    };
+
+    const onSuccessfullApplication = () => {
+        setShowApplyPopup(false);
+        setShowSuccessPopup(true);
+    };
+
+    const onCloseSuccessPopup = () => {
+        setShowSuccessPopup(false);
+    };
+
     return (
         <>
             <JobSeekerNavbar active="job-search" />
@@ -140,7 +164,10 @@ export default function JobSearch() {
                             <span>$50,000 - $60,000 / year • Fulltime </span>
                         </p>
                         <div className="flex flex-row flex-wrap justify-start items-center my-3">
-                            <p className="w-max my-2 mx-4 py-2 px-5 bg-primary-70 text-white rounded-10">
+                            <p
+                                className="w-max my-2 mx-4 py-2 px-5 bg-primary-70 text-white rounded-10 cursor-pointer"
+                                onClick={onApply}
+                            >
                                 Apply
                             </p>
                             <p className="w-max my-2 mx-4 py-2 px-5 bg-white text-primary-70 border border-solid border-primary-70 hover:border-primary-60 rounded-10">
@@ -163,6 +190,15 @@ export default function JobSearch() {
                     </section>
                 </div>
             </div>
+            <ApplyPopup
+                showPopup={showApplyPopup}
+                onClose={onCloseApplyPopup}
+                onSuccess={onSuccessfullApplication}
+            />
+            <ApplySuccessPopup
+                showPopup={showSuccessPopup}
+                onClose={onCloseSuccessPopup}
+            />
             <Footer />
         </>
     );

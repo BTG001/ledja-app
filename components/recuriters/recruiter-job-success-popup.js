@@ -3,7 +3,7 @@ import PrimaryBtn from "../buttons/PrimaryBtn";
 import SecondaryBtn from "../buttons/SecondaryBtn";
 import Image from "next/image";
 
-export default function RecruiterProfileSuccessPopup({ showPopup, onClose }) {
+export default function RecruiterJobSuccessPopup({ showPopup, onClose }) {
     useEffect(() => {
         if (showPopup) {
             document.body.style.overflowY = "hidden";
@@ -26,10 +26,10 @@ export default function RecruiterProfileSuccessPopup({ showPopup, onClose }) {
                         className="my-5 mx-auto"
                     />
                     <h3 className="text-dark-50 text-xl font-medium text-center my-3">
-                        You are all set!
+                        The job has been posted!
                     </h3>
                     <p className="text-dark-50 font-medium text-md text-center my-3">
-                        Do you want to post a new job now?
+                        Congratulations on publishing a new job
                     </p>
                     <p className="text-dark-50 text-normal text-center my-3">
                         Or you can always post a job from your dashboard
@@ -41,12 +41,12 @@ export default function RecruiterProfileSuccessPopup({ showPopup, onClose }) {
                         className="flex flex-row flex-wrap justify-center items-center my-10 mx-auto"
                     >
                         <SecondaryBtn
-                            text={"I’ll do it later"}
+                            text={"Back to Dashboard"}
                             path="/recruiter/recruiter-dashboard"
                             className={"my-5 mx-4 w-max"}
                         />
                         <PrimaryBtn
-                            text={"Post a new job"}
+                            text={"Post another job"}
                             path="/recruiter/job-posting/step1"
                             className={"my-5 mx-4 w-max"}
                         />
