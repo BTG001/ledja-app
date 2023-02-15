@@ -22,7 +22,7 @@ export default function RecruiterDashbaord() {
                     </p>
                     <PrimaryBtn
                         text={"Post a job"}
-                        path="/recruiter/post-job/step1"
+                        path="/recruiter/job-posting/step1"
                     />
                 </div>
                 <div className="shadow-md my-3 p-3 rounded-10 min-h-40-screen flex flex-col justify-center items-center border border-solid border-my-gray-40">
