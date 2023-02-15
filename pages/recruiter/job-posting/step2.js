@@ -19,9 +19,6 @@ export default function () {
             <JobPostNavbar currentStepText={"Step 2 of 6 - Job type"} />
 
             <div className="w-3/4 mt-5 mb-10 mx-auto">
-                <h3 className="font-medium text-xl mb-5">
-                    Please select the type of job you want to post
-                </h3>
                 <div className="md:grid md:grid-cols-3 mb-10">
                     <div className="flex flex-col justify-center items-center border border-solid border-primary-70 py-2 px-8 m-4 rounded-10">
                         <p className="text-primary-70 text-xl text-center">
