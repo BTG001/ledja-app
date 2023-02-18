@@ -7,7 +7,7 @@ export default function SecondaryBtn({ text, path, className, data }) {
                 pathname: path,
                 query: data,
             }}
-            className={`text-primary-70 bg-white px-4 py-2 rounded-lg border border-primary-70  ${className}`}
+            className={`text-primary-70 bg-white px-4 py-2 rounded-lg border border-primary-70  ${className} cursor-pointer`}
         >
             {text}
         </Link>

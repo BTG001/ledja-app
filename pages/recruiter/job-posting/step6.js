@@ -4,11 +4,17 @@ import Image from "next/image";
 import { useRouter } from "next/router";
 import { useState } from "react";
 import RecruiterJobSuccessPopup from "../../../components/recuriters/recruiter-job-success-popup";
+import NotEnoughCreditPopup from "../../../components/payments/not-enough-credit-popup";
+import ReloadCreditPopup from "../../../components/payments/reload-credit-popup";
+import ReloadSuccessPopup from "../../../components/payments/reload-success-popup";
 
 export default function () {
     const router = useRouter();
 
-    const [showSuccessPopup, setShowSuccessPopup] = useState(false);
+    const [showNotEnoughCreditPopup, setShowNotEnoughCreditPopup] =
+        useState(false);
+    const [showReloadCreditPopup, setShowReloadCreditPopup] = useState(false);
+    const [showReloadSuccessPopup, setShowReloadSuccessPopup] = useState(false);
     const onBack = (e) => {
         e.preventDefault();
         router.back();
@@ -16,7 +22,23 @@ export default function () {
 
     const onNext = (e) => {
         e.preventDefault();
-        setShowSuccessPopup(true);
+        setShowNotEnoughCreditPopup(true);
+    };
+
+    const onClose = () => {
+        setShowNotEnoughCreditPopup(false);
+        setShowReloadCreditPopup(false);
+        setShowReloadSuccessPopup(false);
+    };
+
+    const onReloadCredit = () => {
+        setShowNotEnoughCreditPopup(false);
+        setShowReloadCreditPopup(true);
+    };
+
+    const onReloaded = () => {
+        setShowReloadCreditPopup(false);
+        setShowReloadSuccessPopup(true);
     };
 
     return (
@@ -261,11 +283,20 @@ export default function () {
                     />
                 </div>
             </div>
-            <RecruiterJobSuccessPopup
-                showPopup={showSuccessPopup}
-                onClose={() => {
-                    setShowSuccessPopup(false);
-                }}
+
+            <NotEnoughCreditPopup
+                showPopup={showNotEnoughCreditPopup}
+                onReloadCredit={onReloadCredit}
+                onClose={onClose}
+            />
+            <ReloadCreditPopup
+                showPopup={showReloadCreditPopup}
+                onClose={onClose}
+                onReloaded={onReloaded}
+            />
+            <ReloadSuccessPopup
+                showPopup={showReloadSuccessPopup}
+                onClose={onClose}
             />
             <Footer />
         </>

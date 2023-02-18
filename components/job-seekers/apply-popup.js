@@ -38,7 +38,7 @@ export default function ApplyPopup({ showPopup, onClose, onSuccess }) {
                             height={27}
                         />
                     </p>
-                    <section className=" h-70-screen max-h-70-screen overflow-y-scroll pr-6 my-3">
+                    <section className=" h-max max-h-50-screen overflow-y-scroll pr-6 my-3">
                         <div className="form-input-container ">
                             <p className="flex flex-row flex-nowrap justify-between items-center w-full p-2">
                                 <label

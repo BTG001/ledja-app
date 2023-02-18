@@ -7,7 +7,7 @@ export default function PrimaryBtn({ text, path, className, data }) {
                 pathname: path,
                 query: data,
             }}
-            className={`text-white bg-primary-70 px-4 py-2 rounded-lg  ${className}`}
+            className={`text-white bg-primary-70 px-4 py-2 rounded-lg  ${className} cursor-pointer`}
         >
             {text}
         </Link>
