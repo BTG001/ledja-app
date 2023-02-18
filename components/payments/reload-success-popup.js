@@ -3,7 +3,11 @@ import PrimaryBtn from "../buttons/PrimaryBtn";
 import SecondaryBtn from "../buttons/SecondaryBtn";
 import Image from "next/image";
 
-export default function ReloadSuccessPopup({ showPopup, onClose }) {
+export default function ReloadSuccessPopup({
+    showPopup,
+    onAfterPayment,
+    onClose,
+}) {
     useEffect(() => {
         if (showPopup) {
             document.body.style.overflowY = "hidden";
@@ -42,7 +46,7 @@ export default function ReloadSuccessPopup({ showPopup, onClose }) {
                     >
                         <p
                             className={`w-max my-2 mx-4 py-2 px-5 bg-primary-70 text-whiterounded-10 cursor-pointer rounded-md text-white`}
-                            onClick={onClose}
+                            onClick={onAfterPayment}
                         >
                             Continue to post jobs
                         </p>

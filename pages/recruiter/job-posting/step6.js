@@ -11,6 +11,8 @@ import ReloadSuccessPopup from "../../../components/payments/reload-success-popu
 export default function () {
     const router = useRouter();
 
+    const [showJobSuccessPopup, setShowJobSuccessPopup] = useState(false);
+    const [afterPayment, setAfterPayment] = useState(false);
     const [showNotEnoughCreditPopup, setShowNotEnoughCreditPopup] =
         useState(false);
     const [showReloadCreditPopup, setShowReloadCreditPopup] = useState(false);
@@ -22,6 +24,13 @@ export default function () {
 
     const onNext = (e) => {
         e.preventDefault();
+
+        if (afterPayment) {
+            setShowJobSuccessPopup(true);
+            console.log("after payment");
+            return;
+        }
+
         setShowNotEnoughCreditPopup(true);
     };
 
@@ -39,6 +48,12 @@ export default function () {
     const onReloaded = () => {
         setShowReloadCreditPopup(false);
         setShowReloadSuccessPopup(true);
+    };
+
+    const onAfterPayment = () => {
+        console.log("on after payment");
+        setShowReloadSuccessPopup(false);
+        setAfterPayment(true);
     };
 
     return (
@@ -284,11 +299,17 @@ export default function () {
                 </div>
             </div>
 
+            <RecruiterJobSuccessPopup
+                showPopup={showJobSuccessPopup}
+                onClose={onClose}
+            />
+
             <NotEnoughCreditPopup
                 showPopup={showNotEnoughCreditPopup}
                 onReloadCredit={onReloadCredit}
                 onClose={onClose}
             />
+
             <ReloadCreditPopup
                 showPopup={showReloadCreditPopup}
                 onClose={onClose}
@@ -296,6 +317,7 @@ export default function () {
             />
             <ReloadSuccessPopup
                 showPopup={showReloadSuccessPopup}
+                onAfterPayment={onAfterPayment}
                 onClose={onClose}
             />
             <Footer />
