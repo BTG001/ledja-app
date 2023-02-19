@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import JobSeekerProfileIcon from "../job-seekers/job-seeker-profile-icon";
 
 export default function JobSeekerNavbar({ active }) {
     console.log("active: ", active);
@@ -47,12 +48,13 @@ export default function JobSeekerNavbar({ active }) {
                     Message
                 </Link>
 
-                <Image
+                {/* <Image
                     className={`mx-3 p-2`}
                     src={"/user-icon.svg"}
                     width={46}
                     height={46}
-                />
+                /> */}
+                <JobSeekerProfileIcon />
             </div>
         </div>
     );

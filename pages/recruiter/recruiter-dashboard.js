@@ -2,6 +2,7 @@ import Footer from "../../components/Footer";
 import RecruiterNavbar from "../../components/navbars/RecruiterNavbar";
 import PrimaryBtn from "../../components/buttons/PrimaryBtn";
 import Image from "next/image";
+import Link from "next/link";
 
 export default function RecruiterDashbaord() {
     return (
@@ -71,7 +72,10 @@ export default function RecruiterDashbaord() {
                     Applicants management
                 </p>
                 <div className="md:grid md:grid-cols-4 gap-4">
-                    <div className="col-span-2 shadow-md my-3 p-3 rounded-10 min-h-40-screen flex flex-col justify-center items-center border border-solid border-my-gray-40">
+                    <Link
+                        href={"/recruiter/progress-card"}
+                        className="col-span-2 shadow-md my-3 p-3 rounded-10 min-h-40-screen flex flex-col justify-center items-center border border-solid border-my-gray-40 hover:border hover:border-primary-40"
+                    >
                         <h3 className="font-medium flex flex-row flex-nowrap justify-center items-center">
                             <span>Progress card</span>
                             <Image
@@ -84,7 +88,7 @@ export default function RecruiterDashbaord() {
                         <p className="my-3 text-xs text-dark-50 text-center">
                             one-sentence description about the progress card
                         </p>
-                    </div>
+                    </Link>
 
                     <div className="col-span-1 shadow-md my-3 p-3 rounded-10 min-h-40-screen flex flex-col justify-center items-center border border-solid border-my-gray-40">
                         <h3 className="font-medium text-center">

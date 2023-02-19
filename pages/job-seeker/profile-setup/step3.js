@@ -4,9 +4,12 @@ import Image from "next/image";
 import Footer from "../../../components/Footer";
 import { useRouter } from "next/router";
 import { useState } from "react";
+import AddExperiencePopup from "../../../components/job-seekers/add-experience-popup";
 
 export default function JobSeekerProfileSetupStep3() {
     const router = useRouter();
+
+    const [showAddExperiencePopup, setShowAddExperiencePopup] = useState(false);
 
     const onNext = (e) => {
         e.preventDefault();
@@ -17,8 +20,26 @@ export default function JobSeekerProfileSetupStep3() {
         e.preventDefault();
         alert("save and exit");
     };
+    const onClose = () => {
+        setShowAddExperiencePopup(false);
+    };
+
+    const onAddExperience = () => {
+        setShowAddExperiencePopup(true);
+    };
+
+    const onSuccess = () => {
+        // e.preventDefault();
+        setShowAddExperiencePopup(false);
+    };
+
     return (
         <>
+            <AddExperiencePopup
+                showPopup={showAddExperiencePopup}
+                onClose={onClose}
+                onSuccess={onSuccess}
+            />
             <LogoNavbar />
             <p
                 className="back-btn"
@@ -62,8 +83,9 @@ export default function JobSeekerProfileSetupStep3() {
                         </label>
                         <div
                             className={
-                                "mt-4 px-4 py-1 border border-solid border-my-gray-70  rounded-sm flex flex-row flex-nowrap justify-start items-center"
+                                "mt-4 px-4 py-1 border border-solid border-my-gray-70  rounded-sm flex flex-row flex-nowrap justify-start items-center cursor-pointer"
                             }
+                            onClick={onAddExperience}
                         >
                             <Image
                                 src={"/plus-icon.svg"}
