@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import RecruiterProfileIcon from "../recuriters/recruiter-profile-icon";
 
 import SecondaryBtn from "../../components/buttons/SecondaryBtn";
 
@@ -29,12 +30,13 @@ export default function RecruiterNavbar({ currentStepText }) {
                     </Link>
 
                     <div className="flex flex-row flex-nowrap justify-center items-center rounded-full w-12 h-12">
-                        <Image
+                        {/* <Image
                             className="mx-3 p-2 "
                             src={"/user-icon.svg"}
                             width={46}
                             height={46}
-                        />
+                        /> */}
+                        <RecruiterProfileIcon icon={"user"} />
                     </div>
                 </div>
             </div>
