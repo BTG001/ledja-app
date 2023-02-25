@@ -3,13 +3,31 @@ import Link from "next/link";
 import Image from "next/image";
 import Footer from "../../../components/Footer";
 import { useRouter } from "next/router";
+import { useRef } from "react";
+import Utils from "../../../Utils";
+import Config from "../../../Config";
 
 export default function RecruiterProfileSetupStep3() {
     const router = useRouter();
 
+    const R_Step3Form = useRef();
+
     const onNext = (e) => {
         e.preventDefault();
-        router.push("/recruiter/profile-setup/step4");
+        const userId = 2;
+
+        const R_step3FormData = new FormData(R_Step3Form.current);
+
+        R_step3FormData.append("user_id", userId);
+
+        const results = Utils.postForm(
+            `${Config.BASE_URL}/more_about_recruiters`,
+            R_step3FormData
+        );
+
+        if (results.success) {
+            router.push("/recruiter/profile-setup/step4");
+        }
     };
 
     const onSaveAndExit = (e) => {
@@ -54,7 +72,7 @@ export default function RecruiterProfileSetupStep3() {
                     </div>
                 </div>
                 <h3 className="form-label">Tell me more about the company</h3>
-                <form className="form">
+                <form className="form" ref={R_Step3Form}>
                     <div className="form-input-container">
                         <label className="form-label-light" for="company-name">
                             Company Introduction
@@ -63,8 +81,11 @@ export default function RecruiterProfileSetupStep3() {
                         <textarea
                             className="form-input"
                             rows={3}
+                            name="company_intro"
                             placeholder="Hi everyone! I’m a recruiter at ABC company...."
-                        ></textarea>
+                        >
+                            Hi everyone! I’m a recruiter at ABC company....
+                        </textarea>
                     </div>
 
                     <div className="form-input-container">
@@ -75,8 +96,11 @@ export default function RecruiterProfileSetupStep3() {
                         <textarea
                             className="form-input"
                             rows={3}
+                            name="company_culture"
                             placeholder="We offer a collaborative work environment..."
-                        ></textarea>
+                        >
+                            We offer a collaborative work environment...
+                        </textarea>
                     </div>
 
                     <div>

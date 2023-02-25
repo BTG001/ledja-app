@@ -3,17 +3,35 @@ import Link from "next/link";
 import Image from "next/image";
 import Footer from "../../../components/Footer";
 import { useRouter } from "next/router";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import RecruiterProfileSuccessPopup from "../../../components/recuriters/recuiter-profile-success-popup";
+import Utils from "../../../Utils";
+import Config from "../../../Config";
 
 export default function RecruiterProfileSetupStep4() {
     const router = useRouter();
+
+    const R_Step4Form = useRef();
 
     const [showSuccessPopup, setShowSuccessPopup] = useState(false);
 
     const onNext = (e) => {
         e.preventDefault();
-        setShowSuccessPopup(true);
+
+        const userId = 2;
+
+        const R_Step4FormData = new FormData(R_Step4Form.current);
+
+        R_Step4FormData.append("user_id", userId);
+
+        const results = Utils.postForm(
+            `${Config.BASE_URL}/about_recruiters`,
+            R_Step4FormData
+        );
+
+        if (results.success) {
+            setShowSuccessPopup(true);
+        }
     };
 
     const onSaveAndExit = (e) => {
@@ -55,7 +73,7 @@ export default function RecruiterProfileSetupStep4() {
                     </div>
                 </div>
                 <h3 className="form-label">Tell me about youtself</h3>
-                <form className="form">
+                <form className="form" ref={R_Step4Form}>
                     <div className="grid grid-cols-2 gap-6">
                         <div className="form-input-container">
                             <label
@@ -68,6 +86,9 @@ export default function RecruiterProfileSetupStep4() {
                                 className="form-input"
                                 type={"text"}
                                 placeholder="Jennifer"
+                                name="fname"
+                                value={"Jennifer"}
+                                required
                             />
                         </div>
 
@@ -82,6 +103,9 @@ export default function RecruiterProfileSetupStep4() {
                                 className="form-input"
                                 type={"text"}
                                 placeholder="Smith"
+                                name="lname"
+                                value={"Smith"}
+                                required
                             />
                         </div>
                     </div>
@@ -98,6 +122,8 @@ export default function RecruiterProfileSetupStep4() {
                                 className="form-input"
                                 type={"text"}
                                 placeholder="000-000-0000"
+                                name="phone_no"
+                                required
                             />
                         </div>
 
@@ -112,6 +138,8 @@ export default function RecruiterProfileSetupStep4() {
                                 className="form-input"
                                 type={"email"}
                                 placeholder="Jennifer@abccompany.com"
+                                name="email"
+                                required
                             />
                         </div>
                     </div>
@@ -127,6 +155,9 @@ export default function RecruiterProfileSetupStep4() {
                             className="form-input"
                             type={"text"}
                             placeholder="talent acquisition specialist"
+                            name="company_position"
+                            value={"COO"}
+                            required
                         />
                     </div>
 
@@ -140,7 +171,10 @@ export default function RecruiterProfileSetupStep4() {
                         <input
                             className="form-input"
                             type={"text"}
+                            name="location"
                             placeholder="Nairobi, Kenya"
+                            value={"Nairobi, Kenya"}
+                            required
                         />
                     </div>
                     <div>

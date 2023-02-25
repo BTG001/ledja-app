@@ -3,8 +3,9 @@ import Footer from "../components/Footer";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/router";
-import { useEffect, useRef } from "react";
-import UserRequests from "../requests/UserRequets";
+import { useRef } from "react";
+import axios from "axios";
+import Config from "../Config";
 
 export default function login() {
     const router = useRouter();
@@ -14,13 +15,15 @@ export default function login() {
         const loginFormData = new FormData(loginForm.current);
         e.preventDefault();
 
-        const loginResults = await UserRequests.login(loginFormData);
+        const results = await axios.postForm(
+            `${Config.BASE_URL}/login`,
+            loginFormData
+        );
+        console.log("login results: ", loginResults);
 
-        console.log("login: ", loginResults);
-
-        // const userResults = await UserRequests.getOneUser(2);
-
-        // console.log(userResults);
+        if (results.success) {
+            // navigate to dashbaord for recruiter ,and job search for job seeker
+        }
 
         // for (const [key, value] of loginFormData) {
         //     console.log(key, ": ", value);

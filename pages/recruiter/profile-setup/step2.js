@@ -3,14 +3,32 @@ import Link from "next/link";
 import Image from "next/image";
 import Footer from "../../../components/Footer";
 import { useRouter } from "next/router";
-import { useState } from "react";
+import { useRef, useState } from "react";
+import Utils from "../../../Utils";
+import Config from "../../../Config";
 
 export default function RecruiterProfileSetupStep2() {
     const router = useRouter();
 
-    const onNext = (e) => {
+    const R_Step2Form = useRef();
+
+    const onNext = async (e) => {
         e.preventDefault();
-        router.push("/recruiter/profile-setup/step3");
+
+        const userId = 2;
+
+        const R_Step2FormData = new FormData(R_Step2Form.current);
+
+        R_Step2FormData.append("user_id", userId);
+
+        const results = await Utils.postForm(
+            `${Config.BASE_URL}/recruiter_links`,
+            R_Step2FormData
+        );
+
+        if (results.success) {
+            router.push("/recruiter/profile-setup/step3");
+        }
     };
 
     const [websiteFocus, setWebsiteFocus] = useState(false);
@@ -60,7 +78,7 @@ export default function RecruiterProfileSetupStep2() {
                     </div>
                 </div>
                 <h3 className="form-label">Links</h3>
-                <form className="form">
+                <form className="form" ref={R_Step2Form}>
                     <div className="form-input-container">
                         <label className="form-label-light" for="websites">
                             Websites
@@ -76,8 +94,10 @@ export default function RecruiterProfileSetupStep2() {
                                 onFocus={() => setWebsiteFocus(true)}
                                 onBlur={() => setWebsiteFocus(false)}
                                 className="form-input-with-icon peer"
-                                type={"text"}
+                                type={"url"}
                                 placeholder="abccompany.com"
+                                value={"abccompany.com"}
+                                name="websites"
                             />
                             <Image
                                 src={"/website-icon.svg"}
@@ -103,8 +123,11 @@ export default function RecruiterProfileSetupStep2() {
                                 onFocus={() => setLinkedinFocus(true)}
                                 onBlur={() => setLinkedinFocus(false)}
                                 className="form-input-with-icon peer"
-                                type={"text"}
+                                type={"url"}
                                 placeholder="abccompany/linkedin.com"
+                                name="linked_in"
+                                s
+                                value={"abccompany/linkedin.com"}
                             />
                             <Image
                                 src={"/linkedin.svg"}
@@ -126,6 +149,8 @@ export default function RecruiterProfileSetupStep2() {
                                 className="form-input-with-icon peer"
                                 type={"text"}
                                 placeholder="abccompany/twitter.com"
+                                name="twitter"
+                                value={"abccompany/twitter.com"}
                             />
                             <Image
                                 src={"/twitter.svg"}
@@ -147,6 +172,8 @@ export default function RecruiterProfileSetupStep2() {
                                 className="form-input-with-icon peer"
                                 type={"text"}
                                 placeholder="abccompany/facebook.com"
+                                name="facebook"
+                                value={"abccompany/facebook.com"}
                             />
                             <Image
                                 src={"/facebook.svg"}

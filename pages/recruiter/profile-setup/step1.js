@@ -3,19 +3,42 @@ import Link from "next/link";
 import Image from "next/image";
 import Footer from "../../../components/Footer";
 import { useRouter } from "next/router";
+import { useRef } from "react";
+import axios from "axios";
+import Utils from "../../../Utils";
+import Config from "../../../Config";
 
 export default function RecruiterProfileSetupStep1() {
     const router = useRouter();
 
-    const onNext = (e) => {
+    const R_Step1Form = useRef();
+
+    const onNext = async (e) => {
         e.preventDefault();
-        router.push("/recruiter/profile-setup/step2");
+
+        const userId = 2;
+
+        const R_Step1FormData = new FormData(R_Step1Form.current);
+
+        R_Step1FormData.append("user_id", userId);
+
+        const results = await Utils.postForm(
+            `${Config.BASE_URL}/recruiter_basic_infos`,
+            R_Step1FormData
+        );
+
+        console.log(results);
+
+        if (results.success) {
+            router.push("/recruiter/profile-setup/step2");
+        }
     };
 
     const onSaveAndExit = (e) => {
         e.preventDefault();
         alert("save and exit");
     };
+
     return (
         <>
             <LogoNavbar />
@@ -51,7 +74,7 @@ export default function RecruiterProfileSetupStep1() {
                     </div>
                 </div>
                 <h3 className="form-label">Basic information</h3>
-                <form className="form">
+                <form className="form" onSubmit={onNext} ref={R_Step1Form}>
                     <div className="form-input-container">
                         <label
                             className="form-label-light form-label-required"
@@ -63,6 +86,9 @@ export default function RecruiterProfileSetupStep1() {
                             className="form-input"
                             type={"text"}
                             placeholder="ABC Company Inc."
+                            name="company_name"
+                            value={"ABC Company Inc"}
+                            required
                         />
                     </div>
                     <div className="grid grid-cols-2 gap-6">
@@ -73,8 +99,12 @@ export default function RecruiterProfileSetupStep1() {
                             >
                                 Industry
                             </label>
-                            <select className="form-input">
-                                <option>Select</option>
+                            <select
+                                className="form-input"
+                                name="industry"
+                                required
+                            >
+                                <option value={"Banking"}>Banking</option>
                             </select>
                         </div>
 
@@ -89,6 +119,9 @@ export default function RecruiterProfileSetupStep1() {
                                 className="form-input"
                                 type={"text"}
                                 placeholder="Nairobi, Kenya"
+                                name="headquarters"
+                                value={"CBD"}
+                                required
                             />
                         </div>
                     </div>
@@ -105,6 +138,8 @@ export default function RecruiterProfileSetupStep1() {
                                 className="form-input"
                                 type={"number"}
                                 placeholder="25 (employees)"
+                                name="company_size"
+                                value={"2000"}
                             />
                         </div>
 
@@ -114,8 +149,10 @@ export default function RecruiterProfileSetupStep1() {
                             </label>
                             <input
                                 className="form-input"
-                                type={"email"}
-                                placeholder="Jennifer@abccompany.com"
+                                type={"text"}
+                                placeholder="2000000"
+                                name="revenue"
+                                value={"20000000"}
                             />
                         </div>
                     </div>
@@ -128,18 +165,24 @@ export default function RecruiterProfileSetupStep1() {
                             <input
                                 className="form-input"
                                 type={"number"}
+                                min="1900"
+                                max={new Date().getFullYear()}
                                 placeholder="2003"
+                                name="founded_on"
+                                value={"2001"}
                             />
                         </div>
 
                         <div className="form-input-container">
                             <label className="form-label-light " for="revenue">
-                                Revenue
+                                CEO
                             </label>
                             <input
                                 className="form-input"
                                 type={"email"}
-                                placeholder="$ 1M"
+                                placeholder="Frank Jessy"
+                                name="ceo"
+                                value={"Frank Jessy"}
                             />
                         </div>
                     </div>

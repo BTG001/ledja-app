@@ -6,6 +6,7 @@ import { useRouter } from "next/router";
 import { useEffect, useRef } from "react";
 import UserRequests from "../requests/UserRequets";
 import Config from "../Config";
+import axios from "axios";
 
 export default function login() {
     const router = useRouter();
@@ -36,7 +37,10 @@ export default function login() {
         //     console.log(key, ": ", value);
         // }
 
-        const results = await UserRequests.register(signupFormData);
+        const results = await axios.postForm(
+            `${Config.BASE_URL}/register`,
+            signupFormData
+        );
 
         if (results.success) {
             if (role == "recruiter") {
@@ -71,7 +75,8 @@ export default function login() {
                             type={"email"}
                             placeholder="email@example.com"
                             name="email"
-                            value={"testuser2@gmail.com"}
+                            // value={"testuser2@gmail.com"}
+                            required
                         />
                     </div>
 
@@ -85,6 +90,7 @@ export default function login() {
                             placeholder="6 characters minimum"
                             name="password"
                             value={"secret"}
+                            required
                         />
                     </div>
                     <div className="form-input-container">
@@ -97,6 +103,7 @@ export default function login() {
                             placeholder="Password should match"
                             name="c_password"
                             value="secret"
+                            required
                         />
                     </div>
 
