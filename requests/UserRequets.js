@@ -26,10 +26,10 @@ export default class UserRequests {
 
         // return axios.post(LOGIN_URL, data);
 
-        axios.create({
-            withCredentials: true,
-            baseURL: UserRequests.URL,
-        });
+        // axios.create({
+        //     withCredentials: true,
+        //     baseURL: UserRequests.URL,
+        // });
 
         return axios.post(LOGIN_URL, data);
     }

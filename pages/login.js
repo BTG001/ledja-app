@@ -16,11 +16,11 @@ export default function login() {
 
         const loginResults = await UserRequests.login(loginFormData);
 
-        console.log(loginResults);
+        console.log("login: ", loginResults);
 
-        const userResults = await UserRequests.getOneUser(2);
+        // const userResults = await UserRequests.getOneUser(2);
 
-        console.log(userResults);
+        // console.log(userResults);
 
         // for (const [key, value] of loginFormData) {
         //     console.log(key, ": ", value);
