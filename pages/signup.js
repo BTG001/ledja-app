@@ -3,10 +3,14 @@ import Footer from "../components/Footer";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/router";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
+import UserRequests from "../requests/UserRequets";
+import Config from "../Config";
 
 export default function login() {
     const router = useRouter();
+
+    const signupForm = useRef();
 
     const { role } = router.query;
 
@@ -16,12 +20,30 @@ export default function login() {
         }
     }, []);
 
-    const afterSubmit = (e) => {
+    const afterSubmit = async (e) => {
         e.preventDefault();
+
+        let userTypeID = Config.JOB_SEEKER_USER_TYPE_ID;
+
         if (role == "recruiter") {
-            router.push("/recruiter/profile-setup/step1");
-        } else {
-            router.push("/job-seeker/profile-setup/step1");
+            userTypeID = Config.RECRUITER_USER_TYPE_ID;
+        }
+
+        const signupFormData = new FormData(signupForm.current);
+        signupFormData.append("user_type_id", userTypeID);
+
+        // for (const [key, value] of signupFormData) {
+        //     console.log(key, ": ", value);
+        // }
+
+        const results = await UserRequests.register(signupFormData);
+
+        if (results.success) {
+            if (role == "recruiter") {
+                router.push("/recruiter/profile-setup/step1");
+            } else {
+                router.push("/job-seeker/profile-setup/step1");
+            }
         }
     };
 
@@ -39,7 +61,7 @@ export default function login() {
             </p>
             <div className="w-4/5 md:w-1/2 lg:w-1/3 mx-auto my-5 min-h-80-screen mb-24">
                 <h3 className="form-title">Create your account</h3>
-                <form className="form" onSubmit={afterSubmit}>
+                <form className="form" onSubmit={afterSubmit} ref={signupForm}>
                     <div className="form-input-container">
                         <label className="form-label" for="email">
                             Email Address
@@ -48,6 +70,8 @@ export default function login() {
                             className="form-input"
                             type={"email"}
                             placeholder="email@example.com"
+                            name="email"
+                            value={"testuser2@gmail.com"}
                         />
                     </div>
 
@@ -59,6 +83,8 @@ export default function login() {
                             className="form-input"
                             type={"password"}
                             placeholder="6 characters minimum"
+                            name="password"
+                            value={"secret"}
                         />
                     </div>
                     <div className="form-input-container">
@@ -69,11 +95,13 @@ export default function login() {
                             className="form-input"
                             type={"password"}
                             placeholder="Password should match"
+                            name="c_password"
+                            value="secret"
                         />
                     </div>
 
                     <div className="form-input-container mb-8">
-                        <input type={"checkbox"} />{" "}
+                        <input type={"checkbox"} required />{" "}
                         <p className="text-xs inline">
                             <span>By signing up, I agree to the</span>{" "}
                             <Link href={"/terms"} className="underline">

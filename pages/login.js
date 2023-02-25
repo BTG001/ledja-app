@@ -3,10 +3,29 @@ import Footer from "../components/Footer";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/router";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
+import UserRequests from "../requests/UserRequets";
 
 export default function login() {
     const router = useRouter();
+    const loginForm = useRef();
+
+    const onLoginSubmit = async (e) => {
+        const loginFormData = new FormData(loginForm.current);
+        e.preventDefault();
+
+        const loginResults = await UserRequests.login(loginFormData);
+
+        console.log(loginResults);
+
+        const userResults = await UserRequests.getOneUser(2);
+
+        console.log(userResults);
+
+        // for (const [key, value] of loginFormData) {
+        //     console.log(key, ": ", value);
+        // }
+    };
 
     return (
         <>
@@ -22,7 +41,7 @@ export default function login() {
             </p>
             <div className="w-4/5 md:w-1/2 lg:w-1/3 mx-auto my-5 min-h-80-screen mb-24">
                 <h3 className="form-title">Login to LEDJA</h3>
-                <form className="form">
+                <form className="form" ref={loginForm} onSubmit={onLoginSubmit}>
                     <div className="form-input-container">
                         <label className="form-label" for="email">
                             Email Address
@@ -30,18 +49,24 @@ export default function login() {
                         <input
                             className="form-input"
                             type={"email"}
+                            name="email"
+                            value="testuser1@gmail.com"
                             placeholder="email@example.com"
+                            required
                         />
                     </div>
 
-                    <div className="form-input-container">
+                    <div className="form-input-container" required>
                         <label className="form-label" for="password">
                             Password
                         </label>
                         <input
                             className="form-input"
                             type={"password"}
+                            name="password"
                             placeholder="6 characters minimum"
+                            required
+                            value={"secret"}
                         />
                     </div>
 
