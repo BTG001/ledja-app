@@ -3,35 +3,74 @@ import Footer from "../components/Footer";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/router";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import axios from "axios";
 import Config from "../Config";
+import Utils from "../Utils";
+import ErrorPopup from "../components/errorPopup";
 
 export default function login() {
     const router = useRouter();
     const loginForm = useRef();
 
+    const [loading, setLoading] = useState(false);
+    const [showErrorPopup, setShowErrorPopup] = useState(false);
+    const [errorMessage, setErrorMessage] = useState("An Error Occured");
+
     const onLoginSubmit = async (e) => {
+        if (loading) {
+            return;
+        } else {
+            setLoading(true);
+        }
         const loginFormData = new FormData(loginForm.current);
         e.preventDefault();
 
-        const results = await axios.postForm(
-            `${Config.BASE_URL}/login`,
-            loginFormData
-        );
-        console.log("login results: ", loginResults);
+        Utils.makeRequest(async () => {
+            try {
+                const results = await axios.postForm(
+                    `${Config.BASE_URL}/login`,
+                    loginFormData
+                );
+                console.log("login results: ", results);
 
-        if (results.success) {
-            // navigate to dashbaord for recruiter ,and job search for job seeker
-        }
+                if (results.data.success) {
+                    localStorage.setItem("token", results.data.data.token);
+                    localStorage.setItem("user_id", results.data.data.user.id);
+                    const userTypeId = results.data.data.user.user_type_id;
+                    localStorage.setItem("user_type_id", userTypeId);
+
+                    if (userTypeId == Config.JOB_SEEKER_USER_TYPE_ID) {
+                        router.push("/job-seeker/job-search");
+                    } else if (userTypeId == Config.RECRUITER_USER_TYPE_ID) {
+                        router.push("/recruiter/recruiter-dashboard");
+                    }
+                }
+
+                setLoading(false);
+            } catch (error) {
+                setErrorMessage("Incorrect email or passoword");
+                setShowErrorPopup(true);
+                setLoading(false);
+            }
+        });
 
         // for (const [key, value] of loginFormData) {
         //     console.log(key, ": ", value);
         // }
     };
 
+    const onClose = () => {
+        setShowErrorPopup(false);
+    };
+
     return (
         <>
+            <ErrorPopup
+                showPopup={showErrorPopup}
+                onClose={onClose}
+                message={errorMessage}
+            />
             <LogoNavbar />
             <p
                 className="back-btn"
@@ -53,7 +92,6 @@ export default function login() {
                             className="form-input"
                             type={"email"}
                             name="email"
-                            value="testuser1@gmail.com"
                             placeholder="email@example.com"
                             required
                         />
@@ -69,15 +107,13 @@ export default function login() {
                             name="password"
                             placeholder="6 characters minimum"
                             required
-                            value={"secret"}
                         />
                     </div>
 
-                    <input
-                        className="submit-btn"
-                        type={"submit"}
-                        value="Login"
-                    />
+                    <button className={`submit-btn `} type={"submit"}>
+                        {loading && <span className="loader"></span>}
+                        {!loading && <span className="">Login</span>}
+                    </button>
                 </form>
                 <p className="text-center">
                     <span className="text-sm text-dark-50 mr-4">

@@ -6,11 +6,18 @@ import { useRouter } from "next/router";
 import { useEffect, useRef } from "react";
 import Config from "../Config";
 import axios from "axios";
+import { useState } from "react";
+import ErrorPopup from "../components/errorPopup";
+import Utils from "../Utils";
 
 export default function login() {
     const router = useRouter();
 
     const signupForm = useRef();
+
+    const [loading, setLoading] = useState(false);
+    const [showErrorPopup, setShowErrorPopup] = useState(false);
+    const [errorMessage, setErrorMessage] = useState("An Error Occured");
 
     const { role } = router.query;
 
@@ -22,6 +29,12 @@ export default function login() {
 
     const afterSubmit = async (e) => {
         e.preventDefault();
+
+        if (loading) {
+            return;
+        } else {
+            setLoading(true);
+        }
 
         let userTypeID = Config.JOB_SEEKER_USER_TYPE_ID;
 
@@ -36,22 +49,50 @@ export default function login() {
         //     console.log(key, ": ", value);
         // }
 
-        const results = await axios.postForm(
-            `${Config.BASE_URL}/register`,
-            signupFormData
-        );
+        Utils.makeRequest(async () => {
+            try {
+                axios.defaults.withCredentials = true;
+                const results = await axios.postForm(
+                    `${Config.BASE_URL}/register`,
+                    signupFormData
+                );
 
-        if (results.success) {
-            if (role == "recruiter") {
-                router.push("/recruiter/profile-setup/step1");
-            } else {
-                router.push("/job-seeker/profile-setup/step1");
+                console.log("signup results: ", results);
+
+                localStorage.setItem("token", results.data.data.token);
+                localStorage.setItem("user_id", results.data.data.user.id);
+                localStorage.setItem(
+                    "user_type_id",
+                    results.data.data.user.user_type_id
+                );
+
+                if (results.data.success) {
+                    if (role == "recruiter") {
+                        router.push("/recruiter/profile-setup/step1");
+                    } else {
+                        router.push("/job-seeker/profile-setup/step1");
+                    }
+                }
+            } catch (error) {
+                console.log("Sign up Error: ", error);
+                setErrorMessage(error.message);
+                setShowErrorPopup(true);
+                setLoading(false);
             }
-        }
+        });
+    };
+
+    const onClose = () => {
+        setShowErrorPopup(false);
     };
 
     return (
         <>
+            <ErrorPopup
+                showPopup={showErrorPopup}
+                onClose={onClose}
+                message={errorMessage}
+            />
             <LogoNavbar />
             <p
                 className="back-btn"
@@ -74,7 +115,6 @@ export default function login() {
                             type={"email"}
                             placeholder="email@example.com"
                             name="email"
-                            // value={"testuser2@gmail.com"}
                             required
                         />
                     </div>
@@ -88,7 +128,6 @@ export default function login() {
                             type={"password"}
                             placeholder="6 characters minimum"
                             name="password"
-                            value={"secret"}
                             required
                         />
                     </div>
@@ -101,7 +140,6 @@ export default function login() {
                             type={"password"}
                             placeholder="Password should match"
                             name="c_password"
-                            value="secret"
                             required
                         />
                     </div>
@@ -116,11 +154,10 @@ export default function login() {
                         </p>
                     </div>
 
-                    <input
-                        className="submit-btn"
-                        type={"submit"}
-                        value="Sign up"
-                    />
+                    <button className={`submit-btn `} type={"submit"}>
+                        {loading && <span className="loader"></span>}
+                        {!loading && <span className="">Sign up</span>}
+                    </button>
                 </form>
                 <p className="text-center">
                     <span className="text-sm text-dark-50 mr-4">

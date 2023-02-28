@@ -3,39 +3,104 @@ import Link from "next/link";
 import Image from "next/image";
 import Footer from "../../../components/Footer";
 import { useRouter } from "next/router";
-import { useRef } from "react";
+import { useState, useRef } from "react";
 import Utils from "../../../Utils";
 import Config from "../../../Config";
+import ErrorPopup from "../../../components/errorPopup";
 
 export default function RecruiterProfileSetupStep3() {
     const router = useRouter();
 
     const R_Step3Form = useRef();
 
-    const onNext = (e) => {
+    const [loadingNext, setLoadingNext] = useState(false);
+    const [loadingExit, setLoadingExit] = useState(false);
+    const [showErrorPopup, setShowErrorPopup] = useState(false);
+    const [errorMessage, setErrorMessage] = useState("An Error Occured");
+
+    const onNext = async (e) => {
         e.preventDefault();
-        const userId = 2;
+
+        if (loadingNext) {
+            return;
+        } else {
+            setLoadingNext(true);
+        }
+
+        const userId = localStorage.getItem("user_id");
 
         const R_step3FormData = new FormData(R_Step3Form.current);
 
         R_step3FormData.append("user_id", userId);
 
-        const results = Utils.postForm(
-            `${Config.BASE_URL}/more_about_recruiters`,
-            R_step3FormData
-        );
+        Utils.makeRequest(async () => {
+            try {
+                const results = await Utils.postForm(
+                    `${Config.BASE_URL}/more_about_recruiters`,
+                    R_step3FormData
+                );
 
-        if (results.success) {
-            router.push("/recruiter/profile-setup/step4");
-        }
+                console.log("step 3 resulsts: ", results);
+
+                if (results.data.success) {
+                    router.push("/recruiter/profile-setup/step4");
+                }
+                setLoadingNext(false);
+            } catch (error) {
+                console.log("step 3 Error: ", error);
+                setErrorMessage(error.message);
+                setShowErrorPopup(true);
+                setLoadingNext(false);
+            }
+        });
+    };
+
+    const onClose = () => {
+        setShowErrorPopup(false);
     };
 
     const onSaveAndExit = (e) => {
         e.preventDefault();
-        alert("save and exit");
+        if (loadingExit) {
+            return;
+        } else {
+            setLoadingExit(true);
+        }
+
+        const userId = localStorage.getItem("user_id");
+
+        const R_step3FormData = new FormData(R_Step3Form.current);
+
+        R_step3FormData.append("user_id", userId);
+
+        Utils.makeRequest(async () => {
+            try {
+                const results = await Utils.postForm(
+                    `${Config.BASE_URL}/more_about_recruiters`,
+                    R_step3FormData
+                );
+
+                console.log("step 3 resulsts: ", results);
+
+                if (results.data.success) {
+                    router.push("/recruiter/profile-setup/step4");
+                }
+                setLoadingExit(false);
+            } catch (error) {
+                console.log("step 3 Error: ", error);
+                setErrorMessage(error.message);
+                setShowErrorPopup(true);
+                setLoadingExit(false);
+            }
+        });
     };
     return (
         <>
+            <ErrorPopup
+                showPopup={showErrorPopup}
+                onClose={onClose}
+                message={errorMessage}
+            />
             <LogoNavbar />
             <p
                 className="back-btn"
@@ -103,19 +168,27 @@ export default function RecruiterProfileSetupStep3() {
                         </textarea>
                     </div>
 
-                    <div>
-                        <input
+                    <div className="flex flex-row justify-left">
+                        <button
                             className="submit-btn-secondary mr-3"
-                            value={"Save and Exit"}
                             type={"submit"}
                             onClick={onSaveAndExit}
-                        />
-                        <input
+                        >
+                            {loadingExit && (
+                                <span className="loader-secondary"></span>
+                            )}
+                            {!loadingExit && (
+                                <span className="">Save and Exit</span>
+                            )}
+                        </button>
+                        <button
                             className="submit-btn-left ml-3"
                             type={"submit"}
-                            value="Next"
                             onClick={onNext}
-                        />
+                        >
+                            {loadingNext && <span className="loader"></span>}
+                            {!loadingNext && <span className="">Next</span>}
+                        </button>
                     </div>
                 </form>
             </div>

@@ -2,21 +2,42 @@ import JobPostNavbar from "../../../components/navbars/JobPostNavbar";
 import Footer from "../../../components/Footer";
 import Image from "next/image";
 import { useRouter } from "next/router";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import RecruiterJobSuccessPopup from "../../../components/recuriters/recruiter-job-success-popup";
 import NotEnoughCreditPopup from "../../../components/payments/not-enough-credit-popup";
 import ReloadCreditPopup from "../../../components/payments/reload-credit-popup";
 import ReloadSuccessPopup from "../../../components/payments/reload-success-popup";
+import JobCategories from "../../../components/recuriters/job-categories";
+import Utils from "../../../Utils";
+import Config from "../../../Config";
 
 export default function () {
     const router = useRouter();
 
     const [showJobSuccessPopup, setShowJobSuccessPopup] = useState(false);
-    const [afterPayment, setAfterPayment] = useState(false);
+    const [afterPayment, setAfterPayment] = useState(true);
     const [showNotEnoughCreditPopup, setShowNotEnoughCreditPopup] =
         useState(false);
     const [showReloadCreditPopup, setShowReloadCreditPopup] = useState(false);
     const [showReloadSuccessPopup, setShowReloadSuccessPopup] = useState(false);
+
+    const [localJobPost, setLocalJobPost] = useState({});
+    const [jobCategory, setJobCategory] = useState("standard");
+
+    useEffect(() => {
+        const theLocalJobPost = Utils.getLocalJobPost();
+
+        console.log("local Job post: ", theLocalJobPost);
+
+        setLocalJobPost(theLocalJobPost);
+
+        const theJobCategory = localStorage.getItem("job_category");
+
+        if (theJobCategory) {
+            setJobCategory(theJobCategory);
+        }
+    }, []);
+
     const onBack = (e) => {
         e.preventDefault();
         router.back();
@@ -25,13 +46,26 @@ export default function () {
     const onNext = (e) => {
         e.preventDefault();
 
-        if (afterPayment) {
-            setShowJobSuccessPopup(true);
-            console.log("after payment");
+        if (!afterPayment) {
+            setShowNotEnoughCreditPopup(true);
             return;
         }
 
-        setShowNotEnoughCreditPopup(true);
+        localJobPost.job_category_id = Config.JOB_CATEGORIES[jobCategory].id;
+
+        const JobFormData = new FormData();
+
+        //    JobFormData.append()
+
+        // console.log(localJobPost);
+
+        // localStorage.setItem("job_post", JSON.stringify(localJobPost));
+
+        setShowJobSuccessPopup(true);
+    };
+
+    const onChangeJobCategory = (newJobCategory) => {
+        setJobCategory(newJobCategory);
     };
 
     const onClose = () => {
@@ -56,40 +90,28 @@ export default function () {
         setAfterPayment(true);
     };
 
+    const onNavigateToStep1 = () => {
+        router.push("/recruiter/job-posting/step1");
+    };
+
+    const onNavigateToStep2 = () => {
+        router.push("/recruiter/job-posting/step2");
+    };
+
+    const onNavigateToStep4 = () => {
+        router.push("/recruiter/job-posting/step4");
+    };
+
     return (
         <>
             <JobPostNavbar currentStepText={"Step 6 of 6 - Job post review"} />
 
             <div className="w-3/4 mt-5 mb-10 mx-auto">
-                <div className="md:grid md:grid-cols-3 mb-10">
-                    <div className="flex flex-col justify-center items-center border border-solid border-primary-70 py-2 px-8 m-4 rounded-10">
-                        <p className="text-primary-70 text-xl text-center">
-                            BASIC JOB
-                        </p>
-                        <p className="text-sm text-primary-70 text-center">
-                            Access to non-assessed list of applicants to
-                            interview KSh 5,000
-                        </p>
-                    </div>
-                    <div className="flex flex-col justify-center items-center bg-primary-60  py-2 px-8 m-4 rounded-10">
-                        <p className=" text-xl text-center text-white">
-                            STANDARD JOB
-                        </p>
-                        <p className="text-sm text-center text-white">
-                            Access to shortlist of applicants to interview KSh
-                            11,000
-                        </p>
-                    </div>
-                    <div className="flex flex-col justify-center items-center border border-solid border-primary-70 py-2 px-8 m-4 rounded-10">
-                        <p className="text-primary-70 text-xl text-center">
-                            PREMIUM JOB
-                        </p>
-                        <p className="text-sm text-primary-70 text-center">
-                            Curated list of 10 selected candidates to interview
-                            KSh 20,000
-                        </p>
-                    </div>
-                </div>
+                <JobCategories
+                    jobCategory={jobCategory}
+                    onChangeJobCategory={onChangeJobCategory}
+                    showTitle={false}
+                />
 
                 <div>
                     <div>
@@ -102,13 +124,14 @@ export default function () {
                                     </span>
                                     <span className="flex flex-row flex-nowrap justify-start items-center">
                                         <span className="text-my-gray-70">
-                                            Software Engineer
+                                            {localJobPost.title || ""}
                                         </span>
                                         <Image
+                                            onClick={onNavigateToStep1}
                                             src={"/edit-icon.svg"}
                                             width={18}
                                             height={18}
-                                            className="m-1"
+                                            className="m-1 cursor-pointer"
                                         />
                                     </span>
                                 </p>
@@ -134,13 +157,15 @@ export default function () {
                                     </span>
                                     <span className="flex flex-row flex-nowrap justify-start items-center">
                                         <span className="text-my-gray-70">
-                                            IT, Technology services
+                                            {localJobPost.company_industry ||
+                                                ""}
                                         </span>
                                         <Image
+                                            onClick={onNavigateToStep1}
                                             src={"/edit-icon.svg"}
                                             width={18}
                                             height={18}
-                                            className="m-1"
+                                            className="m-1 cursor-pointer"
                                         />
                                     </span>
                                 </p>
@@ -152,13 +177,14 @@ export default function () {
                                     </span>
                                     <span className="flex flex-row flex-nowrap justify-start items-center">
                                         <span className="text-my-gray-70">
-                                            Nairobi, Kenya
+                                            {localJobPost.location || ""}
                                         </span>
                                         <Image
+                                            onClick={onNavigateToStep1}
                                             src={"/edit-icon.svg"}
                                             width={18}
                                             height={18}
-                                            className="m-1"
+                                            className="m-1 cursor-pointer"
                                         />
                                     </span>
                                 </p>
@@ -168,13 +194,14 @@ export default function () {
                                     </span>
                                     <span className="flex flex-row flex-nowrap justify-start items-center">
                                         <span className="text-my-gray-70">
-                                            Fulltime
+                                            {localJobPost.type || ""}
                                         </span>
                                         <Image
+                                            onClick={onNavigateToStep2}
                                             src={"/edit-icon.svg"}
                                             width={18}
                                             height={18}
-                                            className="m-1"
+                                            className="m-1 cursor-pointer"
                                         />
                                     </span>
                                 </p>
@@ -202,26 +229,14 @@ export default function () {
                                     Job description
                                 </span>
                                 <Image
+                                    onClick={onNavigateToStep1}
                                     src={"/edit-icon.svg"}
                                     width={18}
                                     height={18}
-                                    className="m-1"
+                                    className="m-1 cursor-pointer"
                                 />
                             </p>
-                            <p>
-                                Our company is seeking to hire a skilled
-                                software Engineer to help with the development
-                                of our current projects. Your duties will
-                                primarily revolve around building software by
-                                writing code, as well as modifying software to
-                                fix errors, adapt it to new hardware, improve
-                                its performance, or upgrade interfaces. You will
-                                also be involved in directing system testing and
-                                validation procedures, and also working with
-                                customers or departments on technical issues
-                                including software system design and
-                                maintenance.
-                            </p>
+                            <p>{localJobPost.description || ""}</p>
                         </div>
                         <div>
                             <p className="flex flex-row flex-nowrap justify-start items-center">
@@ -252,14 +267,19 @@ export default function () {
                                             Resume required
                                         </span>
                                         <Image
+                                            onClick={onNavigateToStep4}
                                             src={"/edit-icon.svg"}
                                             width={18}
                                             height={18}
-                                            className="m-1"
+                                            className="m-1 cursor-pointer"
                                         />
                                     </p>
                                     <ul className="text-dark-50 list-disc list-inside ml-3">
-                                        <li>Yes</li>
+                                        <li>
+                                            {localJobPost.with_resume
+                                                ? "Yes"
+                                                : "No"}
+                                        </li>
                                     </ul>
                                 </div>
                                 <div>

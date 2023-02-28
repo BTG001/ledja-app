@@ -2,12 +2,47 @@ import JobPostNavbar from "../../../components/navbars/JobPostNavbar";
 import Footer from "../../../components/Footer";
 import Image from "next/image";
 import { useRouter } from "next/router";
+import Config from "../../../Config";
+import { useState, useEffect } from "react";
+import JobCategories from "../../../components/recuriters/job-categories";
+import Utils from "../../../Utils";
 
 export default function () {
     const router = useRouter();
+
+    const [localJobPost, setLocalJobPost] = useState();
+    const [jobCategory, setJobCategory] = useState("standard");
+
+    useEffect(() => {
+        const theLocalJobPost = Utils.getLocalJobPost();
+
+        console.log("local Job post: ", theLocalJobPost);
+
+        setLocalJobPost(theLocalJobPost);
+
+        const theJobCategory = localStorage.getItem("job_category");
+
+        if (theJobCategory) {
+            setJobCategory(theJobCategory);
+        }
+    }, []);
+
     const onNext = (e) => {
         e.preventDefault();
+
+        localJobPost.job_category_id = Config.JOB_CATEGORIES[jobCategory].id;
+
+        localStorage.setItem("job_category", jobCategory);
+
+        console.log(localJobPost);
+
+        localStorage.setItem("job_post", JSON.stringify(localJobPost));
+
         router.push("/recruiter/job-posting/step6");
+    };
+
+    const onChangeJobCategory = (newJobCategory) => {
+        setJobCategory(newJobCategory);
     };
 
     const onBack = (e) => {
@@ -21,40 +56,15 @@ export default function () {
             />
 
             <div className="w-3/4 mt-5 mb-10 mx-auto">
-                <div className="md:grid md:grid-cols-3 mb-10">
-                    <div className="flex flex-col justify-center items-center border border-solid border-primary-70 py-2 px-8 m-4 rounded-10">
-                        <p className="text-primary-70 text-xl text-center">
-                            BASIC JOB
-                        </p>
-                        <p className="text-sm text-primary-70 text-center">
-                            Access to non-assessed list of applicants to
-                            interview KSh 5,000
-                        </p>
-                    </div>
-                    <div className="flex flex-col justify-center items-center bg-primary-60  py-2 px-8 m-4 rounded-10">
-                        <p className=" text-xl text-center text-white">
-                            STANDARD JOB
-                        </p>
-                        <p className="text-sm text-center text-white">
-                            Access to shortlist of applicants to interview KSh
-                            11,000
-                        </p>
-                    </div>
-                    <div className="flex flex-col justify-center items-center border border-solid border-primary-70 py-2 px-8 m-4 rounded-10">
-                        <p className="text-primary-70 text-xl text-center">
-                            PREMIUM JOB
-                        </p>
-                        <p className="text-sm text-primary-70 text-center">
-                            Curated list of 10 selected candidates to interview
-                            KSh 20,000
-                        </p>
-                    </div>
-                </div>
-
+                <JobCategories
+                    jobCategory={jobCategory}
+                    onChangeJobCategory={onChangeJobCategory}
+                    showTitle={false}
+                />
                 <form className="form">
                     <div className="form-input-container mb-5">
                         <label className="form-label-light">
-                            Communication preferences
+                            Add a skills assessment to the job post
                         </label>
 
                         <div className="text-sm my-2 text-my-gray-70 border border-solid border-my-gray-70 rounded-sm p-2 ">
