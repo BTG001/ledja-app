@@ -29,7 +29,7 @@ export default function RecruiterProfileSetupStep1() {
             setLoadingNext(true);
         }
 
-        const userId = 2;
+        const userId = localStorage.getItem("user_id");
 
         const R_Step1FormData = new FormData(R_Step1Form.current);
 

@@ -2,7 +2,7 @@ import axios from "axios";
 import Config from "./Config";
 
 export default class Utils {
-    static async getHeaders() {
+    static getHeaders() {
         const token = localStorage.getItem("token");
         return {
             Authorization: `Bearer ${token}`,
@@ -58,9 +58,5 @@ export default class Utils {
     static async postForm(url, data) {
         axios.defaults.withCredentials = true;
         return axios.postForm(url, data, Utils.getHeaders());
-    }
-
-    static async get(url) {
-        return axios.get(url, Utils.getHeaders());
     }
 }

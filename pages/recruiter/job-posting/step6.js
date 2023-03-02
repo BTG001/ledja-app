@@ -2,7 +2,7 @@ import JobPostNavbar from "../../../components/navbars/JobPostNavbar";
 import Footer from "../../../components/Footer";
 import Image from "next/image";
 import { useRouter } from "next/router";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import RecruiterJobSuccessPopup from "../../../components/recuriters/recruiter-job-success-popup";
 import NotEnoughCreditPopup from "../../../components/payments/not-enough-credit-popup";
 import ReloadCreditPopup from "../../../components/payments/reload-credit-popup";
@@ -10,9 +10,15 @@ import ReloadSuccessPopup from "../../../components/payments/reload-success-popu
 import JobCategories from "../../../components/recuriters/job-categories";
 import Utils from "../../../Utils";
 import Config from "../../../Config";
+import ErrorPopup from "../../../components/errorPopup";
 
 export default function () {
     const router = useRouter();
+
+    const [loading, setLoading] = useState(false);
+
+    const [showErrorPopup, setShowErrorPopup] = useState(false);
+    const [errorMessageArray, setErrorMessageArray] = useState([]);
 
     const [showJobSuccessPopup, setShowJobSuccessPopup] = useState(false);
     const [afterPayment, setAfterPayment] = useState(true);
@@ -43,8 +49,20 @@ export default function () {
         router.back();
     };
 
+    const fileInput = useRef();
+
+    const onUploadFile = () => {
+        fileInput.current.click();
+    };
+
     const onNext = (e) => {
         e.preventDefault();
+
+        if (loading) {
+            return;
+        } else {
+            setLoading(true);
+        }
 
         if (!afterPayment) {
             setShowNotEnoughCreditPopup(true);
@@ -54,14 +72,73 @@ export default function () {
         localJobPost.job_category_id = Config.JOB_CATEGORIES[jobCategory].id;
 
         const JobFormData = new FormData();
+        JobFormData.append("job_category_id", localJobPost.job_category_id);
+        JobFormData.append("user_id", localJobPost.user_id);
+        JobFormData.append("company_industry", localJobPost.company_industry);
+        JobFormData.append(
+            "company_sub_industry",
+            localJobPost.company_sub_industry
+        );
+        JobFormData.append("title", localJobPost.title);
+        JobFormData.append("type", localJobPost.type);
+        JobFormData.append("location", localJobPost.location);
+        JobFormData.append("description", localJobPost.description);
+        JobFormData.append("no_of_hires", 5);
+        JobFormData.append("hiring_speed", localJobPost.hiring_speed);
+        JobFormData.append("with_resume", localJobPost.with_resume);
+        JobFormData.append("apply_method", "email");
 
-        //    JobFormData.append()
+        JobFormData.append("communication_preferences", "mobile_no");
+        JobFormData.append("job_status", "new");
+        JobFormData.append("own_completion", localJobPost.own_completion);
+        JobFormData.append(
+            "with_recommendation",
+            localJobPost.with_recommendation
+        );
 
-        // console.log(localJobPost);
+        JobFormData.append("experience_level", "Minimum 1 year");
+        JobFormData.append("salary", "10000");
+
+        console.log("file: ", fileInput.current.files[0]);
+
+        JobFormData.append("skills_assessment", fileInput.current.files[0]);
+        console.log(localJobPost);
+
+        Utils.makeRequest(async () => {
+            try {
+                const results = await Utils.postForm(
+                    `${Config.BASE_URL}/jobs`,
+                    JobFormData
+                );
+
+                console.log("Job Results: ", results);
+                setShowJobSuccessPopup(true);
+                localStorage.removeItem("job_post");
+                setLoading(false);
+            } catch (error) {
+                console.log("Job Error: ", error);
+                setLoading(false);
+
+                try {
+                    let errorMessages = [];
+                    const errors = error.response.data.data;
+                    Object.keys(errors).map((errorKey) => {
+                        errors[errorKey].map((error) => {
+                            errorMessages.push(error);
+                        });
+                    });
+
+                    console.log("error Message: ", errorMessages);
+                    setErrorMessageArray(errorMessages);
+                } catch (error) {
+                    console.log("Error Generating Error Message: ", error);
+                }
+
+                setShowErrorPopup(true);
+            }
+        });
 
         // localStorage.setItem("job_post", JSON.stringify(localJobPost));
-
-        setShowJobSuccessPopup(true);
     };
 
     const onChangeJobCategory = (newJobCategory) => {
@@ -72,6 +149,7 @@ export default function () {
         setShowNotEnoughCreditPopup(false);
         setShowReloadCreditPopup(false);
         setShowReloadSuccessPopup(false);
+        setShowErrorPopup(false);
     };
 
     const onReloadCredit = () => {
@@ -104,6 +182,17 @@ export default function () {
 
     return (
         <>
+            <ErrorPopup
+                showPopup={showErrorPopup}
+                onClose={onClose}
+                messageArray={errorMessageArray}
+            />
+            <input
+                className="hidden"
+                type={"file"}
+                ref={fileInput}
+                onChange={onNext}
+            />
             <JobPostNavbar currentStepText={"Step 6 of 6 - Job post review"} />
 
             <div className="w-3/4 mt-5 mb-10 mx-auto">
@@ -310,12 +399,15 @@ export default function () {
                         type={"submit"}
                         onClick={onBack}
                     />
-                    <input
-                        className="submit-btn-left ml-3"
+
+                    <button
+                        onClick={onUploadFile}
+                        className={`submit-btn-left ml-3`}
                         type={"submit"}
-                        value="Post a Job"
-                        onClick={onNext}
-                    />
+                    >
+                        {loading && <span className="loader"></span>}
+                        {!loading && <span className="">Post a Job</span>}
+                    </button>
                 </div>
             </div>
 
@@ -338,7 +430,7 @@ export default function () {
             <ReloadSuccessPopup
                 showPopup={showReloadSuccessPopup}
                 onAfterPayment={onAfterPayment}
-                onClose={onClose}
+                onClose={onNext}
             />
             <Footer />
         </>

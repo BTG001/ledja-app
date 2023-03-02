@@ -10,8 +10,8 @@ export default function () {
     const router = useRouter();
 
     const [localJobPost, setLocalJobPost] = useState();
-    const [ownCompletion, setOwnCompletion] = useState(false);
-    const [withRecommendation, setWithRecommendation] = useState(false);
+    const [ownCompletion, setOwnCompletion] = useState(0);
+    const [withRecommendation, setWithRecommendation] = useState(0);
 
     const [showErrorPopup, setShowErrorPopup] = useState(false);
     const [errorMessage, setErrorMessage] = useState("An Error Occured");
@@ -78,8 +78,8 @@ export default function () {
                         </label>
                         <div
                             onClick={() => {
-                                setOwnCompletion(true);
-                                setWithRecommendation(false);
+                                setOwnCompletion(1);
+                                setWithRecommendation(0);
                             }}
                             className={`cursor-pointer flex flex-row flex-nowrap justify-start items-center border border-solid  p-2 rounded-md
                         ${
@@ -103,8 +103,8 @@ export default function () {
                         </label> */}
                         <div
                             onClick={() => {
-                                setOwnCompletion(false);
-                                setWithRecommendation(true);
+                                setOwnCompletion(0);
+                                setWithRecommendation(1);
                             }}
                             className={`cursor-pointer flex flex-row flex-nowrap justify-start items-center border border-solid  p-2 rounded-md
                         ${

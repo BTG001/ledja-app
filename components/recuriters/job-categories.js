@@ -3,6 +3,7 @@ export default function JobCategories({
     onChangeJobCategory,
     showTitle = true,
 }) {
+    // console.log("Job CAtegory: ", jobCategory);
     return (
         <>
             {showTitle && (

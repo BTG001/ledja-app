@@ -1,21 +1,124 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 false;
 import Image from "next/image";
 import Footer from "../../components/Footer";
 import RecruiterNavbar from "../../components/navbars/RecruiterNavbar";
 import SecondaryBtn from "../../components/buttons/SecondaryBtn";
+import Utils from "../../Utils";
+import Config from "../../Config";
+import axios from "axios";
+import { BsBuilding } from "react-icons/bs";
+import { BiUserCircle } from "react-icons/bi";
+import Link from "next/link";
 
 export default function Profile() {
-    const [hasWorkExperience, setHasWorkExperience] = useState();
-    const [hasEducation, setHasEducation] = useState();
-    const [hasSkills, setHasSkills] = useState();
-    const [hasAssessment, setHasAssessment] = useState();
-    const [hasResume, setHasResume] = useState();
+    const [basicInfo, setBasicInfo] = useState({});
+    const [links, setLinks] = useState({});
+    const [aboutRecruiter, setAboutRecruiter] = useState({});
+    const [moreAboutCompany, setMoreAboutCompany] = useState({});
+
+    const [jobs, setJobs] = useState([]);
+
+    const [needsToCompleteProfile, setNeedsToCompleteProfile] = useState(false);
+
+    const [hasContactInfo, setHasContactInfo] = useState(false);
+    const [hasProfilePic, setHasProfilePic] = useState(false);
+    const [hasCompanyInfo, setHasCompanyInfo] = useState(false);
+    const [hasCompanyIntro, setHasCompanyIntro] = useState(false);
+    const [hasCompanyCulture, setHasCompanyCulture] = useState(false);
+    const [hasSocialMediaLinks, setHasSocialMediaLinks] = useState(false);
+
+    const [showBasicInfoEditPopup, setShowBasicInfoEditPopup] = useState(false);
+    const [showCompanyIntrEditPopupo, setShowCompanyIntroEditPopup] =
+        useState(false);
+    const [showCompanyCultureEditPopup, setShowCompanyCultureEditPopup] =
+        useState(false);
+    const [showProfilePicChangeform, setShowProfilePicChangeform] =
+        useState(false);
+    const [showContactInfoEditPopup, setShowContactInfoEditPopup] =
+        useState(false);
+
+    useEffect(() => {
+        fetchRecruiter();
+        fetchJobs();
+    }, []);
+
+    async function fetchRecruiter() {
+        try {
+            const userId = localStorage.getItem("user_id");
+            const url = `${Config.BASE_URL}/users/${userId}`;
+            let recruiter = await axios.get(url, {
+                headers: Utils.getHeaders(),
+            });
+
+            recruiter = recruiter.data.data;
+
+            if (recruiter.basic_info_recruiter) {
+                setBasicInfo(recruiter.basic_info_recruiter);
+                setHasCompanyInfo(true);
+            }
+
+            if (recruiter.recruiter_link) {
+                setLinks(recruiter.recruiter_link);
+                setHasSocialMediaLinks(true);
+            }
+
+            if (recruiter.about_recruiter) {
+                setAboutRecruiter(recruiter.about_recruiter);
+                setHasContactInfo(true);
+            }
+
+            if (recruiter.more_about_recruiter) {
+                setMoreAboutCompany(recruiter.more_about_recruiter);
+                if (recruiter.more_about_recruiter.company_intro) {
+                    setHasCompanyIntro(true);
+                }
+
+                if (recruiter.more_about_recruiter.company_culture) {
+                    setHasCompanyCulture(true);
+                }
+            }
+
+            if (
+                !recruiter.basic_info_recruiter ||
+                !recruiter.recruiter_link ||
+                !recruiter.about_recruiter ||
+                !recruiter.more_about_recruiter
+            ) {
+                setNeedsToCompleteProfile(true);
+            }
+
+            console.log("recruiter: ", recruiter);
+        } catch (error) {
+            console.log("recruiter profile Error: ", error);
+        }
+    }
+
+    async function fetchJobs(url) {
+        if (!url) {
+            const userId = localStorage.getItem("user_id");
+            url = `${Config.BASE_URL}/get_user_jobs/${userId}`;
+        }
+
+        try {
+            let theJobs = await axios.get(url, {
+                headers: Utils.getHeaders(),
+            });
+
+            theJobs = theJobs.data.data;
+
+            setJobs(theJobs);
+
+            console.log("user Jobs: ", theJobs);
+        } catch (error) {
+            console.log("user Jobs request error: ", error);
+        }
+    }
 
     return (
         <>
             <RecruiterNavbar icon={"user"} dashboardLinks={false} />
-            <div className="w-4/5 md:grid grid-cols-3 md:gap-4  mt-5 mb-32 mx-auto ">
+            <div className="w-4/5 md:grid grid-cols-3 md:gap-4  mt-5 mb-32 mx-auto md:grid-flow-dense md:dire ">
                 <section className="col-span-2">
                     <div className="form-input-container ">
                         <p className="flex flex-row flex-nowrap justify-between items-center w-full p-2">
@@ -29,70 +132,79 @@ export default function Profile() {
                                 "mt-4 p-5 border border-solid border-my-gray-70  rounded-10 grid grid-cols-3 gap-3 "
                             }
                         >
-                            <Image
-                                src={"/job-2.png"}
-                                width={145}
-                                height={175}
-                            />
+                            <BsBuilding className="w-32 h-32" />
                             <div className="flex flex-col flex-nowrap justify-start items-start">
-                                <h3 className="font-medium text-xl text-dark-50 my-5">
-                                    Generation Group Inc.
-                                </h3>
+                                <h3 className="font-medium text-xl text-dark-50 my-5"></h3>
                                 <p className="text-sm text-dark-50">
-                                    Software development
+                                    {basicInfo.company_name || ""}
                                 </p>
                                 <p className="text-sm text-dark-50">
-                                    Nairobi, Kenya
+                                    {basicInfo.location || ""}
                                 </p>
                                 <p className="grid grid-cols-2 gap-2 w-fit mt-5 mb-2">
                                     <span className="text-primary-70 text-sm">
                                         Website
                                     </span>
-                                    <span></span>
+                                    <Link
+                                        className="underline"
+                                        href={links.websites || ""}
+                                    >
+                                        {links.websites || ""}
+                                    </Link>
                                 </p>
                                 <p className="grid grid-cols-2 gap-2 w-fit mt-5 mb-2">
                                     <span className="text-primary-70 text-sm">
                                         Founded
                                     </span>
-                                    <span className="text-sm">2003</span>
+                                    <span className="text-sm">
+                                        {basicInfo.founded_on || ""}
+                                    </span>
                                 </p>
                                 <p className="grid grid-cols-3 gap-2 w-fit mt-5 mb-2">
                                     <span className="text-primary-70 text-sm">
                                         Size
                                     </span>
                                     <span className="text-sm line row-span-2">
-                                        23 employees
+                                        {basicInfo.company_size || ""}
                                     </span>
                                 </p>
                                 <p className="grid grid-cols-2 gap-2 w-fit mt-5 mb-2">
                                     <span className="text-primary-70 text-sm">
                                         Revenue
                                     </span>
-                                    <span className="text-sm">$ 1M</span>
+                                    <span className="text-sm">
+                                        {basicInfo.revenue || ""}
+                                    </span>
                                 </p>
                             </div>
 
                             <div className="flex flex-row flex-nowrap justify-center items-start my-3">
                                 <div className="flex justify-center items-center w-8 h-8 rounded-full bg-my-gray-50 mx-2">
-                                    <Image
-                                        src={"/linkedin.svg"}
-                                        width={14}
-                                        height={9}
-                                    />
+                                    <Link href={links.linked_in || ""}>
+                                        <Image
+                                            src={"/linkedin.svg"}
+                                            width={14}
+                                            height={9}
+                                        />
+                                    </Link>
                                 </div>
                                 <div className="flex justify-center items-center w-8 h-8 rounded-full bg-my-gray-50 mx-2">
-                                    <Image
-                                        src={"/twitter.svg"}
-                                        width={13}
-                                        height={11}
-                                    />
+                                    <Link href={links.twitter || ""}>
+                                        <Image
+                                            src={"/twitter.svg"}
+                                            width={13}
+                                            height={11}
+                                        />
+                                    </Link>
                                 </div>
                                 <div className="flex justify-center items-center w-8 h-8 rounded-full bg-my-gray-50 mx-2">
-                                    <Image
-                                        src={"/facebook.svg"}
-                                        width={8}
-                                        height={6}
-                                    />
+                                    <Link href={links.facebook || ""}>
+                                        <Image
+                                            src={"/facebook.svg"}
+                                            width={8}
+                                            height={6}
+                                        />
+                                    </Link>
                                 </div>
                             </div>
                         </div>
@@ -110,13 +222,7 @@ export default function Profile() {
                                 "mt-4 px-4 py-1 border border-solid border-my-gray-70  rounded-md flex flex-row flex-nowrap justify-start items-center"
                             }
                         >
-                            <p>
-                                Generation group is a commercial is a
-                                fast-growing Series C startup with classic
-                                two-sided network effects. We have
-                                product-market fit, generate substantial
-                                revenue.
-                            </p>
+                            <p>{moreAboutCompany.company_intro || ""}</p>
                         </div>
                     </div>
 
@@ -133,16 +239,7 @@ export default function Profile() {
                                 "mt-4 px-4 py-1 border border-solid border-my-gray-70  rounded-md flex flex-row flex-nowrap justify-start items-center"
                             }
                         >
-                            <p>
-                                Generation group is a commercial is a
-                                fast-growing Series C startup with classic
-                                two-sided network effects. We have
-                                product-market fit, generate substantial
-                                revenue. <br /> <br />
-                                Generation group is a commercial is a
-                                fast-growing Series C startup two-sided network
-                                effects. We have product-market fit, generate.
-                            </p>
+                            <p>{moreAboutCompany.company_culture || ""}</p>
                         </div>
                     </div>
                     <div className="flex flex-row flex-nowrap justify-between items-center w-full p-2">
@@ -152,73 +249,19 @@ export default function Profile() {
                         <span className="text-primary-70">Edit</span>
                     </div>
                     <div className="form-input-container border border-solid rounded-md border-my-gray-70 py-2 px-4 my-3">
-                        <div className="grid grid-cols-4 my-3 gap-2 items-center md:w-1/2">
-                            <Image
-                                className="col-span-1"
-                                src={"/job-2.png"}
-                                width={48}
-                                height={48}
-                            />
-                            <div className="col-span-3 flex flex-col flex-nowrap justify-start items-start ">
-                                <h2 className=" mb-2">Technical Writer</h2>
-                                <p className="text-sm text-my-gray-70">
-                                    London (Remote)
-                                </p>
-                            </div>
-                        </div>
-                        <div className="grid grid-cols-4 my-3 gap-2 items-center md:w-1/2">
-                            <Image
-                                className="col-span-1"
-                                src={"/job-2.png"}
-                                width={48}
-                                height={48}
-                            />
-                            <div className="col-span-3 flex flex-col flex-nowrap justify-start items-start ">
-                                <h2 className=" mb-2">HR Specialist </h2>
-                                <p className="text-sm text-my-gray-70">
-                                    Hybrid, Spain
-                                </p>
-                            </div>
-                        </div>
-                        <div className="grid grid-cols-4 my-3 gap-2 items-center md:w-1/2">
-                            <Image
-                                className="col-span-1"
-                                src={"/job-2.png"}
-                                width={48}
-                                height={48}
-                            />
-                            <div className="col-span-3 flex flex-col flex-nowrap justify-start items-start ">
-                                <h2 className=" mb-2">
-                                    Customer Service Specialist{" "}
-                                </h2>
-                                <p className="text-sm text-my-gray-70">
-                                    London (Remote)
-                                </p>
-                            </div>
-                        </div>
-                        <div className="grid grid-cols-4 my-3 gap-2 items-center md:w-1/2">
-                            <Image
-                                className="col-span-1"
-                                src={"/job-2.png"}
-                                width={48}
-                                height={48}
-                            />
-                            <div className="col-span-3 flex flex-col flex-nowrap justify-start items-start ">
-                                <h2 className=" mb-2">Technical Engineer </h2>
-                                <p className="text-sm text-my-gray-70">
-                                    Technical Engineer
-                                </p>
-                            </div>
-                        </div>
-                        <div className="flex flex-row flex-nowrap justify-start items-center text-primary-70 text-sm my-3">
-                            <Image
-                                className="m-2"
-                                src={"/plus-icon.svg"}
-                                width={9}
-                                height={9}
-                            />
-                            <span>Post new jobs</span>
-                        </div>
+                        {jobs.map((job) => {
+                            return (
+                                <div className="grid grid-cols-4 my-3 gap-1 items-center md:w-1/2">
+                                    <BsBuilding className="w-20 h-20 p-3" />
+                                    <div className="col-span-3 flex flex-col flex-nowrap justify-start items-start ">
+                                        <h2 className=" mb-2">{job.title}</h2>
+                                        <p className="text-sm text-my-gray-70">
+                                            {job.location} ({job.type})
+                                        </p>
+                                    </div>
+                                </div>
+                            );
+                        })}
                     </div>
                     <div className="form-input-container ">
                         <p className="flex flex-row flex-nowrap justify-between items-center w-full p-2">
@@ -235,17 +278,14 @@ export default function Profile() {
                                 "mt-4 p-5 border border-solid border-my-gray-70  rounded-10 grid grid-cols-3 gap-3 "
                             }
                         >
-                            <Image
-                                src={"/recruiter.png"}
-                                width={145}
-                                height={175}
-                            />
+                            <BiUserCircle className="w-32 h-32" />
                             <div className="flex flex-col flex-nowrap justify-start items-start">
                                 <h3 className="font-medium text-xl text-dark-50 my-5">
-                                    Jennifer Eva
+                                    {aboutRecruiter.fname}{" "}
+                                    {aboutRecruiter.lname}
                                 </h3>
                                 <p className="text-sm text-dark-50">
-                                    Recruitment Specialist
+                                    {aboutRecruiter.company_position}
                                 </p>
                                 {/* <p className="text-sm text-dark-50">
                                     Nairobi, Kenya
@@ -272,25 +312,31 @@ export default function Profile() {
 
                             <div className="flex flex-row flex-nowrap justify-center items-start my-3">
                                 <div className="flex justify-center items-center w-8 h-8 rounded-full bg-my-gray-50 mx-2">
-                                    <Image
-                                        src={"/linkedin.svg"}
-                                        width={14}
-                                        height={9}
-                                    />
+                                    <Link href={links.linked_in || ""}>
+                                        <Image
+                                            src={"/linkedin.svg"}
+                                            width={14}
+                                            height={9}
+                                        />
+                                    </Link>
                                 </div>
                                 <div className="flex justify-center items-center w-8 h-8 rounded-full bg-my-gray-50 mx-2">
-                                    <Image
-                                        src={"/twitter.svg"}
-                                        width={13}
-                                        height={11}
-                                    />
+                                    <Link href={links.twitter || ""}>
+                                        <Image
+                                            src={"/twitter.svg"}
+                                            width={13}
+                                            height={11}
+                                        />
+                                    </Link>
                                 </div>
                                 <div className="flex justify-center items-center w-8 h-8 rounded-full bg-my-gray-50 mx-2">
-                                    <Image
-                                        src={"/facebook.svg"}
-                                        width={8}
-                                        height={6}
-                                    />
+                                    <Link href={links.facebook || ""}>
+                                        <Image
+                                            src={"/facebook.svg"}
+                                            width={8}
+                                            height={6}
+                                        />
+                                    </Link>
                                 </div>
                             </div>
                         </div>
@@ -304,40 +350,130 @@ export default function Profile() {
                         </p>
                         <p className="bg-my-gray-50 w-full h-2-px my-5"></p>
                         <div>
-                            <p className="flex flex-row flex-nowrap justify-start items-center">
-                                <span className="block w-4 h-4  bg-white rounded-full border border-grey-70 m-2"></span>
-                                <span className="text-dark-50 text-sm">
+                            <p
+                                className={`flex flex-row flex-nowrap justify-start items-center`}
+                            >
+                                <span
+                                    className={`block w-4 h-4  bg-white rounded-full border border-grey-70 m-2`}
+                                >
+                                    {hasContactInfo && (
+                                        <Image
+                                            src={"/tick-icon.svg"}
+                                            width={16}
+                                            height={16}
+                                        />
+                                    )}
+                                </span>
+                                <span
+                                    className={`text-dark-50 text-sm 
+                                ${hasContactInfo ? "line-through" : ""}`}
+                                >
                                     Add contact info
                                 </span>
                             </p>
-                            <p className="flex flex-row flex-nowrap justify-start items-center">
-                                <span className="block w-4 h-4  bg-white rounded-full border border-grey-70 m-2"></span>
-                                <span className="text-dark-50 text-sm">
+                            <p
+                                className={`flex flex-row flex-nowrap justify-start items-center`}
+                            >
+                                <span
+                                    className={`block w-4 h-4  bg-white rounded-full border border-grey-70 m-2`}
+                                >
+                                    {hasProfilePic && (
+                                        <Image
+                                            src={"/tick-icon.svg"}
+                                            width={16}
+                                            height={16}
+                                        />
+                                    )}
+                                </span>
+                                <span
+                                    className={`text-dark-50 text-sm 
+                                ${hasProfilePic ? "line-through" : ""}`}
+                                >
                                     Add profile picture
                                 </span>
                             </p>
-                            <p className="flex flex-row flex-nowrap justify-start items-center">
-                                <span className="block w-4 h-4  bg-white rounded-full border border-grey-70 m-2"></span>
-                                <span className="text-dark-50 text-sm">
+                            <p
+                                className={`flex flex-row flex-nowrap justify-start items-center`}
+                            >
+                                <span
+                                    className={`block w-4 h-4  bg-white rounded-full border border-grey-70 m-2`}
+                                >
+                                    {hasSocialMediaLinks && (
+                                        <Image
+                                            src={"/tick-icon.svg"}
+                                            width={16}
+                                            height={16}
+                                        />
+                                    )}
+                                </span>
+                                <span
+                                    className={`text-dark-50 text-sm 
+                                ${hasSocialMediaLinks ? "line-through" : ""}`}
+                                >
                                     Linked with social media
                                 </span>
                             </p>
-                            <p className="flex flex-row flex-nowrap justify-start items-center">
-                                <span className="block w-4 h-4  bg-white rounded-full border border-grey-70 m-2"></span>
-                                <span className="text-dark-50 text-sm">
-                                    Add work experience
+                            <p
+                                className={`flex flex-row flex-nowrap justify-start items-center`}
+                            >
+                                <span
+                                    className={`block w-4 h-4  bg-white rounded-full border border-grey-70 m-2`}
+                                >
+                                    {hasCompanyInfo && (
+                                        <Image
+                                            src={"/tick-icon.svg"}
+                                            width={16}
+                                            height={16}
+                                        />
+                                    )}
+                                </span>
+                                <span
+                                    className={`text-dark-50 text-sm 
+                                ${hasCompanyInfo ? "line-through" : ""}`}
+                                >
+                                    Add basic company information
                                 </span>
                             </p>
-                            <p className="flex flex-row flex-nowrap justify-start items-center">
-                                <span className="block w-4 h-4  bg-white rounded-full border border-grey-70 m-2"></span>
-                                <span className="text-dark-50 text-sm">
-                                    Add education
+                            <p
+                                className={`flex flex-row flex-nowrap justify-start items-center`}
+                            >
+                                <span
+                                    className={`block w-4 h-4  bg-white rounded-full border border-grey-70 m-2`}
+                                >
+                                    {hasCompanyIntro && (
+                                        <Image
+                                            src={"/tick-icon.svg"}
+                                            width={16}
+                                            height={16}
+                                        />
+                                    )}
+                                </span>
+                                <span
+                                    className={`text-dark-50 text-sm 
+                                ${hasCompanyIntro ? "line-through" : ""}`}
+                                >
+                                    Add company introduction
                                 </span>
                             </p>
-                            <p className="flex flex-row flex-nowrap justify-start items-center">
-                                <span className="block w-4 h-4  bg-white rounded-full border border-grey-70 m-2"></span>
-                                <span className="text-dark-50 text-sm">
-                                    Add at least 3 skills
+                            <p
+                                className={`flex flex-row flex-nowrap justify-start items-center`}
+                            >
+                                <span
+                                    className={`block w-4 h-4  bg-white rounded-full border border-grey-70 m-2`}
+                                >
+                                    {hasCompanyCulture && (
+                                        <Image
+                                            src={"/tick-icon.svg"}
+                                            width={16}
+                                            height={16}
+                                        />
+                                    )}
+                                </span>
+                                <span
+                                    className={`text-dark-50 text-sm 
+                                ${hasCompanyCulture ? "line-through" : ""}`}
+                                >
+                                    Add company culture
                                 </span>
                             </p>
                         </div>

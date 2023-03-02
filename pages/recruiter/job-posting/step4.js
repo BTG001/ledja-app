@@ -13,7 +13,7 @@ export default function () {
 
     const [localJobPost, setLocalJobPost] = useState();
     const [jobCategory, setJobCategory] = useState("standard");
-    const [withResume, setWithResume] = useState(true);
+    const [withResume, setWithResume] = useState(1);
 
     const [showErrorPopup, setShowErrorPopup] = useState(false);
     const [errorMessage, setErrorMessage] = useState("An Error Occured");
@@ -88,7 +88,7 @@ export default function () {
                         </label>
                         <div
                             onClick={() => {
-                                setWithResume(true);
+                                setWithResume(1);
                             }}
                             className={`flex flex-row flex-nowrap justify-start items-center border border-solid  px-2 rounded-md text-dark-50 mb-8 cursor-pointer
                         ${
@@ -109,7 +109,7 @@ export default function () {
                         </div>
                         <div
                             onClick={() => {
-                                setWithResume(false);
+                                setWithResume(0);
                             }}
                             className={`flex flex-row flex-nowrap justify-start items-center border border-solid  px-2 rounded-md text-dark-50 mb-8 cursor-pointer
                         ${

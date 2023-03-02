@@ -4,7 +4,8 @@ import { MdError } from "react-icons/md";
 export default function ErrorPopup({
     showPopup,
     onClose,
-    message = "Error Message",
+    message,
+    messageArray,
 }) {
     useEffect(() => {
         if (showPopup) {
@@ -26,9 +27,22 @@ export default function ErrorPopup({
                     <h3 className="text-dark-50 text-xl font-medium text-center my-3">
                         Error
                     </h3>
-                    <p className="text-dark-50 font-medium text-md text-center my-3">
-                        {message}
-                    </p>
+                    <div className="text-dark-50 font-medium text-md text-center my-3">
+                        {messageArray &&
+                            messageArray.map((message) => {
+                                return (
+                                    <p className="text-red-500 border border-solid border-red-5-500 my-1">
+                                        {message}
+                                    </p>
+                                );
+                            })}
+
+                        {message && !messageArray && (
+                            <p className="text-red-500 border border-solid border-red-5-500 my-1">
+                                {message}
+                            </p>
+                        )}
+                    </div>
                     <div
                         onClick={() => {
                             document.body.style.overflowY = "visible";

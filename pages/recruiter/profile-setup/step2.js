@@ -70,7 +70,7 @@ export default function RecruiterProfileSetupStep2() {
             setLoadingExit(true);
         }
 
-        const userId = 2;
+        const userId = localStorage.getItem("user_id");
 
         const R_Step2FormData = new FormData(R_Step2Form.current);
 

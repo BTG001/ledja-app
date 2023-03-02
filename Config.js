@@ -22,6 +22,6 @@ export default {
         "Internship",
         "Seasonal",
     ],
-    NO_OF_PEOPLE_TO_HIRE: ["1", "1-2", "1-5", "5+"],
+    NO_OF_PEOPLE_TO_HIRE: ["1", "2", "5", "10"],
     HIRE_SPEED: ["Immediately", "In a week", "In a month"],
 };
