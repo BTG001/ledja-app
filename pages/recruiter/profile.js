@@ -10,6 +10,7 @@ import axios from "axios";
 import { BsBuilding } from "react-icons/bs";
 import { BiUserCircle } from "react-icons/bi";
 import Link from "next/link";
+import CompanyBasicInfoPopup from "../../components/recuriters/profile-edit/company-basic-info-popup";
 
 export default function Profile() {
     const [basicInfo, setBasicInfo] = useState({});
@@ -115,8 +116,25 @@ export default function Profile() {
         }
     }
 
+    const afterBasicInfoUpdate = () => {
+        // get the updated basic infos
+        setShowBasicInfoEditPopup(false);
+        alert("successful");
+    };
+
+    const onClose = () => {
+        setShowBasicInfoEditPopup(false);
+    };
+
     return (
         <>
+            <CompanyBasicInfoPopup
+                showPopup={showBasicInfoEditPopup}
+                onClose={onClose}
+                onSuccess={afterBasicInfoUpdate}
+                basicInfos={basicInfo}
+                links={links}
+            />
             <RecruiterNavbar icon={"user"} dashboardLinks={false} />
             <div className="w-4/5 md:grid grid-cols-3 md:gap-4  mt-5 mb-32 mx-auto md:grid-flow-dense md:dire ">
                 <section className="col-span-2">
@@ -125,7 +143,14 @@ export default function Profile() {
                             <label className="font-medium text-my-gray-70">
                                 Basic Info
                             </label>
-                            <span className="text-primary-70">Edit</span>
+                            <span
+                                onClick={() => {
+                                    setShowBasicInfoEditPopup(true);
+                                }}
+                                className="text-primary-70 cursor-pointer"
+                            >
+                                Edit
+                            </span>
                         </p>
                         <div
                             className={

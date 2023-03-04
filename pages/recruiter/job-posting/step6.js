@@ -11,6 +11,7 @@ import JobCategories from "../../../components/recuriters/job-categories";
 import Utils from "../../../Utils";
 import Config from "../../../Config";
 import ErrorPopup from "../../../components/errorPopup";
+import axios from "axios";
 
 export default function () {
     const router = useRouter();
@@ -21,14 +22,13 @@ export default function () {
     const [errorMessageArray, setErrorMessageArray] = useState([]);
 
     const [showJobSuccessPopup, setShowJobSuccessPopup] = useState(false);
-    const [afterPayment, setAfterPayment] = useState(true);
     const [showNotEnoughCreditPopup, setShowNotEnoughCreditPopup] =
         useState(false);
     const [showReloadCreditPopup, setShowReloadCreditPopup] = useState(false);
     const [showReloadSuccessPopup, setShowReloadSuccessPopup] = useState(false);
-
+    const [wallet, setWallet] = useState();
     const [localJobPost, setLocalJobPost] = useState({});
-    const [jobCategory, setJobCategory] = useState("standard");
+    const [activeJobCategoryId, setActiveJobCategoryId] = useState();
 
     useEffect(() => {
         const theLocalJobPost = Utils.getLocalJobPost();
@@ -37,11 +37,9 @@ export default function () {
 
         setLocalJobPost(theLocalJobPost);
 
-        const theJobCategory = localStorage.getItem("job_category");
+        fetchRecruiter();
 
-        if (theJobCategory) {
-            setJobCategory(theJobCategory);
-        }
+        setActiveJobCategoryId(theLocalJobPost.job_category_id);
     }, []);
 
     const onBack = (e) => {
@@ -49,11 +47,11 @@ export default function () {
         router.back();
     };
 
-    const fileInput = useRef();
+    // const fileInput = useRef();
 
-    const onUploadFile = () => {
-        fileInput.current.click();
-    };
+    // const onUploadFile = () => {
+    //     fileInput.current.click();
+    // };
 
     const onNext = (e) => {
         e.preventDefault();
@@ -63,13 +61,18 @@ export default function () {
         } else {
             setLoading(true);
         }
+        console.log("job categories: ", JobCategories);
 
-        if (!afterPayment) {
+        const activeCategoryCost = parseInt(
+            localStorage.getItem("active_job_category_cost")
+        );
+
+        if (wallet.amount < activeCategoryCost) {
             setShowNotEnoughCreditPopup(true);
             return;
         }
 
-        localJobPost.job_category_id = Config.JOB_CATEGORIES[jobCategory].id;
+        localJobPost.job_category_id = activeJobCategoryId;
 
         const JobFormData = new FormData();
         JobFormData.append("job_category_id", localJobPost.job_category_id);
@@ -83,7 +86,7 @@ export default function () {
         JobFormData.append("type", localJobPost.type);
         JobFormData.append("location", localJobPost.location);
         JobFormData.append("description", localJobPost.description);
-        JobFormData.append("no_of_hires", 5);
+        JobFormData.append("no_of_hires", localJobPost.no_of_hires);
         JobFormData.append("hiring_speed", localJobPost.hiring_speed);
         JobFormData.append("with_resume", localJobPost.with_resume);
         JobFormData.append("apply_method", "email");
@@ -96,12 +99,12 @@ export default function () {
             localJobPost.with_recommendation
         );
 
-        JobFormData.append("experience_level", "Minimum 1 year");
-        JobFormData.append("salary", "10000");
+        JobFormData.append("experience_level", localJobPost.experience_level);
+        JobFormData.append("salary", localJobPost.salary);
 
-        console.log("file: ", fileInput.current.files[0]);
+        // console.log("file: ", fileInput.current.files[0]);
 
-        JobFormData.append("skills_assessment", fileInput.current.files[0]);
+        // JobFormData.append("skills_assessment", fileInput.current.files[0]);
         console.log(localJobPost);
 
         Utils.makeRequest(async () => {
@@ -141,8 +144,28 @@ export default function () {
         // localStorage.setItem("job_post", JSON.stringify(localJobPost));
     };
 
-    const onChangeJobCategory = (newJobCategory) => {
-        setJobCategory(newJobCategory);
+    async function fetchRecruiter() {
+        try {
+            const userId = localStorage.getItem("user_id");
+            const url = `${Config.BASE_URL}/users/${userId}`;
+            let recruiter = await axios.get(url, {
+                headers: Utils.getHeaders(),
+            });
+
+            recruiter = recruiter.data.data;
+
+            if (recruiter.wallet) {
+                setWallet(recruiter.wallet);
+            }
+
+            console.log("recruiter: ", recruiter);
+        } catch (error) {
+            console.log("recruiter profile Error: ", error);
+        }
+    }
+
+    const onChangeJobCategory = (newJobCategoryId) => {
+        setActiveJobCategoryId(newJobCategoryId);
     };
 
     const onClose = () => {
@@ -165,7 +188,6 @@ export default function () {
     const onAfterPayment = () => {
         console.log("on after payment");
         setShowReloadSuccessPopup(false);
-        setAfterPayment(true);
     };
 
     const onNavigateToStep1 = () => {
@@ -187,17 +209,38 @@ export default function () {
                 onClose={onClose}
                 messageArray={errorMessageArray}
             />
-            <input
+            <RecruiterJobSuccessPopup
+                showPopup={showJobSuccessPopup}
+                onClose={onClose}
+            />
+
+            <NotEnoughCreditPopup
+                showPopup={showNotEnoughCreditPopup}
+                onReloadCredit={onReloadCredit}
+                onClose={onClose}
+            />
+
+            <ReloadCreditPopup
+                showPopup={showReloadCreditPopup}
+                onClose={onClose}
+                onReloaded={onReloaded}
+            />
+            <ReloadSuccessPopup
+                showPopup={showReloadSuccessPopup}
+                onAfterPayment={onAfterPayment}
+                onClose={onNext}
+            />
+            {/* <input
                 className="hidden"
                 type={"file"}
                 ref={fileInput}
                 onChange={onNext}
-            />
+            /> */}
             <JobPostNavbar currentStepText={"Step 6 of 6 - Job post review"} />
 
             <div className="w-3/4 mt-5 mb-10 mx-auto">
                 <JobCategories
-                    jobCategory={jobCategory}
+                    activeJobCategoryId={activeJobCategoryId}
                     onChangeJobCategory={onChangeJobCategory}
                     showTitle={false}
                 />
@@ -224,7 +267,7 @@ export default function () {
                                         />
                                     </span>
                                 </p>
-                                <p className="flex flex-col flex-nowrap justify-start items-start my-3">
+                                {/* <p className="flex flex-col flex-nowrap justify-start items-start my-3">
                                     <span className="text-dark-50">
                                         Company
                                     </span>
@@ -239,7 +282,7 @@ export default function () {
                                             className="m-1"
                                         />
                                     </span>
-                                </p>
+                                </p> */}
                                 <p className="flex flex-col flex-nowrap justify-start items-start my-3">
                                     <span className="text-dark-50">
                                         Industry
@@ -247,6 +290,24 @@ export default function () {
                                     <span className="flex flex-row flex-nowrap justify-start items-center">
                                         <span className="text-my-gray-70">
                                             {localJobPost.company_industry ||
+                                                ""}
+                                        </span>
+                                        <Image
+                                            onClick={onNavigateToStep1}
+                                            src={"/edit-icon.svg"}
+                                            width={18}
+                                            height={18}
+                                            className="m-1 cursor-pointer"
+                                        />
+                                    </span>
+                                </p>
+                                <p className="flex flex-col flex-nowrap justify-start items-start my-3">
+                                    <span className="text-dark-50">
+                                        Sub Industry
+                                    </span>
+                                    <span className="flex flex-row flex-nowrap justify-start items-center">
+                                        <span className="text-my-gray-70">
+                                            {localJobPost.company_sub_industry ||
                                                 ""}
                                         </span>
                                         <Image
@@ -300,13 +361,29 @@ export default function () {
                                     </span>
                                     <span className="flex flex-row flex-nowrap justify-start items-center">
                                         <span className="text-my-gray-70">
-                                            Minimum 1 year
+                                            {localJobPost.experience_level}
                                         </span>
                                         <Image
+                                            onClick={onNavigateToStep2}
                                             src={"/edit-icon.svg"}
                                             width={18}
                                             height={18}
-                                            className="m-1"
+                                            className="m-1 cursor-pointer"
+                                        />
+                                    </span>
+                                </p>
+                                <p className="flex flex-col flex-nowrap justify-start items-start my-3">
+                                    <span className="text-dark-50">Salary</span>
+                                    <span className="flex flex-row flex-nowrap justify-start items-center">
+                                        <span className="text-my-gray-70">
+                                            {localJobPost.salary}
+                                        </span>
+                                        <Image
+                                            onClick={onNavigateToStep2}
+                                            src={"/edit-icon.svg"}
+                                            width={18}
+                                            height={18}
+                                            className="m-1 cursor-pointer"
                                         />
                                     </span>
                                 </p>
@@ -339,12 +416,12 @@ export default function () {
                                         <span className="text-dark-50 my-2">
                                             Apply method
                                         </span>
-                                        <Image
+                                        {/* <Image
                                             src={"/edit-icon.svg"}
                                             width={18}
                                             height={18}
                                             className="m-1"
-                                        />
+                                        /> */}
                                     </p>
                                     <ul className="text-dark-50 list-disc list-inside ml-3">
                                         <li>Email</li>
@@ -377,14 +454,15 @@ export default function () {
                                             Send application updates to
                                         </span>
                                         <Image
+                                            onClick={onNavigateToStep4}
                                             src={"/edit-icon.svg"}
                                             width={18}
                                             height={18}
-                                            className="m-1"
+                                            className="m-1 cursor-pointer"
                                         />
                                     </p>
                                     <ul className="text-dark-50 list-disc list-inside ml-3">
-                                        <li>email@email.com</li>
+                                        <li>{localJobPost.send_to_email}</li>
                                     </ul>
                                 </div>
                             </div>
@@ -401,7 +479,7 @@ export default function () {
                     />
 
                     <button
-                        onClick={onUploadFile}
+                        onClick={onNext}
                         className={`submit-btn-left ml-3`}
                         type={"submit"}
                     >
@@ -411,27 +489,6 @@ export default function () {
                 </div>
             </div>
 
-            <RecruiterJobSuccessPopup
-                showPopup={showJobSuccessPopup}
-                onClose={onClose}
-            />
-
-            <NotEnoughCreditPopup
-                showPopup={showNotEnoughCreditPopup}
-                onReloadCredit={onReloadCredit}
-                onClose={onClose}
-            />
-
-            <ReloadCreditPopup
-                showPopup={showReloadCreditPopup}
-                onClose={onClose}
-                onReloaded={onReloaded}
-            />
-            <ReloadSuccessPopup
-                showPopup={showReloadSuccessPopup}
-                onAfterPayment={onAfterPayment}
-                onClose={onNext}
-            />
             <Footer />
         </>
     );

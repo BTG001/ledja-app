@@ -5,19 +5,24 @@ import { useEffect, useRef, useState } from "react";
 import Config from "../../../Config";
 import Utils from "../../../Utils";
 import JobCategories from "../../../components/recuriters/job-categories";
+import axios from "axios";
+import ErrorPopup from "../../../components/errorPopup";
 
-export default function () {
+export default function ({ jobCategories }) {
     const router = useRouter();
 
     const emptySelectString = "Please Select";
     const [localJobPost, setLocalJobPost] = useState();
-    const [jobCategory, setJobCategory] = useState("standard");
+    const [activeJobCategoryId, setActiveJobCategoryId] = useState();
     const [subIndustries, setSubIndustries] = useState([]);
     const [companyIndustry, setCompanyIndustry] = useState();
     const [companySubIndustry, setcompanySubIndustry] = useState();
     const [jobTitle, setJobTitle] = useState();
     const [jobLocation, setJobLocation] = useState();
     const [jobDescription, setJobDescription] = useState();
+    const [showErrorPopup, setShowErrorPopup] = useState();
+    const [errorMessage, setErrorMessage] = useState(" an Error Occured");
+    const [errors, setErrors] = useState({});
 
     useEffect(() => {
         const theLocalJobPost = Utils.getLocalJobPost();
@@ -26,11 +31,7 @@ export default function () {
 
         setLocalJobPost(theLocalJobPost);
 
-        const tehJobCategory = localStorage.getItem("job_category");
-
-        if (tehJobCategory) {
-            setJobCategory(tehJobCategory);
-        }
+        setActiveJobCategoryId(theLocalJobPost.job_category_id);
 
         setCompanyIndustry(theLocalJobPost.company_industry);
         setcompanySubIndustry(theLocalJobPost.company_sub_industry);
@@ -45,8 +46,8 @@ export default function () {
         setJobDescription(theLocalJobPost.description);
     }, []);
 
-    const onChangeJobCategory = (newJobCategory) => {
-        setJobCategory(newJobCategory);
+    const onChangeJobCategory = (newJobCategoryId) => {
+        setActiveJobCategoryId(newJobCategoryId);
     };
 
     const updateSubIndustries = (industryKey) => {
@@ -56,7 +57,17 @@ export default function () {
     const onNext = async (e) => {
         e.preventDefault();
 
-        localJobPost.job_category_id = Config.JOB_CATEGORIES[jobCategory].id;
+        setErrors({});
+
+        const hasErrors = handleErrors();
+
+        if (hasErrors) {
+            setErrorMessage("Please resolve the errors");
+            setShowErrorPopup(true);
+            return;
+        }
+
+        localJobPost.job_category_id = activeJobCategoryId;
         localJobPost.company_industry = companyIndustry;
         localJobPost.company_sub_industry = companySubIndustry;
         localJobPost.title = jobTitle;
@@ -65,28 +76,119 @@ export default function () {
 
         console.log(localJobPost);
 
-        localStorage.setItem("job_category", jobCategory);
-
         localStorage.setItem("job_post", JSON.stringify(localJobPost));
 
         router.push("/recruiter/job-posting/step2");
+    };
+
+    const handleErrors = () => {
+        let hasErrors = false;
+        if (!activeJobCategoryId) {
+            hasErrors = true;
+
+            setErrors((previousValues) => {
+                return {
+                    ...previousValues,
+                    jobCategory: "Job category is required",
+                };
+            });
+        }
+
+        if (!companyIndustry) {
+            hasErrors = true;
+            setErrors((previousValues) => {
+                return {
+                    ...previousValues,
+                    companyIndustry: "Company industry is required",
+                };
+            });
+        }
+        if (!companySubIndustry) {
+            hasErrors = true;
+            setErrors((previousValues) => {
+                return {
+                    ...previousValues,
+                    companySubIndustry: "Company sub industry is required",
+                };
+            });
+        }
+        if (!jobTitle) {
+            hasErrors = true;
+            setErrors((previousValues) => {
+                return { ...previousValues, jobTitle: "Job title is required" };
+            });
+        }
+
+        if (!jobLocation) {
+            hasErrors = true;
+            setErrors((previousValues) => {
+                return {
+                    ...previousValues,
+                    jobLocation: "Job location is required",
+                };
+            });
+        }
+
+        if (!jobDescription) {
+            hasErrors = true;
+            setErrors((previousValues) => {
+                return {
+                    ...previousValues,
+                    jobDescription: "Job description is required",
+                };
+            });
+        }
+
+        return hasErrors;
     };
 
     const onSaveAndExit = (e) => {
         e.preventDefault();
         router.push("/recruiter/job-posting/step1");
     };
+    const onClose = () => {
+        setShowErrorPopup(false);
+    };
 
     return (
         <>
+            <ErrorPopup
+                showPopup={showErrorPopup}
+                onClose={onClose}
+                message={errorMessage}
+            />
             <JobPostNavbar currentStepText={"Step 1 of 6 - Job details"} />
 
             <div className="w-3/4 mt-5 mb-10 mx-auto">
                 <JobCategories
-                    jobCategory={jobCategory}
+                    activeJobCategoryId={activeJobCategoryId}
                     onChangeJobCategory={onChangeJobCategory}
                 />
+                <p className="text-red-500 text-left py-2 px-4 ">
+                    {errors.jobCategory}
+                </p>
                 <form className="form">
+                    <div className="form-input-container my-5">
+                        <label className="form-label-light" for="title">
+                            Job title
+                        </label>
+
+                        <input
+                            className="form-input"
+                            type={"text"}
+                            name="title"
+                            placeholder="e.g. Software Developer"
+                            value={jobTitle}
+                            onChange={(e) => {
+                                const value = e.target.value;
+                                setJobTitle(value);
+                            }}
+                        />
+
+                        <p className="text-red-500 text-left py-2 ">
+                            {errors.jobTitle}
+                        </p>
+                    </div>
                     <div className="form-input-container my-5">
                         <label className="form-label-light" for="industry">
                             Your Company’s industry
@@ -126,6 +228,9 @@ export default function () {
                                 }
                             )}
                         </select>
+                        <p className="text-red-500 text-left py-2 ">
+                            {errors.companyIndustry}
+                        </p>
                     </div>
 
                     <div className="form-input-container my-5">
@@ -160,41 +265,9 @@ export default function () {
                                 );
                             })}
                         </select>
-                    </div>
-
-                    <div className="form-input-container my-5">
-                        <label className="form-label-light" for="title">
-                            Job title
-                        </label>
-                        <select
-                            value={jobTitle || emptySelectString}
-                            onChange={(e) => {
-                                const value = e.target.value;
-                                if (value == emptySelectString) {
-                                    setJobTitle(null);
-                                    return;
-                                }
-                                setJobTitle(value);
-                            }}
-                            className="form-input"
-                            name="title"
-                            required
-                        >
-                            <option value={emptySelectString}>
-                                {emptySelectString}
-                            </option>
-                            {Config.JOB_TITLES.map((title, index) => {
-                                return (
-                                    <option
-                                        key={index}
-                                        className="text-sm text-my-gray-70 capitalize"
-                                        value={title}
-                                    >
-                                        {title}
-                                    </option>
-                                );
-                            })}
-                        </select>
+                        <p className="text-red-500 text-left py-2 ">
+                            {errors.companySubIndustry}
+                        </p>
                     </div>
 
                     <div className="form-input-container my-5">
@@ -230,6 +303,9 @@ export default function () {
                                 );
                             })}
                         </select>
+                        <p className="text-red-500 text-left py-2 ">
+                            {errors.jobLocation}
+                        </p>
                     </div>
                     <div className="form-input-container my-5">
                         <label className="form-label-light" for="company-name">
@@ -250,6 +326,9 @@ export default function () {
                         >
                             {jobDescription}
                         </textarea>
+                        <p className="text-red-500 text-left py-2 ">
+                            {errors.jobDescription}
+                        </p>
                     </div>
 
                     <div className="w-full flex flex-row flex-wrap justify-center items-center ">
@@ -273,3 +352,24 @@ export default function () {
         </>
     );
 }
+
+// export async function getServerSideProps(context) {
+//     const url = `${Config.BASE_URL}/job_categories`;
+
+//     console.log("token: ", Config.TOKEN);
+
+//     let jobCategories;
+//     try {
+//         jobCategories = await axios.get(url, {
+//             headers: {
+//                 Authorization: Config.TOKEN,
+//             },
+//         });
+//         console.log("job categories: ", jobCategories);
+//     } catch (error) {
+//         console.log("getting job categories error: ", error);
+//     }
+//     return {
+//         props: { jobCategories: jobCategories || null }, // will be passed to the page component as props
+//     };
+// }

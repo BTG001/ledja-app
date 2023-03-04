@@ -12,8 +12,9 @@ export default function () {
     const router = useRouter();
 
     const [localJobPost, setLocalJobPost] = useState();
-    const [jobCategory, setJobCategory] = useState("standard");
+    const [activeJobCategoryId, setActiveJobCategoryId] = useState();
     const [withResume, setWithResume] = useState(1);
+    const [userEmail, setUserEmail] = useState("");
 
     const [showErrorPopup, setShowErrorPopup] = useState(false);
     const [errorMessage, setErrorMessage] = useState("An Error Occured");
@@ -21,28 +22,30 @@ export default function () {
     useEffect(() => {
         const theLocalJobPost = Utils.getLocalJobPost();
 
+        const email = localStorage.getItem("email");
+        setUserEmail(email);
+
         console.log("local Job post: ", theLocalJobPost);
 
         setLocalJobPost(theLocalJobPost);
-
-        const theJobCategory = localStorage.getItem("job_category");
 
         if (theLocalJobPost.with_resume) {
             setWithResume(theLocalJobPost.with_resume);
         }
 
-        if (theJobCategory) {
-            setJobCategory(theJobCategory);
+        if (theLocalJobPost.send_to_email) {
+            setUserEmail(theLocalJobPost.send_to_email);
         }
+
+        setActiveJobCategoryId(theLocalJobPost.job_category_id);
     }, []);
 
     const onNext = (e) => {
         e.preventDefault();
 
-        localJobPost.job_category_id = Config.JOB_CATEGORIES[jobCategory].id;
+        localJobPost.job_category_id = activeJobCategoryId;
         localJobPost.with_resume = withResume;
-
-        localStorage.setItem("job_category", jobCategory);
+        localJobPost.send_to_email = userEmail;
 
         console.log(localJobPost);
 
@@ -50,8 +53,8 @@ export default function () {
         router.push("/recruiter/job-posting/step5");
     };
 
-    const onChangeJobCategory = (newJobCategory) => {
-        setJobCategory(newJobCategory);
+    const onChangeJobCategory = (newJobCategoryId) => {
+        setActiveJobCategoryId(newJobCategoryId);
     };
 
     const onBack = (e) => {
@@ -76,7 +79,7 @@ export default function () {
 
             <div className="w-3/4 mt-5 mb-10 mx-auto">
                 <JobCategories
-                    jobCategory={jobCategory}
+                    activeJobCategoryId={activeJobCategoryId}
                     onChangeJobCategory={onChangeJobCategory}
                     showTitle={false}
                 />
@@ -139,7 +142,7 @@ export default function () {
                     </div>
                     <div className="form-input-container">
                         <label className="form-label-light">
-                            Communication preferences
+                            Communication Email
                         </label>
                         <p className="text-sm my-2 text-my-gray-70">
                             Receive daily updates about this job and
@@ -147,8 +150,13 @@ export default function () {
                         </p>
                         <input
                             className="form-input"
-                            type={"text"}
-                            placeholder=""
+                            type={"email"}
+                            placeholder="test@gmail.com"
+                            value={userEmail}
+                            onChange={(e) => {
+                                const value = e.target.value;
+                                setUserEmail(value);
+                            }}
                         />
                     </div>
 

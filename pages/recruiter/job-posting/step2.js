@@ -16,13 +16,16 @@ export default function () {
     const emptySelectString = "Please Select";
 
     const [localJobPost, setLocalJobPost] = useState();
-    const [jobCategory, setJobCategory] = useState("standard");
+    const [activeJobCategoryId, setActiveJobCategoryId] = useState();
     const [selectedJobType, setSelectedJobType] = useState();
     const [noOfHires, setNoOfHires] = useState();
     const [hireSpeed, setHireSpeed] = useState();
+    const [salary, setSalary] = useState();
+    const [experienceLevel, setExperienceLevel] = useState();
 
     const [showErrorPopup, setShowErrorPopup] = useState(false);
     const [errorMessage, setErrorMessage] = useState("An Error Occured");
+    const [errors, setErrors] = useState({});
 
     useEffect(() => {
         const theLocalJobPost = Utils.getLocalJobPost();
@@ -31,34 +34,37 @@ export default function () {
 
         setLocalJobPost(theLocalJobPost);
 
-        const theJobCategory = localStorage.getItem("job_category");
-
-        if (theJobCategory) {
-            setJobCategory(theJobCategory);
-        }
+        setActiveJobCategoryId(theLocalJobPost.job_category_id);
 
         setSelectedJobType(theLocalJobPost.type);
 
         setNoOfHires(theLocalJobPost.no_of_hires);
         setHireSpeed(theLocalJobPost.hiring_speed);
+        setSalary(theLocalJobPost.salary);
+        setExperienceLevel(theLocalJobPost.experience_level);
     }, []);
 
     const onNext = async (e) => {
         e.preventDefault();
-        if (!selectedJobType) {
-            setErrorMessage("Job Type is Required");
+
+        setErrors({});
+
+        const hasErrors = handleErrors();
+
+        if (hasErrors) {
+            setErrorMessage("Please resolve the errors");
             setShowErrorPopup(true);
             return;
         }
 
-        localJobPost.job_category_id = Config.JOB_CATEGORIES[jobCategory].id;
+        localJobPost.job_category_id = activeJobCategoryId;
 
         localJobPost.type = selectedJobType;
 
         localJobPost.no_of_hires = noOfHires;
         localJobPost.hiring_speed = hireSpeed;
-
-        localStorage.setItem("job_category", jobCategory);
+        localJobPost.salary = salary;
+        localJobPost.experience_level = experienceLevel;
 
         console.log(localJobPost);
 
@@ -67,13 +73,67 @@ export default function () {
         router.push("/recruiter/job-posting/step3");
     };
 
-    const onChangeJobCategory = (newJobCategory) => {
-        setJobCategory(newJobCategory);
+    const onChangeJobCategory = (newJobCategoryId) => {
+        setActiveJobCategoryId(newJobCategoryId);
     };
 
     const onBack = (e) => {
         e.preventDefault();
         router.back();
+    };
+
+    const handleErrors = () => {
+        let hasErrors = false;
+
+        if (!activeJobCategoryId) {
+            hasErrors = true;
+            setErrors((prevValues) => {
+                return {
+                    ...prevValues,
+                    jobCategory: "Job category is required",
+                };
+            });
+        }
+
+        if (!selectedJobType) {
+            hasErrors = true;
+            setErrors((prevValues) => {
+                return { ...prevValues, jobType: "Job type is required" };
+            });
+        }
+
+        if (!noOfHires) {
+            hasErrors = true;
+            setErrors((prevValues) => {
+                return { ...prevValues, noOfHires: "No of hires is required" };
+            });
+        }
+
+        if (!hireSpeed) {
+            hasErrors = true;
+            setErrors((prevValues) => {
+                return { ...prevValues, hireSpeed: "Hire speed is required" };
+            });
+        }
+
+        if (!salary) {
+            hasErrors = true;
+            setErrors((prevValues) => {
+                return { ...prevValues, salary: "salary is required" };
+            });
+        }
+
+        if (!experienceLevel) {
+            hasErrors = true;
+            setErrors((prevValues) => {
+                return {
+                    ...prevValues,
+                    experienceLevel: "Experience level is required",
+                };
+            });
+        }
+
+        return hasErrors;
     };
 
     const onClose = () => {
@@ -91,10 +151,13 @@ export default function () {
 
             <div className="w-3/4 mt-5 mb-10 mx-auto">
                 <JobCategories
-                    jobCategory={jobCategory}
+                    activeJobCategoryId={activeJobCategoryId}
                     onChangeJobCategory={onChangeJobCategory}
                     showTitle={false}
                 />
+                <p className="text-red-500 text-left py-2 px-4 ">
+                    {errors.jobCategory}
+                </p>
 
                 <form className="form">
                     <div className="form-input-container my-5">
@@ -123,6 +186,9 @@ export default function () {
                                     </p>
                                 );
                             })}
+                            <p className="text-red-500 text-left py-2 ">
+                                {errors.jobType}
+                            </p>
                         </div>
                     </div>
 
@@ -130,36 +196,69 @@ export default function () {
                         <label className="form-label-light" for="industry">
                             How many people do you want to hire for this job?
                         </label>
-                        <select
-                            value={noOfHires || emptySelectString}
+
+                        <input
+                            className="form-input"
+                            type={"number"}
+                            min={1}
+                            name="no_of_hires"
+                            placeholder="e.g. 5"
+                            value={noOfHires}
                             onChange={(e) => {
                                 const value = e.target.value;
-                                if (value == emptySelectString) {
-                                    setNoOfHires(null);
-                                    return;
-                                }
                                 setNoOfHires(value);
                             }}
-                            className="form-input py=2"
+                        />
+
+                        <p className="text-red-500 text-left py-2 ">
+                            {errors.noOfHires}
+                        </p>
+                    </div>
+
+                    <div className="form-input-container my-5">
+                        <label className="form-label-light" for="industry">
+                            Salary
+                        </label>
+
+                        <input
+                            className="form-input"
+                            type={"number"}
+                            min={1}
                             name="no_of_hires"
-                        >
-                            <option value={emptySelectString}>
-                                {emptySelectString}
-                            </option>
-                            {Config.NO_OF_PEOPLE_TO_HIRE.map(
-                                (noOfHire, index) => {
-                                    return (
-                                        <option
-                                            key={index}
-                                            className="text-sm text-my-gray-70 capitalize"
-                                            value={noOfHire}
-                                        >
-                                            {noOfHire}
-                                        </option>
-                                    );
-                                }
-                            )}
-                        </select>
+                            placeholder="e.g. 10000"
+                            value={salary}
+                            onChange={(e) => {
+                                const value = e.target.value;
+                                setSalary(value);
+                            }}
+                        />
+
+                        <p className="text-red-500 text-left py-2 ">
+                            {errors.salary}
+                        </p>
+                    </div>
+
+                    <div className="form-input-container my-5">
+                        <label className="form-label-light" for="industry">
+                            Experience level (Years)
+                        </label>
+
+                        <input
+                            className="form-input"
+                            type={"number"}
+                            min={1}
+                            name="no_of_hires"
+                            placeholder="e.g. 3"
+                            value={experienceLevel}
+                            onChange={(e) => {
+                                const value = e.target.value;
+                                setExperienceLevel(value);
+                            }}
+                        />
+
+                        <p className="text-red-500 text-left py-2 ">
+                            {errors.experienceLevel}
+                        </p>
                     </div>
 
                     <div className="form-input-container my-5">
@@ -194,6 +293,9 @@ export default function () {
                                 );
                             })}
                         </select>
+                        <p className="text-red-500 text-left py-2 ">
+                            {errors.hireSpeed}
+                        </p>
                     </div>
 
                     <div className="w-full flex flex-row flex-wrap justify-center items-center ">

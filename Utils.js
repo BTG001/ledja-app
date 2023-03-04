@@ -2,11 +2,28 @@ import axios from "axios";
 import Config from "./Config";
 
 export default class Utils {
+    static isLoggedIn() {
+        const token = localStorage.getItem("token");
+        const userId = localStorage.getItem("user_id");
+        const userTypeId = localStorage.getItem("user_type_id");
+        const email = localStorage.getItem("email");
+
+        if (token && userId && userTypeId && email) {
+            return true;
+        }
+
+        return false;
+    }
     static getHeaders() {
         const token = localStorage.getItem("token");
         return {
             Authorization: `Bearer ${token}`,
         };
+    }
+
+    static getAuthorization() {
+        const token = localStorage.getItem("token");
+        return `Bearer ${token}`;
     }
 
     static getLocalJobPost() {
@@ -56,7 +73,14 @@ export default class Utils {
     }
 
     static async postForm(url, data) {
-        axios.defaults.withCredentials = true;
-        return axios.postForm(url, data, Utils.getHeaders());
+        return axios.postForm(url, data, {
+            headers: Utils.getHeaders(),
+        });
+    }
+
+    static async putForm(url, data) {
+        return axios.putForm(url, data, {
+            headers: Utils.getHeaders(),
+        });
     }
 }

@@ -1,17 +1,69 @@
 import RecruiterNavbar from "../../components/navbars/RecruiterNavbar";
 import Footer from "../../components/Footer";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { AiOutlineInfoCircle } from "react-icons/ai";
 import PrimaryBtn from "../../components/buttons/PrimaryBtn";
 import SecondaryBtn from "../../components/buttons/SecondaryBtn";
+import Config from "../../Config";
+import Utils from "../../Utils";
+import axios from "axios";
 
 export default function () {
     const [jobsSearchFocus, setJobsSearchFocus] = useState(false);
     const [candidateSearchFocus, setCandidateSearchFocus] = useState(false);
     const [filterFocus, setFilterFocus] = useState(false);
-    const [activeJob, setActiveJob] = useState(); // use id
+    const [activeJobIndex, setActiveJobIndex] = useState(0);
+    const [jobs, setJobs] = useState();
+    const jobsContainer = useRef();
+    const [jobsContainerMouseDown, setJobsContainerMouseDown] = useState(false);
+    const [startX, setStartX] = useState(0);
+    const [scrollLeft, setScrollLeft] = useState(0);
+
+    useEffect(() => {
+        getJobs();
+    }, []);
+
+    const onJobsContainerMouseMove = (e) => {
+        if (!jobsContainerMouseDown) {
+            return;
+        }
+
+        e.preventDefault();
+        const x = e.pageX - jobsContainer.current.offsetLeft;
+        const walk = x - startX;
+        jobsContainer.current.scrollLeft = scrollLeft - walk;
+    };
+
+    const onJobsContainerMouseDown = (e) => {
+        setJobsContainerMouseDown(true);
+        const startX = e.pageX - jobsContainer.current.offsetLeft;
+        console.log(startX);
+        setStartX(startX);
+        setScrollLeft(jobsContainer.current.scrollLeft);
+    };
+
+    async function getJobs() {
+        const userId = localStorage.getItem("user_id");
+        const url = `${Config.BASE_URL}/get_user_jobs/${userId}`;
+
+        try {
+            const theJobs = await axios.get(url, {
+                headers: Utils.getHeaders(),
+            });
+
+            setJobs(theJobs.data.data);
+
+            console.log("jobs: ", theJobs.data.data);
+        } catch (error) {
+            console.log("get jobs error: ", error);
+        }
+    }
+
+    const onChangeActiveJob = (index) => {
+        setActiveJobIndex(index);
+    };
     return (
         <>
             <RecruiterNavbar active="progress-card" />
@@ -46,42 +98,56 @@ export default function () {
                         </div>
                     </form>
                 </div>
-                <div className="flex flex-row flex-nowrap overflow-x-hidden justify-start items-center py-2 cursor-grab ">
-                    <div className="min-w-20-screen bg-primary-40 rounded-md py-2 px-6 mr-4 border border-primary-40 border-solid">
-                        <h3 className="font-semibold text-lg ">
-                            Software engineer
-                        </h3>
-                        <p className="my-1">Nairobi, Kenya</p>
-                        <p>Created: October 21, 2022</p>
-                    </div>
-                    <div className="min-w-20-screen bg-white rounded-md py-2 px-6 mr-4 border border-primary-40 border-solid">
-                        <h3 className="font-semibold text-lg ">
-                            Software engineer
-                        </h3>
-                        <p className="my-1">Nairobi, Kenya</p>
-                        <p>Created: October 21, 2022</p>
-                    </div>
-                    <div className="min-w-20-screen bg-white rounded-md py-2 px-6 mr-4 border border-primary-40 border-solid">
-                        <h3 className="font-semibold text-lg ">
-                            Software engineer
-                        </h3>
-                        <p className="my-1">Nairobi, Kenya</p>
-                        <p>Created: October 21, 2022</p>
-                    </div>
-                    <div className="min-w-20-screen bg-white rounded-md py-2 px-6 mr-4 border border-primary-40 border-solid">
-                        <h3 className="font-semibold text-lg ">
-                            Software engineer
-                        </h3>
-                        <p className="my-1">Nairobi, Kenya</p>
-                        <p>Created: October 21, 2022</p>
-                    </div>
-                    <div className="min-w-20-screen bg-white rounded-md py-2 px-6 mr-4 border border-primary-40 border-solid">
-                        <h3 className="font-semibold text-lg ">
-                            Software engineer
-                        </h3>
-                        <p className="my-1">Nairobi, Kenya</p>
-                        <p>Created: October 21, 2022</p>
-                    </div>
+                <div
+                    ref={jobsContainer}
+                    onMouseDown={onJobsContainerMouseDown}
+                    onMouseUp={() => {
+                        setJobsContainerMouseDown(false);
+                    }}
+                    onMouseMove={onJobsContainerMouseMove}
+                    className="flex flex-row flex-nowrap overflow-x-hidden justify-start items-center py-2 cursor-grab "
+                >
+                    {!jobs && (
+                        <p className="text-sm text-dark-50 text-center flex justify-center items-center min-h-20-screen min-w-20-screen bg-primary-40 rounded-md py-2 px-6 mr-4 border border-primary-40 border-solid">
+                            You have not posted any jobs yet
+                        </p>
+                    )}
+
+                    {jobs &&
+                        jobs.map((job, index) => {
+                            return (
+                                <div
+                                    key={index}
+                                    onClick={() => {
+                                        onChangeActiveJob(index);
+                                    }}
+                                    className={`min-w-20-screen  rounded-md py-2 px-6 mr-4 border border-primary-40 border-solid
+                                    ${
+                                        activeJobIndex == index
+                                            ? "bg-primary-40"
+                                            : "bg-white"
+                                    }`}
+                                >
+                                    <h3 className="font-semibold text-lg ">
+                                        {job.title}
+                                    </h3>
+                                    <p className="my-1">Nairobi, Kenya</p>
+                                    <p>
+                                        Created:{" "}
+                                        {
+                                            Config.MONTH_NAMES[
+                                                new Date(
+                                                    job.created_at
+                                                ).getMonth()
+                                            ]
+                                        }{" "}
+                                        {new Date(job.created_at).getDate()}
+                                        {", "}
+                                        {new Date(job.created_at).getFullYear()}
+                                    </p>
+                                </div>
+                            );
+                        })}
                 </div>
                 <label className="form-label-light" for="websites">
                     Candidate

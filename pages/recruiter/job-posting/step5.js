@@ -6,12 +6,14 @@ import Config from "../../../Config";
 import { useState, useEffect } from "react";
 import JobCategories from "../../../components/recuriters/job-categories";
 import Utils from "../../../Utils";
+import Switch from "../../../components/switch";
 
 export default function () {
     const router = useRouter();
 
     const [localJobPost, setLocalJobPost] = useState();
-    const [jobCategory, setJobCategory] = useState("standard");
+    const [activeJobCategoryId, setActiveJobCategoryId] = useState();
+    const [withAssessment, setWithAssessment] = useState(true);
 
     useEffect(() => {
         const theLocalJobPost = Utils.getLocalJobPost();
@@ -20,19 +22,13 @@ export default function () {
 
         setLocalJobPost(theLocalJobPost);
 
-        const theJobCategory = localStorage.getItem("job_category");
-
-        if (theJobCategory) {
-            setJobCategory(theJobCategory);
-        }
+        setActiveJobCategoryId(theLocalJobPost.job_category_id);
     }, []);
 
     const onNext = (e) => {
         e.preventDefault();
 
-        localJobPost.job_category_id = Config.JOB_CATEGORIES[jobCategory].id;
-
-        localStorage.setItem("job_category", jobCategory);
+        localJobPost.job_category_id = activeJobCategoryId;
 
         console.log(localJobPost);
 
@@ -41,13 +37,17 @@ export default function () {
         router.push("/recruiter/job-posting/step6");
     };
 
-    const onChangeJobCategory = (newJobCategory) => {
-        setJobCategory(newJobCategory);
+    const onChangeJobCategory = (newJobCategoryId) => {
+        setActiveJobCategoryId(newJobCategoryId);
     };
 
     const onBack = (e) => {
         e.preventDefault();
         router.back();
+    };
+
+    const onChangeWithAssessment = (newValue) => {
+        setWithAssessment(newValue);
     };
     return (
         <>
@@ -57,7 +57,7 @@ export default function () {
 
             <div className="w-3/4 mt-5 mb-10 mx-auto">
                 <JobCategories
-                    jobCategory={jobCategory}
+                    activeJobCategoryId={activeJobCategoryId}
                     onChangeJobCategory={onChangeJobCategory}
                     showTitle={false}
                 />
@@ -76,7 +76,7 @@ export default function () {
                                 <br /> This option is available for the premium
                                 job selection
                             </p>
-                            <p className="flex flex-row flex-nowrap justify-end items-center p-2 ">
+                            <div className="flex flex-row flex-nowrap justify-end items-center p-2 ">
                                 <span className="text-xs my-1 mx-2 text-my-gray-70   ">
                                     Add a skills assessment for this job
                                 </span>
@@ -85,7 +85,11 @@ export default function () {
                                     width={34}
                                     height={20}
                                 />
-                            </p>
+                                {/* <Switch
+                                    on={withAssessment}
+                                    onChangeOn={onChangeWithAssessment}
+                                /> */}
+                            </div>
                         </div>
                     </div>
 

@@ -3,12 +3,13 @@ import Footer from "../components/Footer";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/router";
-import { useEffect, useRef } from "react";
+import { useContext, useEffect, useRef } from "react";
 import Config from "../Config";
 import axios from "axios";
 import { useState } from "react";
 import ErrorPopup from "../components/errorPopup";
 import Utils from "../Utils";
+import { AuthContext } from "./_app";
 
 export default function login() {
     const router = useRouter();
@@ -20,6 +21,7 @@ export default function login() {
     const [errorMessage, setErrorMessage] = useState("An Error Occured");
 
     const { role } = router.query;
+    const auth = useContext(AuthContext);
 
     useEffect(() => {
         if (!role) {
@@ -60,11 +62,19 @@ export default function login() {
                 console.log("signup results: ", results);
 
                 localStorage.setItem("token", results.data.data.token);
+                localStorage.setItem("email", results.data.data.email);
                 localStorage.setItem("user_id", results.data.data.user.id);
                 localStorage.setItem(
                     "user_type_id",
                     results.data.data.user.user_type_id
                 );
+
+                auth.setAuth((prevValues) => {
+                    return {
+                        ...prevValues,
+                        isLoggedIn: true,
+                    };
+                });
 
                 if (results.data.success) {
                     if (role == "recruiter") {

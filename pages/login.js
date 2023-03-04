@@ -3,11 +3,12 @@ import Footer from "../components/Footer";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/router";
-import { useRef, useState } from "react";
+import { useContext, useRef, useState } from "react";
 import axios from "axios";
 import Config from "../Config";
 import Utils from "../Utils";
 import ErrorPopup from "../components/errorPopup";
+import { AuthContext } from "./_app";
 
 export default function login() {
     const router = useRouter();
@@ -16,8 +17,10 @@ export default function login() {
     const [loading, setLoading] = useState(false);
     const [showErrorPopup, setShowErrorPopup] = useState(false);
     const [errorMessage, setErrorMessage] = useState("An Error Occured");
+    const auth = useContext(AuthContext);
 
     const onLoginSubmit = async (e) => {
+        console.log("auth: ", auth);
         if (loading) {
             return;
         } else {
@@ -36,9 +39,18 @@ export default function login() {
 
                 if (results.data.success) {
                     localStorage.setItem("token", results.data.data.token);
+                    localStorage.setItem("email", results.data.data.email);
+
                     localStorage.setItem("user_id", results.data.data.user.id);
                     const userTypeId = results.data.data.user.user_type_id;
                     localStorage.setItem("user_type_id", userTypeId);
+
+                    auth.setAuth((prevValues) => {
+                        return {
+                            ...prevValues,
+                            isLoggedIn: true,
+                        };
+                    });
 
                     if (userTypeId == Config.JOB_SEEKER_USER_TYPE_ID) {
                         router.push("/job-seeker/job-search");

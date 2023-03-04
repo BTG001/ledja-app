@@ -2,11 +2,18 @@ import GuestNavbar from "../components/navbars/GuestNavbar";
 import Image from "next/image";
 import PrimaryBtn from "../components/buttons/PrimaryBtn";
 import Footer from "../components/Footer";
+import Utils from "../Utils";
+import { useContext, useEffect, useState } from "react";
+import AuthenticatedNavbar from "../components/navbars/authenticatedNavbar";
+import { AuthContext } from "./_app";
 
 export default function Home() {
+    const auth = useContext(AuthContext);
+
     return (
         <>
-            <GuestNavbar />
+            {auth.isLoggedIn && <AuthenticatedNavbar />}
+            {!auth.isLoggedIn && <GuestNavbar />}
             <div className="w-full h-80-screen relative">
                 <Image
                     className="object-cover max-w-full min-h-full max-h-full z-0 absolute"

@@ -3,15 +3,69 @@ import RecruiterNavbar from "../../components/navbars/RecruiterNavbar";
 import PrimaryBtn from "../../components/buttons/PrimaryBtn";
 import Image from "next/image";
 import Link from "next/link";
+import { useEffect, useState } from "react";
+import Config from "../../Config";
+import axios from "axios";
+import Utils from "../../Utils";
+import JobsTable from "../../components/recuriters/jobsTable";
 
 export default function RecruiterDashbaord() {
+    const [jobs, setJobs] = useState();
+    const [fname, setFname] = useState("");
+
+    useEffect(() => {
+        getJobs();
+        fetchRecruiter();
+    }, []);
+
+    async function getJobs() {
+        const userId = localStorage.getItem("user_id");
+        const url = `${Config.BASE_URL}/get_user_jobs/${userId}`;
+
+        try {
+            let theJobs = await axios.get(url, {
+                headers: Utils.getHeaders(),
+            });
+
+            theJobs = theJobs.data.data;
+
+            if (theJobs && theJobs.length > 0) {
+                setJobs(theJobs);
+            }
+
+            console.log("jobs: ", theJobs);
+        } catch (error) {
+            console.log("get jobs error: ", error);
+        }
+    }
+
+    async function fetchRecruiter() {
+        try {
+            const userId = localStorage.getItem("user_id");
+            const url = `${Config.BASE_URL}/users/${userId}`;
+            let recruiter = await axios.get(url, {
+                headers: Utils.getHeaders(),
+            });
+
+            recruiter = recruiter.data.data;
+
+            if (recruiter.about_recruiter) {
+                setFname(recruiter.about_recruiter.fname);
+            }
+
+            console.log("recruiter: ", recruiter);
+        } catch (error) {
+            console.log("recruiter profile Error: ", error);
+        }
+    }
+
     return (
         <>
             <RecruiterNavbar />
             <section className="w-4/5 mx-auto my-5">
                 <div className="my-16">
-                    <h1 className="text-dark-50 text-3xl text-left font-zilla-slab   my-3">
-                        Welcome, Jennifer!
+                    <h1 className="text-dark-50 text-3xl text-left font-zilla-slab capitalize my-3">
+                        Welcome, {fname}!
                     </h1>
                     <p className="font-medium text-dark-50">
                         Post a job and hire talents now
@@ -27,12 +81,17 @@ export default function RecruiterDashbaord() {
                     />
                 </div>
                 <div className="shadow-md my-3 p-3 rounded-10 min-h-40-screen flex flex-col justify-center items-center border border-solid border-my-gray-40">
-                    <h3 className="font-semibold text-dark-50 text-center">
-                        Job listings
-                    </h3>
-                    <p className="text-sm text-dark-50 text-center ">
-                        You have not posted any jobs yet
-                    </p>
+                    {jobs && <JobsTable jobs={jobs} />}
+                    {!jobs && (
+                        <>
+                            <h3 className="font-semibold text-dark-50 text-center">
+                                Job listings
+                            </h3>
+                            <p className="text-sm text-dark-50 text-center ">
+                                You have not posted any jobs yet
+                            </p>
+                        </>
+                    )}
                 </div>
                 <div className="md:grid md:grid-cols-2 gap-4">
                     <div className="shadow-md my-3 p-3 rounded-10 min-h-40-screen flex flex-col justify-center items-center border border-solid border-my-gray-40">
