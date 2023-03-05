@@ -150,7 +150,7 @@ export default function RecruiterProfileSetupStep1() {
                             type={"text"}
                             placeholder="ABC Company Inc."
                             name="company_name"
-                            value={"ABC Company Inc"}
+                            // value={"ABC Company Inc"}
                             required
                         />
                     </div>
@@ -168,6 +168,7 @@ export default function RecruiterProfileSetupStep1() {
                                 required
                             >
                                 <option value={"Banking"}>Banking</option>
+                                <option value={"Industry2"}>Industry2</option>
                             </select>
                         </div>
 
@@ -183,7 +184,7 @@ export default function RecruiterProfileSetupStep1() {
                                 type={"text"}
                                 placeholder="Nairobi, Kenya"
                                 name="headquarters"
-                                value={"CBD"}
+                                // value={"CBD"}
                                 required
                             />
                         </div>
@@ -202,7 +203,7 @@ export default function RecruiterProfileSetupStep1() {
                                 type={"number"}
                                 placeholder="25 (employees)"
                                 name="company_size"
-                                value={"2000"}
+                                // value={"2000"}
                             />
                         </div>
 
@@ -215,7 +216,7 @@ export default function RecruiterProfileSetupStep1() {
                                 type={"text"}
                                 placeholder="2000000"
                                 name="revenue"
-                                value={"20000000"}
+                                // value={"20000000"}
                             />
                         </div>
                     </div>
@@ -232,7 +233,7 @@ export default function RecruiterProfileSetupStep1() {
                                 max={new Date().getFullYear()}
                                 placeholder="2003"
                                 name="founded_on"
-                                value={"2001"}
+                                // value={"2001"}
                             />
                         </div>
 
@@ -245,7 +246,7 @@ export default function RecruiterProfileSetupStep1() {
                                 type={"email"}
                                 placeholder="Frank Jessy"
                                 name="ceo"
-                                value={"Frank Jessy"}
+                                // value={"Frank Jessy"}
                             />
                         </div>
                     </div>

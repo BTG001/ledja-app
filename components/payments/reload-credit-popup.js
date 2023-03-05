@@ -3,8 +3,21 @@ import PrimaryBtn from "../buttons/PrimaryBtn";
 import SecondaryBtn from "../buttons/SecondaryBtn";
 import Image from "next/image";
 import PaymentOptions from "./payment-options";
+import Config from "../../Config";
+import Utils from "../../Utils";
+import axios from "axios";
 
-export default function ReloadCreditPopup({ showPopup, onClose, onReloaded }) {
+export default function ReloadCreditPopup({
+    showPopup,
+    onClose,
+    onReloaded,
+    wallet,
+}) {
+    const [currentBalance, setCurrentBalance] = useState(0);
+    const [jobCategories, setJobCategories] = useState();
+    const [requestFinished, setRequestFinished] = useState(false);
+    const [amountType, setamountType] = useState("fixed");
+    const [amount, setAmount] = useState(10000);
     useEffect(() => {
         if (showPopup) {
             document.body.style.overflowY = "hidden";
@@ -12,6 +25,16 @@ export default function ReloadCreditPopup({ showPopup, onClose, onReloaded }) {
             document.body.style.overflowY = "visible";
         }
     }, [showPopup]);
+
+    useEffect(() => {
+        if (wallet && wallet.amount) {
+            setCurrentBalance(wallet.amount);
+        }
+    }, [wallet]);
+
+    useEffect(() => {
+        getJobCategories();
+    }, []);
 
     const onBack = () => {
         if (selectedPaymentMethod) {
@@ -33,8 +56,53 @@ export default function ReloadCreditPopup({ showPopup, onClose, onReloaded }) {
             return;
         }
         document.body.style.overflowY = "visible";
-        onReloaded();
+
+        const transactionFormData = new FormData();
+
+        transactionFormData.append("user_id", localStorage.getItem("user_id"));
+        transactionFormData.append("type", "Debit");
+        transactionFormData.append("amount", amount);
+        transactionFormData.append("wallet_id", wallet.id);
+
+        const url = `${Config.BASE_URL}/transactions`;
+
+        Utils.makeRequest(async () => {
+            try {
+                const transaction = await Utils.postForm(
+                    url,
+                    transactionFormData
+                );
+
+                console.log("transaction results: ", transaction);
+
+                // onReloaded();
+            } catch (error) {
+                console.log("transaction Error: ", error);
+            }
+        });
+
+        onReloaded(); // should be called only when reload is successful. not here.
     };
+
+    async function getJobCategories() {
+        const url = `${Config.BASE_URL}/job_categories`;
+
+        try {
+            let jobCategories = await axios.get(url, {
+                headers: Utils.getHeaders(),
+            });
+
+            jobCategories = jobCategories.data.data.data;
+
+            console.log("job categories: ", jobCategories);
+            setJobCategories(jobCategories);
+            setRequestFinished(true);
+        } catch (error) {
+            // setErrorMessage("Could not resolve job categories");
+            // setShowErrorPopup(true);
+            console.log("getting job categories error: ", error);
+        }
+    }
 
     return (
         showPopup && (
@@ -57,7 +125,7 @@ export default function ReloadCreditPopup({ showPopup, onClose, onReloaded }) {
                         Reload Your Credit
                     </h3>
                     <p className="text-dark-50 font-medium text-md text-left my-3">
-                        Current balance: KSh 4,000
+                        Current balance: KSh {currentBalance}
                     </p>
                     <div className="h-max max-h-50-screen overflow-y-auto pr-6 my-3">
                         <p className="text-dark-50 text-normal text-left my-3">
@@ -68,19 +136,72 @@ export default function ReloadCreditPopup({ showPopup, onClose, onReloaded }) {
                             balance?
                         </p>
                         <div className="flex flex-row justify-start items-center my-3">
-                            <p className="text-sm text-white px-4 py-1 bg-primary-70 border border-solid border-primary-70 rounded-md my-2">
+                            <p
+                                onClick={() => {
+                                    setamountType("fixed");
+                                    setAmount(2000);
+                                }}
+                                className={`cursor-pointer text-sm mx-2 px-4 py-1  border border-solid border-primary-70 rounded-md my-2
+                            ${
+                                amountType == "fixed" && amount == 2000
+                                    ? "bg-primary-70 text-white"
+                                    : "bg-white text-primary-70"
+                            }`}
+                            >
                                 2,000 KSh
                             </p>
-                            <p className="text-sm text-primary-70 px-4 py-1 border border-solid border-primary-70 rounded-md m-2">
+                            <p
+                                onClick={() => {
+                                    setamountType("fixed");
+                                    setAmount(5000);
+                                }}
+                                className={`cursor-pointer text-sm mx-2 px-4 py-1  border border-solid border-primary-70 rounded-md my-2
+                            ${
+                                amountType == "fixed" && amount == 5000
+                                    ? "bg-primary-70 text-white"
+                                    : "bg-white text-primary-70"
+                            }`}
+                            >
                                 5,000 KSh
                             </p>
-                            <p className="text-sm text-primary-70 px-4 py-1 border border-solid border-primary-70 rounded-md m-2">
+                            <p
+                                onClick={() => {
+                                    setamountType("fixed");
+                                    setAmount(10000);
+                                }}
+                                className={`cursor-pointer text-sm  px-4 py-1  border border-solid border-primary-70 rounded-md my-2
+                        ${
+                            amountType == "fixed" && amount == 10000
+                                ? "bg-primary-70 text-white"
+                                : "bg-white text-primary-70"
+                        }`}
+                            >
                                 10,000 KSh
                             </p>
-                            <p className="text-sm text-primary-70 px-4 py-1 border border-solid border-primary-70 rounded-md m-2">
+                            <p
+                                onClick={() => {
+                                    setamountType("fixed");
+                                    setAmount(20000);
+                                }}
+                                className={`cursor-pointer text-sm mx-2 px-4 py-1  border border-solid border-primary-70 rounded-md my-2
+                            ${
+                                amountType == "fixed" && amount == 20000
+                                    ? "bg-primary-70 text-white"
+                                    : "bg-white text-primary-70"
+                            }`}
+                            >
                                 20,000 KSh
                             </p>
                             <input
+                                value={
+                                    amountType == "custom" ? amount : undefined
+                                }
+                                onChange={(e) => {
+                                    const value = e.target.value;
+                                    setamountType("custom");
+                                    setAmount(value);
+                                }}
+                                type={"number"}
                                 className="text-primary-70 px-4 py-1 border border-solid border-primary-70 rounded-md m-2 outline-none focus:outline-solid focus:outline-primary-60 placeholder:text-sm"
                                 placeholder="Enter an amount in KSh..."
                             />
@@ -90,7 +211,7 @@ export default function ReloadCreditPopup({ showPopup, onClose, onReloaded }) {
                             to choose:
                         </p>
                         <div className="flex flex-row justify-start items-center my-3">
-                            <p className="w-max text-sm text-primary-70 px-4 py-2 border border-solid border-primary-70 rounded-md m-2">
+                            {/* <p className="w-max text-sm text-primary-70 px-4 py-2 border border-solid border-primary-70 rounded-md m-2">
                                 1 Basic plan =2,000 KSh
                             </p>
                             <p className="w-max text-sm text-primary-70 px-4 py-2 border border-solid border-primary-70 rounded-md m-2">
@@ -98,12 +219,43 @@ export default function ReloadCreditPopup({ showPopup, onClose, onReloaded }) {
                             </p>
                             <p className="w-max text-sm text-primary-70 px-4 py-2 border border-solid border-primary-70 rounded-md m-2">
                                 1 Premium plan =20,000 KSh
-                            </p>
+                            </p> */}
+
+                            {!jobCategories && requestFinished && (
+                                <p className="text-center w-full text-red-500 border border-solid border-red-500 rounded-lg">
+                                    No Job Categories!
+                                </p>
+                            )}
+
+                            {jobCategories &&
+                                jobCategories.map((jobCategory, index) => {
+                                    return (
+                                        <div
+                                            key={index}
+                                            onClick={() => {
+                                                setamountType("plan");
+                                                setAmount(jobCategory.cost);
+                                            }}
+                                            className={` cursor-pointer w-max text-sm text-primary-70 px-4 py-2 border border-solid border-primary-70 rounded-md m-2
+                                            ${
+                                                amountType == "plan" &&
+                                                amount == jobCategory.cost
+                                                    ? "bg-primary-70 text-white"
+                                                    : "bg-white text-primary-70"
+                                            }`}
+                                        >
+                                            1 {jobCategory.type} plan ={" "}
+                                            {jobCategory.cost}
+                                        </div>
+                                    );
+                                })}
                         </div>
+
                         <p className="text-dark-50 text-normal text-left my-3">
                             2. Select a Payment method
                         </p>
                         <PaymentOptions
+                            amount={amount}
                             onSelectedPaymentMethod={onSelectedPaymentMethod}
                         />
 
@@ -122,7 +274,7 @@ export default function ReloadCreditPopup({ showPopup, onClose, onReloaded }) {
                                 } rounded-10 cursor-pointer`}
                                 onClick={onReloadCredit}
                             >
-                                Reload KSh 2,000
+                                Reload KSh {amount || "0"}
                             </p>
                         </div>
                     </div>

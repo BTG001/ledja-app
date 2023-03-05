@@ -80,10 +80,10 @@ export default function RecruiterProfileSetupStep3() {
                     R_step3FormData
                 );
 
-                console.log("step 3 resulsts: ", results);
+                console.log("step 3 results: ", results);
 
                 if (results.data.success) {
-                    router.push("/recruiter/profile-setup/step4");
+                    router.push("/recruiter/recruiter-dashboard");
                 }
                 setLoadingExit(false);
             } catch (error) {
@@ -149,7 +149,7 @@ export default function RecruiterProfileSetupStep3() {
                             name="company_intro"
                             placeholder="Hi everyone! I’m a recruiter at ABC company...."
                         >
-                            Hi everyone! I’m a recruiter at ABC company....
+                            {/* Hi everyone! I’m a recruiter at ABC company.... */}
                         </textarea>
                     </div>
 
@@ -164,7 +164,7 @@ export default function RecruiterProfileSetupStep3() {
                             name="company_culture"
                             placeholder="We offer a collaborative work environment..."
                         >
-                            We offer a collaborative work environment...
+                            {/* We offer a collaborative work environment... */}
                         </textarea>
                     </div>
 

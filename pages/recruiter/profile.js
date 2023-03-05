@@ -11,6 +11,8 @@ import { BsBuilding } from "react-icons/bs";
 import { BiUserCircle } from "react-icons/bi";
 import Link from "next/link";
 import CompanyBasicInfoPopup from "../../components/recuriters/profile-edit/company-basic-info-popup";
+import MissingcompanyProfilePopup from "../../components/recuriters/MissingCompanyProfilePopup";
+import IncompleteRecruiterProfilePopup from "../../components/recuriters/IncompleteRecruiterProfilePopup";
 
 export default function Profile() {
     const [basicInfo, setBasicInfo] = useState({});
@@ -38,6 +40,15 @@ export default function Profile() {
         useState(false);
     const [showContactInfoEditPopup, setShowContactInfoEditPopup] =
         useState(false);
+
+    const [showMissingCompanyProfilePopup, setShowMissingCompanyProfilePopup] =
+        useState(false);
+    const [
+        showIncompleteRecruiterProfilePopup,
+        setShowIncompleteRecruiterProfilePopup,
+    ] = useState(false);
+
+    const [pathToIncompleteStep, setPathToIncompleteStep] = useState();
 
     useEffect(() => {
         fetchRecruiter();
@@ -81,12 +92,26 @@ export default function Profile() {
             }
 
             if (
-                !recruiter.basic_info_recruiter ||
-                !recruiter.recruiter_link ||
-                !recruiter.about_recruiter ||
+                !recruiter.basic_info_recruiter &&
+                !recruiter.recruiter_link &&
+                !recruiter.about_recruiter &&
                 !recruiter.more_about_recruiter
             ) {
-                setNeedsToCompleteProfile(true);
+                setShowMissingCompanyProfilePopup(true);
+            } else {
+                if (!recruiter.basic_info_recruiter) {
+                    setPathToIncompleteStep("/recruiter/profile-setup/step1");
+                    setShowIncompleteRecruiterProfilePopup(true);
+                } else if (!recruiter.recruiter_link) {
+                    setPathToIncompleteStep("/recruiter/profile-setup/step2");
+                    setShowIncompleteRecruiterProfilePopup(true);
+                } else if (!recruiter.about_recruiter) {
+                    setPathToIncompleteStep("/recruiter/profile-setup/step3");
+                    setShowIncompleteRecruiterProfilePopup(true);
+                } else if (!recruiter.more_about_recruiter) {
+                    setPathToIncompleteStep("/recruiter/profile-setup/step4");
+                    setShowIncompleteRecruiterProfilePopup(true);
+                }
             }
 
             console.log("recruiter: ", recruiter);
@@ -124,6 +149,8 @@ export default function Profile() {
 
     const onClose = () => {
         setShowBasicInfoEditPopup(false);
+        setShowMissingCompanyProfilePopup(false);
+        setShowIncompleteRecruiterProfilePopup(false);
     };
 
     return (
@@ -134,6 +161,15 @@ export default function Profile() {
                 onSuccess={afterBasicInfoUpdate}
                 basicInfos={basicInfo}
                 links={links}
+            />
+            <MissingcompanyProfilePopup
+                onClose={onClose}
+                showPopup={showMissingCompanyProfilePopup}
+            />
+            <IncompleteRecruiterProfilePopup
+                onClose={onClose}
+                showPopup={showIncompleteRecruiterProfilePopup}
+                pathToIncompleteStep={pathToIncompleteStep}
             />
             <RecruiterNavbar icon={"user"} dashboardLinks={false} />
             <div className="w-4/5 md:grid grid-cols-3 md:gap-4  mt-5 mb-32 mx-auto md:grid-flow-dense md:dire ">

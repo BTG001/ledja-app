@@ -2,10 +2,12 @@ import Link from "next/link";
 import { useContext, useState } from "react";
 import Image from "next/image";
 import { AuthContext } from "../../pages/_app";
+import { useRouter } from "next/router";
 
 export default function RecruiterProfileIcon({ icon }) {
     const [showLinks, setShowLinks] = useState(false);
     const auth = useContext(AuthContext);
+    const router = useRouter();
 
     const onShowLinks = () => {
         setShowLinks(true);
@@ -28,6 +30,7 @@ export default function RecruiterProfileIcon({ icon }) {
             };
         });
         onCloseLinks();
+        router.replace("/");
     };
 
     return (

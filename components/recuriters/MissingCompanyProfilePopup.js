@@ -3,12 +3,7 @@ import PrimaryBtn from "../buttons/PrimaryBtn";
 import SecondaryBtn from "../buttons/SecondaryBtn";
 import Image from "next/image";
 
-export default function NotEnoughCreditPopup({
-    showPopup,
-    onClose,
-    onReloadCredit,
-    currentAmount,
-}) {
+export default function MissingcompanyProfilePopup({ showPopup, onClose }) {
     useEffect(() => {
         if (showPopup) {
             document.body.style.overflowY = "hidden";
@@ -16,11 +11,6 @@ export default function NotEnoughCreditPopup({
             document.body.style.overflowY = "visible";
         }
     }, [showPopup]);
-
-    const onChooseOtherPlan = () => {
-        onClose();
-    };
-
     return (
         showPopup && (
             <>
@@ -30,21 +20,17 @@ export default function NotEnoughCreditPopup({
                 ></div>
                 <div className="z-50 fixed w-4/5 md:w-2/3 lg:w-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2    top-1/2 p-10 bg-white opacity-100 rounded-10 shadow-md">
                     <Image
-                        src={"/not-enough-credit-icon.svg"}
-                        width={91}
-                        height={91}
+                        src={"/warning-icon.svg"}
+                        width={80}
+                        height={80}
                         className="my-5 mx-auto"
                     />
                     <h3 className="text-dark-50 text-xl font-medium text-center my-3">
-                        Not enough credit
+                        Missing Company Profile
                     </h3>
-                    <p className="text-dark-50 font-medium text-md text-center my-3">
-                        You don’t have enough credit to publish a job with your
-                        selected plan Deposit at least 5,000 Ksh to post a basic
-                        job
-                    </p>
-                    <p className="text-dark-50 text-normal text-center my-3">
-                        Current balance: KSh {currentAmount}
+                    <p className="text-dark-50 font-normal text-md text-center my-3 ">
+                        Tip: Candidates are more interested in <br /> applying a
+                        position with a full company profile
                     </p>
 
                     <div
@@ -55,16 +41,15 @@ export default function NotEnoughCreditPopup({
                     >
                         <p
                             className="cursor-pointer w-max my-2 mx-4 py-2 px-5 bg-white text-primary-70  rounded-10 border border-primary-70 border-solid"
-                            onClick={onChooseOtherPlan}
+                            onClick={onClose}
                         >
-                            Choose other plan
+                            I’ll do it later
                         </p>
-                        <p
-                            className="w-max my-2 mx-4 py-2 px-5 bg-primary-70 text-white rounded-10 cursor-pointer"
-                            onClick={onReloadCredit}
-                        >
-                            Reload your credit
-                        </p>
+                        <PrimaryBtn
+                            text={"Complete Now"}
+                            path="/recruiter/profile-setup/step1"
+                            className={"my-5 mx-4 w-max"}
+                        />
                     </div>
                 </div>
             </>

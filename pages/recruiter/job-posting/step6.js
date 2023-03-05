@@ -21,12 +21,14 @@ export default function () {
     const [showErrorPopup, setShowErrorPopup] = useState(false);
     const [errorMessageArray, setErrorMessageArray] = useState([]);
 
+    const [reloadSuccessful, setReloadSuccessful] = useState(false);
+
     const [showJobSuccessPopup, setShowJobSuccessPopup] = useState(false);
     const [showNotEnoughCreditPopup, setShowNotEnoughCreditPopup] =
         useState(false);
     const [showReloadCreditPopup, setShowReloadCreditPopup] = useState(false);
     const [showReloadSuccessPopup, setShowReloadSuccessPopup] = useState(false);
-    const [wallet, setWallet] = useState();
+    const [wallet, setWallet] = useState({});
     const [localJobPost, setLocalJobPost] = useState({});
     const [activeJobCategoryId, setActiveJobCategoryId] = useState();
 
@@ -67,8 +69,11 @@ export default function () {
             localStorage.getItem("active_job_category_cost")
         );
 
-        if (wallet.amount < activeCategoryCost) {
+        console.log("the wallet: ", wallet);
+
+        if (wallet.amount < activeCategoryCost && !reloadSuccessful) {
             setShowNotEnoughCreditPopup(true);
+            setLoading(false);
             return;
         }
 
@@ -101,6 +106,7 @@ export default function () {
 
         JobFormData.append("experience_level", localJobPost.experience_level);
         JobFormData.append("salary", localJobPost.salary);
+        JobFormData.append("send_to_email", localJobPost.send_to_email);
 
         // console.log("file: ", fileInput.current.files[0]);
 
@@ -118,6 +124,7 @@ export default function () {
                 setShowJobSuccessPopup(true);
                 localStorage.removeItem("job_post");
                 setLoading(false);
+                setReloadSuccessful(false);
             } catch (error) {
                 console.log("Job Error: ", error);
                 setLoading(false);
@@ -183,6 +190,7 @@ export default function () {
     const onReloaded = () => {
         setShowReloadCreditPopup(false);
         setShowReloadSuccessPopup(true);
+        setReloadSuccessful(true);
     };
 
     const onAfterPayment = () => {
@@ -218,12 +226,14 @@ export default function () {
                 showPopup={showNotEnoughCreditPopup}
                 onReloadCredit={onReloadCredit}
                 onClose={onClose}
+                currentAmount={wallet.amount}
             />
 
             <ReloadCreditPopup
                 showPopup={showReloadCreditPopup}
                 onClose={onClose}
                 onReloaded={onReloaded}
+                wallet={wallet}
             />
             <ReloadSuccessPopup
                 showPopup={showReloadSuccessPopup}
@@ -361,7 +371,8 @@ export default function () {
                                     </span>
                                     <span className="flex flex-row flex-nowrap justify-start items-center">
                                         <span className="text-my-gray-70">
-                                            {localJobPost.experience_level}
+                                            {localJobPost.experience_level}{" "}
+                                            Years
                                         </span>
                                         <Image
                                             onClick={onNavigateToStep2}
@@ -376,7 +387,7 @@ export default function () {
                                     <span className="text-dark-50">Salary</span>
                                     <span className="flex flex-row flex-nowrap justify-start items-center">
                                         <span className="text-my-gray-70">
-                                            {localJobPost.salary}
+                                            KSh {localJobPost.salary}
                                         </span>
                                         <Image
                                             onClick={onNavigateToStep2}
@@ -472,7 +483,7 @@ export default function () {
 
                 <div className="w-full flex flex-row flex-wrap justify-center items-center ">
                     <input
-                        className="submit-btn-secondary mr-3"
+                        className="submit-btn-secondary mr-3 cursor-pointer"
                         value={"Back"}
                         type={"submit"}
                         onClick={onBack}

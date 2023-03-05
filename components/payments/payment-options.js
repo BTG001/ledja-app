@@ -1,7 +1,7 @@
 import { useState } from "react";
 import Image from "next/image";
 
-export default function PaymentOptions({ onSelectedPaymentMethod }) {
+export default function PaymentOptions({ onSelectedPaymentMethod, amount }) {
     const [enterMpesaDetails, setEnterMpesaDetails] = useState(false);
 
     const onPayWithMpesa = () => {
@@ -37,7 +37,8 @@ export default function PaymentOptions({ onSelectedPaymentMethod }) {
                         </p>
                         <input
                             disabled
-                            placeholder="Ksh 10,000"
+                            placeholder="e.g Ksh 10,000"
+                            value={amount}
                             className="py-2 px-4 border-solid border border-my-gray-70 outline-none placeholder:text-my-gray-70 placeholder:text-sm focus:outline-primary-70 rounded-tr-md rounded-br-md w-1/2"
                         />
                     </div>

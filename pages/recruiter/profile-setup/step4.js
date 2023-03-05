@@ -152,7 +152,7 @@ export default function RecruiterProfileSetupStep4() {
                                 type={"text"}
                                 placeholder="Jennifer"
                                 name="fname"
-                                value={"Jennifer"}
+                                // value={"Jennifer"}
                                 required
                             />
                         </div>
@@ -169,7 +169,7 @@ export default function RecruiterProfileSetupStep4() {
                                 type={"text"}
                                 placeholder="Smith"
                                 name="lname"
-                                value={"Smith"}
+                                // value={"Smith"}
                                 required
                             />
                         </div>
@@ -221,7 +221,7 @@ export default function RecruiterProfileSetupStep4() {
                             type={"text"}
                             placeholder="talent acquisition specialist"
                             name="company_position"
-                            value={"COO"}
+                            // value={"COO"}
                             required
                         />
                     </div>
@@ -238,7 +238,7 @@ export default function RecruiterProfileSetupStep4() {
                             type={"text"}
                             name="location"
                             placeholder="Nairobi, Kenya"
-                            value={"Nairobi, Kenya"}
+                            // value={"Nairobi, Kenya"}
                             required
                         />
                     </div>

@@ -61,7 +61,8 @@ export default function login() {
 
                 setLoading(false);
             } catch (error) {
-                setErrorMessage("Incorrect email or passoword");
+                console.log("login error: ", error);
+                setErrorMessage("Incorrect email or password");
                 setShowErrorPopup(true);
                 setLoading(false);
             }

@@ -155,8 +155,8 @@ export default function RecruiterProfileSetupStep2() {
                                 onBlur={() => setWebsiteFocus(false)}
                                 className="form-input-with-icon peer"
                                 type={"url"}
-                                placeholder="abccompany.com"
-                                value={"abccompany.com"}
+                                placeholder="https://abccompany.com"
+                                // value={"abccompany.com"}
                                 name="websites"
                             />
                             <Image
@@ -184,10 +184,10 @@ export default function RecruiterProfileSetupStep2() {
                                 onBlur={() => setLinkedinFocus(false)}
                                 className="form-input-with-icon peer"
                                 type={"url"}
-                                placeholder="abccompany/linkedin.com"
+                                placeholder="https://linkedin.com/abc"
                                 name="linked_in"
                                 s
-                                value={"abccompany/linkedin.com"}
+                                // value={"abccompany/linkedin.com"}
                             />
                             <Image
                                 src={"/linkedin.svg"}
@@ -208,9 +208,9 @@ export default function RecruiterProfileSetupStep2() {
                                 onBlur={() => setTwitterFocus(false)}
                                 className="form-input-with-icon peer"
                                 type={"text"}
-                                placeholder="abccompany/twitter.com"
+                                placeholder="https://twitter.com/abc"
                                 name="twitter"
-                                value={"abccompany/twitter.com"}
+                                // value={"abccompany/twitter.com"}
                             />
                             <Image
                                 src={"/twitter.svg"}
@@ -231,9 +231,9 @@ export default function RecruiterProfileSetupStep2() {
                                 onBlur={() => setFacebookFocus(false)}
                                 className="form-input-with-icon peer"
                                 type={"text"}
-                                placeholder="abccompany/facebook.com"
+                                placeholder="https://facebook.com/abc"
                                 name="facebook"
-                                value={"abccompany/facebook.com"}
+                                // value={"abccompany/facebook.com"}
                             />
                             <Image
                                 src={"/facebook.svg"}
