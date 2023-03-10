@@ -41,7 +41,7 @@ export default function RecruiterProfileSetupStep2() {
         Utils.makeRequest(async () => {
             try {
                 const results = await Utils.postForm(
-                    `${Config.BASE_URL}/recruiter_links`,
+                    `${Config.API_URL}/recruiter_links`,
                     R_Step2FormData
                 );
 
@@ -79,7 +79,7 @@ export default function RecruiterProfileSetupStep2() {
         Utils.makeRequest(async () => {
             try {
                 const results = await Utils.postForm(
-                    `${Config.BASE_URL}/recruiter_links`,
+                    `${Config.API_URL}/recruiter_links`,
                     R_Step2FormData
                 );
 

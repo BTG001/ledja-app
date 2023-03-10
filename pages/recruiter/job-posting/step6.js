@@ -116,7 +116,7 @@ export default function () {
         Utils.makeRequest(async () => {
             try {
                 const results = await Utils.postForm(
-                    `${Config.BASE_URL}/jobs`,
+                    `${Config.API_URL}/jobs`,
                     JobFormData
                 );
 
@@ -154,7 +154,7 @@ export default function () {
     async function fetchRecruiter() {
         try {
             const userId = localStorage.getItem("user_id");
-            const url = `${Config.BASE_URL}/users/${userId}`;
+            const url = `${Config.API_URL}/users/${userId}`;
             let recruiter = await axios.get(url, {
                 headers: Utils.getHeaders(),
             });

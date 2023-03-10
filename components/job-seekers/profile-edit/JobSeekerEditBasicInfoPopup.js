@@ -4,11 +4,10 @@ import Utils from "../../../Utils";
 import Config from "../../../Config";
 import axios from "axios";
 
-export default function CompanyBasicInfoPopup({
+export default function JobSeekerEditBasicInfoPopup({
     showPopup,
     onClose,
-    onBasicInfosUpdateSuccess,
-    onLinksUpdateSuccess,
+    onSuccess,
     basicInfos: propBasicInfos,
     links: propLinks,
 }) {
@@ -22,8 +21,6 @@ export default function CompanyBasicInfoPopup({
     const [basicInfos, setBasicInfos] = useState(propBasicInfos);
 
     const [links, setLinks] = useState(propLinks);
-
-    const [errors, setErrors] = useState({});
 
     useEffect(() => {
         if (showPopup) {
@@ -41,8 +38,6 @@ export default function CompanyBasicInfoPopup({
     const onSubmit = (e) => {
         e.preventDefault();
 
-        setErrors({});
-
         if (loading) {
             return;
         } else {
@@ -54,6 +49,7 @@ export default function CompanyBasicInfoPopup({
                 basicInfosFormData.append(key, basicInfos[key]);
             }
         });
+
         const linksFormData = new FormData();
 
         Object.keys(links).map((key) => {
@@ -64,44 +60,73 @@ export default function CompanyBasicInfoPopup({
 
         Utils.makeRequest(async () => {
             try {
-                const basicInfosUrl = `${Config.API_URL}/recruiter_basic_infos/${basicInfos.id}`;
-                let basicInfosUpdate = await Utils.putForm(
+                const basicInfosUrl = `${Config.API_URL}/basic_infos/${basicInfos.id}`;
+                const basicInfosUpdate = await Utils.postForm(
                     basicInfosUrl,
                     basicInfosFormData
                 );
-                basicInfosUpdate = basicInfosUpdate.data.data;
-
-                onBasicInfosUpdateSuccess(basicInfosUpdate);
+                setBasicInfos(basicInfosUpdate.data.data);
+                onSuccess();
+                setLoading(false);
                 console.log("basic infos update: ", basicInfosUpdate);
             } catch (error) {
-                setErrors((prevValues) => {
-                    return {
-                        ...prevValues,
-                        basicInfo: "Failed to update basic information",
-                    };
-                });
                 console.log("basic infos update error: ", error);
             }
         });
 
         Utils.makeRequest(async () => {
             try {
-                const linksUrl = `${Config.API_URL}/recruiter_links/${links.id}`;
+                const linksUrl = `${Config.API_URL}/job_seeker_links/${links.id}`;
 
-                let linksUpdate = await Utils.putForm(linksUrl, linksFormData);
+                const linksUpdate = await Utils.putForm(
+                    linksUrl,
+                    linksFormData
+                );
+                // axios.defaults.headers = {
+                //     "Content-Type": "application/x-www-form-urlencoded",
+                //     Authorization: Utils.getAuthorization(),
+                // };
+                // const linksUpdate = axios(linksUrl, {
+                //     method: "PUT",
+                //     headers: {
+                //         Authorization: Utils.getAuthorization(),
+                //         "Content-Type": "application/x-www-form-urlencoded",
+                //     },
+                //     data: linksFormData,
+                // });
+                // const data = {
+                //     websites: "website.com",
+                //     linkedin: "linkedin.com/abcc",
+                // };
 
-                linksUpdate = linksUpdate.data.data;
+                // await axios.putForm(linksUrl, data, {
+                //     headers: {
+                //         "Content-Type": "application/x-www-form-urlencoded",
+                //         Authorization: Utils.getAuthorization(),
+                //     },
+                // });
 
-                console.log("links update: ", linksUpdate);
-                onLinksUpdateSuccess(linksUpdate);
+                // const linksUpdate = await fetch(linksUrl, {
+                //     method: "PUT", // *GET, POST, PUT, DELETE, etc.
+                //     mode: "cors", // no-cors, *cors, same-origin
+                //     cache: "no-cache", // *default, no-cache, reload, force-cache, only-if-cached
+                //     credentials: "include", // include, *same-origin, omit
+                //     headers: {
+                //         //   "Content-Type": "application/json",
+                //         "Content-Type": "application/x-www-form-urlencoded",
+                //         Authorization: Utils.getAuthorization(),
+                //     },
+                //     redirect: "follow", // manual, *follow, error
+                //     referrerPolicy: "no-referrer", // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
+                //     body: linksFormData,
+                // });
+
+                setLinks(linksUpdate.data.data);
+                console.log("links update: ", await linksUpdate.data.data);
+
+                onSuccess();
                 setLoading(false);
             } catch (error) {
-                setErrors((prevValues) => {
-                    return {
-                        ...prevValues,
-                        links: "Failed to update social media links",
-                    };
-                });
                 setLoading(false);
                 console.log("links update error: ", error);
             }
@@ -123,12 +148,8 @@ export default function CompanyBasicInfoPopup({
                     <form className="form">
                         <div className="h-max max-h-60-screen overflow-y-auto pl-6 pr-6 my-3">
                             <h3 className="form-label">Basic information</h3>
-                            {errors.basicInfo && (
-                                <p className="text-red-500 text-left py-2 px-1 before:mr-2 before:p-1 before:h-full before:bg-red-500 ">
-                                    {errors.basicInfo || ""}
-                                </p>
-                            )}
-                            <div className="form-input-container">
+
+                            {/* <div className="form-input-container">
                                 <label className="form-label-light">
                                     Company Name
                                 </label>
@@ -148,48 +169,46 @@ export default function CompanyBasicInfoPopup({
                                         });
                                     }}
                                 />
-                            </div>
+                            </div> */}
                             <div className="grid grid-cols-2 gap-6">
                                 <div className="form-input-container">
-                                    <label className="form-label-light">
-                                        Industry
-                                    </label>
-                                    <select
-                                        className="form-input"
-                                        name="industry"
-                                        value={basicInfos.industry || ""}
-                                        onChange={(e) => {
-                                            const value = e.target.value;
-                                            setBasicInfos((prevValues) => {
-                                                return {
-                                                    ...prevValues,
-                                                    industry: value,
-                                                };
-                                            });
-                                        }}
-                                    >
-                                        <option value={"Banking"}>
-                                            Banking
-                                        </option>
-                                    </select>
-                                </div>
-
-                                <div className="form-input-container">
                                     <label className="form-label-light ">
-                                        Headquarter
+                                        First Name
                                     </label>
                                     <input
                                         className="form-input"
                                         type={"text"}
                                         placeholder="Nairobi, Kenya"
-                                        name="headquarters"
-                                        value={basicInfos.headquarters || ""}
+                                        name="fname"
+                                        value={basicInfos.fname || ""}
                                         onChange={(e) => {
                                             const value = e.target.value;
                                             setBasicInfos((prevValues) => {
                                                 return {
                                                     ...prevValues,
-                                                    headquarters: value,
+                                                    fname: value,
+                                                };
+                                            });
+                                        }}
+                                    />
+                                </div>
+
+                                <div className="form-input-container">
+                                    <label className="form-label-light ">
+                                        Last Name
+                                    </label>
+                                    <input
+                                        className="form-input"
+                                        type={"text"}
+                                        placeholder="Nairobi, Kenya"
+                                        name="lname"
+                                        value={basicInfos.lname || ""}
+                                        onChange={(e) => {
+                                            const value = e.target.value;
+                                            setBasicInfos((prevValues) => {
+                                                return {
+                                                    ...prevValues,
+                                                    lname: value,
                                                 };
                                             });
                                         }}
@@ -200,21 +219,21 @@ export default function CompanyBasicInfoPopup({
                             <div className=" md:grid md:grid-cols-2 md:gap-6">
                                 <div className="form-input-container">
                                     <label className="form-label-light ">
-                                        Company Size
+                                        Phone Number
                                     </label>
                                     <input
                                         className="form-input"
                                         type={"number"}
                                         placeholder="25 (employees)"
-                                        name="company_size"
+                                        name="phone_no"
                                         min={1}
-                                        value={basicInfos.company_size || ""}
+                                        value={basicInfos.phone_no || ""}
                                         onChange={(e) => {
                                             const value = e.target.value;
                                             setBasicInfos((prevValues) => {
                                                 return {
                                                     ...prevValues,
-                                                    company_size: value,
+                                                    phone_no: value,
                                                 };
                                             });
                                         }}
@@ -223,20 +242,20 @@ export default function CompanyBasicInfoPopup({
 
                                 <div className="form-input-container">
                                     <label className="form-label-light ">
-                                        Revenue
+                                        Email
                                     </label>
                                     <input
                                         className="form-input"
-                                        type={"text"}
-                                        placeholder="2000000"
+                                        type={"email"}
+                                        placeholder="email@example.com"
                                         name="revenue"
-                                        value={`${basicInfos.revenue || ""}`}
+                                        value={`${basicInfos.email || ""}`}
                                         onChange={(e) => {
                                             const value = e.target.value;
                                             setBasicInfos((prevValues) => {
                                                 return {
                                                     ...prevValues,
-                                                    revenue: value,
+                                                    email: value,
                                                 };
                                             });
                                         }}
@@ -247,22 +266,20 @@ export default function CompanyBasicInfoPopup({
                             <div className=" md:grid md:grid-cols-2 md:gap-6">
                                 <div className="form-input-container">
                                     <label className="form-label-light ">
-                                        Founded
+                                        Position
                                     </label>
                                     <input
                                         className="form-input"
-                                        type={"number"}
-                                        min="1900"
-                                        max={new Date().getFullYear()}
-                                        placeholder="2003"
-                                        name="founded_on"
-                                        value={`${basicInfos.founded_on || ""}`}
+                                        type={"text"}
+                                        placeholder="CEO"
+                                        name="position"
+                                        value={`${basicInfos.position || ""}`}
                                         onChange={(e) => {
                                             const value = e.target.value;
                                             setBasicInfos((prevValues) => {
                                                 return {
                                                     ...prevValues,
-                                                    founded_on: value,
+                                                    position: value,
                                                 };
                                             });
                                         }}
@@ -271,35 +288,29 @@ export default function CompanyBasicInfoPopup({
 
                                 <div className="form-input-container">
                                     <label className="form-label-light ">
-                                        CEO
+                                        Location
                                     </label>
                                     <input
                                         className="form-input"
                                         type={"text"}
-                                        placeholder="Frank Jessy"
-                                        name="ceo"
-                                        value={`${basicInfos.ceo || ""}`}
+                                        placeholder="Nairobi, kenya"
+                                        name="location"
+                                        value={`${basicInfos.location || ""}`}
                                         onChange={(e) => {
                                             const value = e.target.value;
                                             setBasicInfos((prevValues) => {
                                                 return {
                                                     ...prevValues,
-                                                    ceo: value,
+                                                    location: value,
                                                 };
                                             });
                                         }}
                                     />
                                 </div>
                             </div>
-                            <h3 className="form-label">Social Media Links</h3>
-                            {errors.links && (
-                                <p className="text-red-500 text-left py-2 px-1 before:mr-2 before:p-1 before:h-full before:bg-red-500 ">
-                                    {errors.links || ""}
-                                </p>
-                            )}
                             <div className="form-input-container">
                                 <label className="form-label-light">
-                                    Websites
+                                    Website
                                 </label>
                                 <div
                                     className={`mt-4 border border-solid  rounded-sm flex flex-row flex-nowrap justify-center items-center ${

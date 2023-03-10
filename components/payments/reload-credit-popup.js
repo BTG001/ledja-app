@@ -64,7 +64,7 @@ export default function ReloadCreditPopup({
         transactionFormData.append("amount", amount);
         transactionFormData.append("wallet_id", wallet.id);
 
-        const url = `${Config.BASE_URL}/transactions`;
+        const url = `${Config.API_URL}/transactions`;
 
         Utils.makeRequest(async () => {
             try {
@@ -85,7 +85,7 @@ export default function ReloadCreditPopup({
     };
 
     async function getJobCategories() {
-        const url = `${Config.BASE_URL}/job_categories`;
+        const url = `${Config.API_URL}/job_categories`;
 
         try {
             let jobCategories = await axios.get(url, {

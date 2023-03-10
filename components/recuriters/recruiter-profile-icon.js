@@ -62,16 +62,16 @@ export default function RecruiterProfileIcon({ icon }) {
                     >
                         Profile
                     </Link>
-                    <Link className="hover:bg-primary-40 py-1 px-2" href={"/"}>
+                    {/* <Link className="hover:bg-primary-40 py-1 px-2" href={"/"}>
                         Update Profile Image
-                    </Link>
+                    </Link> */}
                     <Link className="hover:bg-primary-40 py-1 px-2" href={"/"}>
                         Reset Password
                     </Link>
 
                     <span
                         onClick={onLogout}
-                        className="hover:bg-primary-40 py-1 px-2"
+                        className="hover:bg-primary-40 py-1 px-2 cursor-pointer"
                     >
                         Log out
                     </span>

@@ -32,7 +32,7 @@ export default function login() {
         Utils.makeRequest(async () => {
             try {
                 const results = await axios.postForm(
-                    `${Config.BASE_URL}/login`,
+                    `${Config.API_URL}/login`,
                     loginFormData
                 );
                 console.log("login results: ", results);
@@ -98,9 +98,7 @@ export default function login() {
                 <h3 className="form-title">Login to LEDJA</h3>
                 <form className="form" ref={loginForm} onSubmit={onLoginSubmit}>
                     <div className="form-input-container">
-                        <label className="form-label" for="email">
-                            Email Address
-                        </label>
+                        <label className="form-label">Email Address</label>
                         <input
                             className="form-input"
                             type={"email"}
@@ -111,9 +109,7 @@ export default function login() {
                     </div>
 
                     <div className="form-input-container" required>
-                        <label className="form-label" for="password">
-                            Password
-                        </label>
+                        <label className="form-label">Password</label>
                         <input
                             className="form-input"
                             type={"password"}

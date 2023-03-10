@@ -354,7 +354,7 @@ export default function ({ jobCategories }) {
 }
 
 // export async function getServerSideProps(context) {
-//     const url = `${Config.BASE_URL}/job_categories`;
+//     const url = `${Config.API_URL}/job_categories`;
 
 //     console.log("token: ", Config.TOKEN);
 

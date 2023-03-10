@@ -61,7 +61,7 @@ export default class Utils {
     static async makeRequest(requestFunction) {
         axios.defaults.withCredentials = true;
         axios
-            .get(`${Config.BASE_URL_NON_API}/sanctum/csrf-cookie`)
+            .get(`${Config.BASE_URL}/sanctum/csrf-cookie`)
             .then((data) => {
                 console.log("CSRF Request: ", data);
                 axios.defaults.withCredentials = true;
@@ -72,15 +72,30 @@ export default class Utils {
             });
     }
 
+    static async makeFetchRequest(requestFunction) {
+        fetch(`${Config.BASE_URL}/sanctum/csrf-cookie`, {
+            method: "GET", // *GET, POST, PUT, DELETE, etc.
+            mode: "cors", // no-cors, *cors, same-origin
+            cache: "no-cache", // *default, no-cache, reload, force-cache, only-if-cached
+            credentials: "include", // include, *same-origin, omit
+        })
+            .then((data) => {
+                requestFunction();
+            })
+            .catch((error) => console.log("Fetch error: ", error));
+    }
+
     static async postForm(url, data) {
         return axios.postForm(url, data, {
             headers: Utils.getHeaders(),
         });
     }
 
-    static async putForm(url, data) {
-        return axios.putForm(url, data, {
+    static async putForm(url, data, params) {
+        data.append("_method", "PUT");
+        return axios.postForm(url, data, {
             headers: Utils.getHeaders(),
+            params: params,
         });
     }
 }

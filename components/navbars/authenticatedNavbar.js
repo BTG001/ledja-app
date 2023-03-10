@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import Config from "../../Config";
 import JobSeekerProfileIcon from "../job-seekers/job-seeker-profile-icon";
 import RecruiterProfileIcon from "../recuriters/recruiter-profile-icon";
 
@@ -23,8 +24,12 @@ export default function AuthenticatedNavbar() {
                 <Image src="/Logo.svg" width={117} height={64} />
             </Link>
             <div className="flex flex-row flex-nowrap justify-center items-center">
-                {userTypeId == 1 && <JobSeekerProfileIcon />}
-                {userTypeId == 2 && <RecruiterProfileIcon icon={"user"} />}
+                {userTypeId == Config.JOB_SEEKER_USER_TYPE_ID && (
+                    <JobSeekerProfileIcon />
+                )}
+                {userTypeId == Config.RECRUITER_USER_TYPE_ID && (
+                    <RecruiterProfileIcon icon={"user"} />
+                )}
             </div>
         </div>
     );

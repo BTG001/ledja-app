@@ -19,7 +19,7 @@ export default function JobCategories({
     }, []);
 
     async function getJobCategories() {
-        const url = `${Config.BASE_URL}/job_categories`;
+        const url = `${Config.API_URL}/job_categories`;
 
         try {
             let jobCategories = await axios.get(url, {

@@ -13,16 +13,19 @@ import Link from "next/link";
 import CompanyBasicInfoPopup from "../../components/recuriters/profile-edit/company-basic-info-popup";
 import MissingcompanyProfilePopup from "../../components/recuriters/MissingCompanyProfilePopup";
 import IncompleteRecruiterProfilePopup from "../../components/recuriters/IncompleteRecruiterProfilePopup";
+import { useRouter } from "next/router";
+import CompanyIntroEditPopup from "../../components/recuriters/profile-edit/company-intro-edit-popup";
+import CompanyCultureEditPopup from "../../components/recuriters/profile-edit/company-culture-edit-popup";
+import RecruiterInfoEditPopup from "../../components/recuriters/profile-edit/recruiter-info-edit-popup";
 
 export default function Profile() {
+    const router = useRouter();
     const [basicInfo, setBasicInfo] = useState({});
     const [links, setLinks] = useState({});
     const [aboutRecruiter, setAboutRecruiter] = useState({});
     const [moreAboutCompany, setMoreAboutCompany] = useState({});
 
     const [jobs, setJobs] = useState([]);
-
-    const [needsToCompleteProfile, setNeedsToCompleteProfile] = useState(false);
 
     const [hasContactInfo, setHasContactInfo] = useState(false);
     const [hasProfilePic, setHasProfilePic] = useState(false);
@@ -31,8 +34,11 @@ export default function Profile() {
     const [hasCompanyCulture, setHasCompanyCulture] = useState(false);
     const [hasSocialMediaLinks, setHasSocialMediaLinks] = useState(false);
 
+    const [alreadyShowedIncompletePopups, setAlreadyShowedIncompletePopups] =
+        useState(false);
+
     const [showBasicInfoEditPopup, setShowBasicInfoEditPopup] = useState(false);
-    const [showCompanyIntrEditPopupo, setShowCompanyIntroEditPopup] =
+    const [showCompanyIntroEditPopup, setShowCompanyIntroEditPopup] =
         useState(false);
     const [showCompanyCultureEditPopup, setShowCompanyCultureEditPopup] =
         useState(false);
@@ -50,6 +56,17 @@ export default function Profile() {
 
     const [pathToIncompleteStep, setPathToIncompleteStep] = useState();
 
+    const [basicInfoUpdateSuccess, setBasicInfoUpdateSuccess] = useState(false);
+    const [linksUpdateSuccess, setLinksUpdateSuccess] = useState(false);
+
+    useEffect(() => {
+        if (basicInfoUpdateSuccess && linksUpdateSuccess) {
+            setShowBasicInfoEditPopup(false);
+            setBasicInfoUpdateSuccess(false);
+            setLinksUpdateSuccess(false);
+        }
+    }, [basicInfoUpdateSuccess, linksUpdateSuccess]);
+
     useEffect(() => {
         fetchRecruiter();
         fetchJobs();
@@ -58,7 +75,7 @@ export default function Profile() {
     async function fetchRecruiter() {
         try {
             const userId = localStorage.getItem("user_id");
-            const url = `${Config.BASE_URL}/users/${userId}`;
+            const url = `${Config.API_URL}/users/${userId}`;
             let recruiter = await axios.get(url, {
                 headers: Utils.getHeaders(),
             });
@@ -91,6 +108,12 @@ export default function Profile() {
                 }
             }
 
+            console.log("recruiter: ", recruiter);
+
+            if (alreadyShowedIncompletePopups) {
+                return;
+            }
+
             if (
                 !recruiter.basic_info_recruiter &&
                 !recruiter.recruiter_link &&
@@ -114,7 +137,7 @@ export default function Profile() {
                 }
             }
 
-            console.log("recruiter: ", recruiter);
+            setAlreadyShowedIncompletePopups(true);
         } catch (error) {
             console.log("recruiter profile Error: ", error);
         }
@@ -123,7 +146,7 @@ export default function Profile() {
     async function fetchJobs(url) {
         if (!url) {
             const userId = localStorage.getItem("user_id");
-            url = `${Config.BASE_URL}/get_user_jobs/${userId}`;
+            url = `${Config.API_URL}/get_user_jobs/${userId}`;
         }
 
         try {
@@ -141,16 +164,38 @@ export default function Profile() {
         }
     }
 
-    const afterBasicInfoUpdate = () => {
+    const afterBasicInfoUpdate = (updatedBasicInfos) => {
+        setBasicInfo(updatedBasicInfos);
+        setBasicInfoUpdateSuccess(true);
+    };
+
+    const afterLinksUpdate = (updatedLinks) => {
         // get the updated basic infos
-        setShowBasicInfoEditPopup(false);
-        alert("successful");
+        setLinks(updatedLinks);
+        setLinksUpdateSuccess(true);
+    };
+
+    const afterCompanyIntroUpdate = (updatedMoreAboutCompany) => {
+        setShowCompanyIntroEditPopup(false);
+        setMoreAboutCompany(updatedMoreAboutCompany);
+    };
+
+    const afterCompanyCultureUpdate = (updatedMoreAboutCompany) => {
+        setShowCompanyCultureEditPopup(false);
+        setMoreAboutCompany(updatedMoreAboutCompany);
+    };
+
+    const afterRecruiterInfoUpdate = (updatedRecruiterInfo) => {
+        setShowContactInfoEditPopup(false);
+        setAboutRecruiter(updatedRecruiterInfo);
     };
 
     const onClose = () => {
         setShowBasicInfoEditPopup(false);
         setShowMissingCompanyProfilePopup(false);
         setShowIncompleteRecruiterProfilePopup(false);
+        setShowCompanyIntroEditPopup(false);
+        setShowCompanyCultureEditPopup(false);
     };
 
     return (
@@ -158,14 +203,38 @@ export default function Profile() {
             <CompanyBasicInfoPopup
                 showPopup={showBasicInfoEditPopup}
                 onClose={onClose}
-                onSuccess={afterBasicInfoUpdate}
+                onBasicInfosUpdateSuccess={afterBasicInfoUpdate}
+                onLinksUpdateSuccess={afterLinksUpdate}
                 basicInfos={basicInfo}
                 links={links}
             />
+
+            <CompanyIntroEditPopup
+                showPopup={showCompanyIntroEditPopup}
+                onClose={onClose}
+                onSuccess={afterCompanyIntroUpdate}
+                moreAboutCompany={moreAboutCompany}
+            />
+
+            <CompanyCultureEditPopup
+                showPopup={showCompanyCultureEditPopup}
+                onClose={onClose}
+                onSuccess={afterCompanyCultureUpdate}
+                moreAboutCompany={moreAboutCompany}
+            />
+
+            <RecruiterInfoEditPopup
+                showPopup={showContactInfoEditPopup}
+                onClose={onClose}
+                onSuccess={afterRecruiterInfoUpdate}
+                recruiterInfo={aboutRecruiter}
+            />
+
             <MissingcompanyProfilePopup
                 onClose={onClose}
                 showPopup={showMissingCompanyProfilePopup}
             />
+
             <IncompleteRecruiterProfilePopup
                 onClose={onClose}
                 showPopup={showIncompleteRecruiterProfilePopup}
@@ -179,112 +248,184 @@ export default function Profile() {
                             <label className="font-medium text-my-gray-70">
                                 Basic Info
                             </label>
-                            <span
-                                onClick={() => {
-                                    setShowBasicInfoEditPopup(true);
-                                }}
-                                className="text-primary-70 cursor-pointer"
-                            >
-                                Edit
-                            </span>
+                            {hasCompanyInfo && (
+                                <span
+                                    onClick={() => {
+                                        setShowBasicInfoEditPopup(true);
+                                    }}
+                                    className="text-primary-70 cursor-pointer"
+                                >
+                                    Edit
+                                </span>
+                            )}
                         </p>
+                        {hasCompanyInfo && (
+                            <div
+                                className={
+                                    "mt-4 p-5 border border-solid border-my-gray-70  rounded-10 grid grid-cols-3 gap-3 "
+                                }
+                            >
+                                <BsBuilding className="w-32 h-32" />
+                                <div className="flex flex-col flex-nowrap justify-start items-start">
+                                    <h3 className="font-medium text-xl text-dark-50 my-5"></h3>
+                                    <p className="text-sm text-dark-50">
+                                        {basicInfo.company_name || ""}
+                                    </p>
+                                    <p className="text-sm text-dark-50">
+                                        {basicInfo.location || ""}
+                                    </p>
+                                    <p className="grid grid-cols-2 gap-2 w-fit mt-5 mb-2">
+                                        <span className="text-primary-70 text-sm">
+                                            Website
+                                        </span>
+                                        <Link
+                                            target={"_blank"}
+                                            className="underline"
+                                            href={links.websites || ""}
+                                        >
+                                            {links.websites || ""}
+                                        </Link>
+                                    </p>
+
+                                    <p className="grid grid-cols-2 gap-2 w-fit mt-5 mb-2">
+                                        <span className="text-primary-70 text-sm">
+                                            Founded
+                                        </span>
+                                        <span className="text-sm">
+                                            {basicInfo.founded_on || ""}
+                                        </span>
+                                    </p>
+                                    <p className="grid grid-cols-3 gap-2 w-fit mt-5 mb-2">
+                                        <span className="text-primary-70 text-sm">
+                                            Size
+                                        </span>
+                                        <span className="text-sm line row-span-2">
+                                            {basicInfo.company_size || ""}
+                                        </span>
+                                    </p>
+                                    <p className="grid grid-cols-2 gap-2 w-fit mt-5 mb-2">
+                                        <span className="text-primary-70 text-sm">
+                                            Revenue
+                                        </span>
+                                        <span className="text-sm">
+                                            {basicInfo.revenue || ""}
+                                        </span>
+                                    </p>
+                                </div>
+
+                                <div className="flex flex-row flex-nowrap justify-center items-start my-3">
+                                    <div className="flex justify-center items-center  mx-2">
+                                        <Link
+                                            target={"_blank"}
+                                            className="flex justify-center items-center w-8 h-8 rounded-full bg-my-gray-50"
+                                            href={links.linked_in || ""}
+                                        >
+                                            <Image
+                                                src={"/linkedin.svg"}
+                                                width={14}
+                                                height={9}
+                                            />
+                                        </Link>
+                                    </div>
+                                    <div className="flex justify-center items-center mx-2">
+                                        <Link
+                                            target={"_blank"}
+                                            className="flex justify-center items-center w-8 h-8 rounded-full bg-my-gray-50"
+                                            href={links.twitter || ""}
+                                        >
+                                            <Image
+                                                src={"/twitter.svg"}
+                                                width={13}
+                                                height={11}
+                                            />
+                                        </Link>
+                                    </div>
+                                    <div className="flex justify-center items-center  mx-2">
+                                        <Link
+                                            target={"_blank"}
+                                            className="flex justify-center items-center w-8 h-8 rounded-full bg-my-gray-50"
+                                            href={links.facebook || ""}
+                                        >
+                                            <Image
+                                                src={"/facebook.svg"}
+                                                width={8}
+                                                height={6}
+                                            />
+                                        </Link>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+
+                    {!hasCompanyInfo && (
                         <div
+                            onClick={() => {
+                                router.push("/recruiter/profile-setup/step1");
+                            }}
                             className={
-                                "mt-4 p-5 border border-solid border-my-gray-70  rounded-10 grid grid-cols-3 gap-3 "
+                                "mt-4 px-4 py-1 border border-solid border-my-gray-70  rounded-md flex flex-row flex-nowrap justify-start items-center cursor-pointer"
                             }
                         >
-                            <BsBuilding className="w-32 h-32" />
-                            <div className="flex flex-col flex-nowrap justify-start items-start">
-                                <h3 className="font-medium text-xl text-dark-50 my-5"></h3>
-                                <p className="text-sm text-dark-50">
-                                    {basicInfo.company_name || ""}
-                                </p>
-                                <p className="text-sm text-dark-50">
-                                    {basicInfo.location || ""}
-                                </p>
-                                <p className="grid grid-cols-2 gap-2 w-fit mt-5 mb-2">
-                                    <span className="text-primary-70 text-sm">
-                                        Website
-                                    </span>
-                                    <Link
-                                        className="underline"
-                                        href={links.websites || ""}
-                                    >
-                                        {links.websites || ""}
-                                    </Link>
-                                </p>
-                                <p className="grid grid-cols-2 gap-2 w-fit mt-5 mb-2">
-                                    <span className="text-primary-70 text-sm">
-                                        Founded
-                                    </span>
-                                    <span className="text-sm">
-                                        {basicInfo.founded_on || ""}
-                                    </span>
-                                </p>
-                                <p className="grid grid-cols-3 gap-2 w-fit mt-5 mb-2">
-                                    <span className="text-primary-70 text-sm">
-                                        Size
-                                    </span>
-                                    <span className="text-sm line row-span-2">
-                                        {basicInfo.company_size || ""}
-                                    </span>
-                                </p>
-                                <p className="grid grid-cols-2 gap-2 w-fit mt-5 mb-2">
-                                    <span className="text-primary-70 text-sm">
-                                        Revenue
-                                    </span>
-                                    <span className="text-sm">
-                                        {basicInfo.revenue || ""}
-                                    </span>
-                                </p>
-                            </div>
-
-                            <div className="flex flex-row flex-nowrap justify-center items-start my-3">
-                                <div className="flex justify-center items-center w-8 h-8 rounded-full bg-my-gray-50 mx-2">
-                                    <Link href={links.linked_in || ""}>
-                                        <Image
-                                            src={"/linkedin.svg"}
-                                            width={14}
-                                            height={9}
-                                        />
-                                    </Link>
-                                </div>
-                                <div className="flex justify-center items-center w-8 h-8 rounded-full bg-my-gray-50 mx-2">
-                                    <Link href={links.twitter || ""}>
-                                        <Image
-                                            src={"/twitter.svg"}
-                                            width={13}
-                                            height={11}
-                                        />
-                                    </Link>
-                                </div>
-                                <div className="flex justify-center items-center w-8 h-8 rounded-full bg-my-gray-50 mx-2">
-                                    <Link href={links.facebook || ""}>
-                                        <Image
-                                            src={"/facebook.svg"}
-                                            width={8}
-                                            height={6}
-                                        />
-                                    </Link>
-                                </div>
-                            </div>
+                            <Image
+                                src={"/plus-icon.svg"}
+                                width={9}
+                                height={9}
+                                className="m-2"
+                            />
+                            <span className="text-xs text-primary-70">
+                                Add company basic information and social links
+                            </span>
                         </div>
-                    </div>
+                    )}
                     <div className="form-input-container ">
                         <div className="flex flex-row flex-nowrap justify-between items-center w-full p-2">
                             <p className="text-my-gray-70 font-medium">
                                 Company introduction
                             </p>
-                            <span className="text-primary-70">Edit</span>
+                            {hasCompanyIntro && (
+                                <span
+                                    onClick={() => {
+                                        setShowCompanyIntroEditPopup(true);
+                                    }}
+                                    className="text-primary-70 cursor-pointer"
+                                >
+                                    Edit
+                                </span>
+                            )}
                         </div>
 
-                        <div
-                            className={
-                                "mt-4 px-4 py-1 border border-solid border-my-gray-70  rounded-md flex flex-row flex-nowrap justify-start items-center"
-                            }
-                        >
-                            <p>{moreAboutCompany.company_intro || ""}</p>
-                        </div>
+                        {hasCompanyIntro && (
+                            <div
+                                className={
+                                    "mt-4 px-4 py-1 border border-solid border-my-gray-70  rounded-md flex flex-row flex-nowrap justify-start items-center"
+                                }
+                            >
+                                <p>{moreAboutCompany.company_intro || ""}</p>
+                            </div>
+                        )}
+                        {!hasCompanyIntro && (
+                            <div
+                                onClick={() => {
+                                    router.push(
+                                        "/recruiter/profile-setup/step3"
+                                    );
+                                }}
+                                className={
+                                    "mt-4 px-4 py-1 border border-solid border-my-gray-70  rounded-md flex flex-row flex-nowrap justify-start items-center cursor-pointer"
+                                }
+                            >
+                                <Image
+                                    src={"/plus-icon.svg"}
+                                    width={9}
+                                    height={9}
+                                    className="m-2"
+                                />
+                                <span className="text-xs text-primary-70">
+                                    Add
+                                </span>
+                            </div>
+                        )}
                     </div>
 
                     <div className="form-input-container ">
@@ -292,119 +433,231 @@ export default function Profile() {
                             <p className="text-my-gray-70 font-medium">
                                 Culture & Values
                             </p>
-                            <span className="text-primary-70">Edit</span>
+                            {hasCompanyCulture && (
+                                <span
+                                    onClick={() => {
+                                        setShowCompanyCultureEditPopup(true);
+                                    }}
+                                    className="text-primary-70 cursor-pointer"
+                                >
+                                    Edit
+                                </span>
+                            )}
                         </div>
 
-                        <div
-                            className={
-                                "mt-4 px-4 py-1 border border-solid border-my-gray-70  rounded-md flex flex-row flex-nowrap justify-start items-center"
-                            }
-                        >
-                            <p>{moreAboutCompany.company_culture || ""}</p>
-                        </div>
+                        {hasCompanyCulture && (
+                            <div
+                                className={
+                                    "mt-4 px-4 py-1 border border-solid border-my-gray-70  rounded-md flex flex-row flex-nowrap justify-start items-center"
+                                }
+                            >
+                                <p>{moreAboutCompany.company_culture || ""}</p>
+                            </div>
+                        )}
+                        {!hasCompanyCulture && (
+                            <div
+                                onClick={() => {
+                                    router.push(
+                                        "/recruiter/profile-setup/step3"
+                                    );
+                                }}
+                                className={
+                                    "mt-4 px-4 py-1 border border-solid border-my-gray-70  rounded-md flex flex-row flex-nowrap justify-start items-center cursor-pointer"
+                                }
+                            >
+                                <Image
+                                    src={"/plus-icon.svg"}
+                                    width={9}
+                                    height={9}
+                                    className="m-2"
+                                />
+                                <span className="text-xs text-primary-70">
+                                    Add
+                                </span>
+                            </div>
+                        )}
                     </div>
                     <div className="flex flex-row flex-nowrap justify-between items-center w-full p-2">
                         <p className="text-my-gray-70 font-medium">
                             Jobs Available
                         </p>
-                        <span className="text-primary-70">Edit</span>
+                        {/* <span className="text-primary-70">Edit</span> */}
                     </div>
                     <div className="form-input-container border border-solid rounded-md border-my-gray-70 py-2 px-4 my-3">
-                        {jobs.map((job) => {
-                            return (
-                                <div className="grid grid-cols-4 my-3 gap-1 items-center md:w-1/2">
-                                    <BsBuilding className="w-20 h-20 p-3" />
-                                    <div className="col-span-3 flex flex-col flex-nowrap justify-start items-start ">
-                                        <h2 className=" mb-2">{job.title}</h2>
-                                        <p className="text-sm text-my-gray-70">
-                                            {job.location} ({job.type})
-                                        </p>
+                        {jobs &&
+                            jobs.map((job, index) => {
+                                return (
+                                    <div
+                                        key={index}
+                                        className="grid grid-cols-4 my-3 gap-1 items-center md:w-1/2"
+                                    >
+                                        <BsBuilding className="w-20 h-20 p-3" />
+                                        <div className="col-span-3 flex flex-col flex-nowrap justify-start items-start ">
+                                            <h2 className=" mb-2">
+                                                {job.title}
+                                            </h2>
+                                            <p className="text-sm text-my-gray-70">
+                                                {job.location} ({job.type})
+                                            </p>
+                                        </div>
                                     </div>
-                                </div>
-                            );
-                        })}
+                                );
+                            })}
+                        {!jobs ||
+                            (jobs.length < 1 && (
+                                <p className="text-primary-70 text-center py-2">
+                                    You have not posted any jobs yet!
+                                </p>
+                            ))}
+
+                        <div
+                            onClick={() => {
+                                router.push("/recruiter/job-posting/step1");
+                            }}
+                            className={
+                                "mt-4 px-4 py-1 flex flex-row flex-nowrap justify-start items-center cursor-pointer"
+                            }
+                        >
+                            <Image
+                                src={"/plus-icon.svg"}
+                                width={9}
+                                height={9}
+                                className="m-2"
+                            />
+                            <span className="text-xs text-primary-70">
+                                Post new jobs
+                            </span>
+                        </div>
                     </div>
                     <div className="form-input-container ">
                         <p className="flex flex-row flex-nowrap justify-between items-center w-full p-2">
-                            <label
-                                className=" font-medium text-my-gray-70"
-                                for="websites"
-                            >
+                            <label className=" font-medium text-my-gray-70">
                                 Contact Info
                             </label>
-                            <span className="text-primary-70">Edit</span>
+                            {hasContactInfo && (
+                                <span
+                                    onClick={() => {
+                                        setShowContactInfoEditPopup(true);
+                                    }}
+                                    className="text-primary-70 cursor-pointer"
+                                >
+                                    Edit
+                                </span>
+                            )}
                         </p>
-                        <div
-                            className={
-                                "mt-4 p-5 border border-solid border-my-gray-70  rounded-10 grid grid-cols-3 gap-3 "
-                            }
-                        >
-                            <BiUserCircle className="w-32 h-32" />
-                            <div className="flex flex-col flex-nowrap justify-start items-start">
-                                <h3 className="font-medium text-xl text-dark-50 my-5">
-                                    {aboutRecruiter.fname}{" "}
-                                    {aboutRecruiter.lname}
-                                </h3>
-                                <p className="text-sm text-dark-50">
-                                    {aboutRecruiter.company_position}
-                                </p>
-                                {/* <p className="text-sm text-dark-50">
+                        {hasContactInfo && (
+                            <div
+                                className={
+                                    "mt-4 p-5 border border-solid border-my-gray-70  rounded-10 grid grid-cols-3 gap-3 "
+                                }
+                            >
+                                {!hasProfilePic && (
+                                    <BiUserCircle className="w-32 h-32" />
+                                )}
+
+                                {hasProfilePic && (
+                                    <BiUserCircle className="w-32 h-32" />
+                                )}
+                                <div className="flex flex-col flex-nowrap justify-start items-start">
+                                    <h3 className="font-medium text-xl text-dark-50 my-5">
+                                        {aboutRecruiter.fname}{" "}
+                                        {aboutRecruiter.lname}
+                                    </h3>
+                                    <p className="text-sm text-dark-50">
+                                        {aboutRecruiter.company_position}
+                                    </p>
+                                    {/* <p className="text-sm text-dark-50">
                                     Nairobi, Kenya
                                 </p> */}
-                                <p className="flex flex-row flex-nowrap justify-between items-center my-5 ">
-                                    <Image
-                                        src={"/email.svg"}
-                                        width={20}
-                                        height={20}
-                                        className="mr-3"
+                                    <p className="flex flex-row flex-nowrap justify-between items-center my-5 ">
+                                        <Image
+                                            src={"/email.svg"}
+                                            width={20}
+                                            height={20}
+                                            className="mr-3"
+                                        />
+                                        <Image
+                                            src={"/phone.svg"}
+                                            width={20}
+                                            height={20}
+                                            className="ml-3"
+                                        />
+                                    </p>
+                                    <SecondaryBtn
+                                        text={"Message"}
+                                        path="/message"
                                     />
-                                    <Image
-                                        src={"/phone.svg"}
-                                        width={20}
-                                        height={20}
-                                        className="ml-3"
-                                    />
-                                </p>
-                                <SecondaryBtn
-                                    text={"Message"}
-                                    path="/message"
-                                />
-                            </div>
+                                </div>
 
-                            <div className="flex flex-row flex-nowrap justify-center items-start my-3">
-                                <div className="flex justify-center items-center w-8 h-8 rounded-full bg-my-gray-50 mx-2">
-                                    <Link href={links.linked_in || ""}>
-                                        <Image
-                                            src={"/linkedin.svg"}
-                                            width={14}
-                                            height={9}
-                                        />
-                                    </Link>
-                                </div>
-                                <div className="flex justify-center items-center w-8 h-8 rounded-full bg-my-gray-50 mx-2">
-                                    <Link href={links.twitter || ""}>
-                                        <Image
-                                            src={"/twitter.svg"}
-                                            width={13}
-                                            height={11}
-                                        />
-                                    </Link>
-                                </div>
-                                <div className="flex justify-center items-center w-8 h-8 rounded-full bg-my-gray-50 mx-2">
-                                    <Link href={links.facebook || ""}>
-                                        <Image
-                                            src={"/facebook.svg"}
-                                            width={8}
-                                            height={6}
-                                        />
-                                    </Link>
+                                <div className="flex flex-row flex-nowrap justify-center items-start my-3">
+                                    <div className="flex justify-center items-center  mx-2">
+                                        <Link
+                                            target={"_blank"}
+                                            className="flex justify-center items-center w-8 h-8 rounded-full bg-my-gray-50"
+                                            href={links.linked_in || ""}
+                                        >
+                                            <Image
+                                                src={"/linkedin.svg"}
+                                                width={14}
+                                                height={9}
+                                            />
+                                        </Link>
+                                    </div>
+                                    <div className="flex justify-center items-center  mx-2">
+                                        <Link
+                                            target={"_blank"}
+                                            className="flex justify-center items-center w-8 h-8 rounded-full bg-my-gray-50"
+                                            href={links.twitter || ""}
+                                        >
+                                            <Image
+                                                src={"/twitter.svg"}
+                                                width={13}
+                                                height={11}
+                                            />
+                                        </Link>
+                                    </div>
+                                    <div className="flex justify-center items-center  mx-2">
+                                        <Link
+                                            target={"_blank"}
+                                            className="flex justify-center items-center w-8 h-8 rounded-full bg-my-gray-50"
+                                            href={links.facebook || ""}
+                                        >
+                                            <Image
+                                                src={"/facebook.svg"}
+                                                width={8}
+                                                height={6}
+                                            />
+                                        </Link>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
+                        )}
+                        {!hasContactInfo && (
+                            <div
+                                onClick={() => {
+                                    router.push(
+                                        "/recruiter/profile-setup/step4"
+                                    );
+                                }}
+                                className={
+                                    "mt-4 px-4 py-1 border border-solid border-my-gray-70  rounded-md flex flex-row flex-nowrap justify-start items-center cursor-pointer"
+                                }
+                            >
+                                <Image
+                                    src={"/plus-icon.svg"}
+                                    width={9}
+                                    height={9}
+                                    className="m-2"
+                                />
+                                <span className="text-xs text-primary-70">
+                                    Add your contact info
+                                </span>
+                            </div>
+                        )}
                     </div>
                 </section>
 
-                <sidebar className="py-16">
+                <sidebar className="py-16 hidden md:block">
                     <div className="border border-my-gray-70 border-solid rounded-10 p-5">
                         <p className="text-dark-50 w-full">
                             Let’s complete your setup!

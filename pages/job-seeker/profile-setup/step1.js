@@ -3,21 +3,177 @@ import Link from "next/link";
 import Image from "next/image";
 import Footer from "../../../components/Footer";
 import { useRouter } from "next/router";
+import { useState } from "react";
+import Config from "../../../Config";
+import Utils from "../../../Utils";
+import ErrorPopup from "../../../components/errorPopup";
 
 export default function JobSeekerProfileSetupStep1() {
     const router = useRouter();
 
+    const [loadingNext, setLoadingNext] = useState(false);
+    const [loadingExit, setLoadingExit] = useState(false);
+    const [showErrorPopup, setShowErrorPopup] = useState(false);
+    const [errorMessage, setErrorMessage] = useState("An Error Occured");
+    const [basicInfos, setBasicInfos] = useState({
+        firstName: "Jane",
+        lastName: "Doe",
+        phoneNumber: "000-000-000",
+        email: "jane@gmail.com",
+        position: "Recruitment Specialist",
+        location: "Nairobi, Kenya",
+    });
+
+    const [errors, setErrors] = useState({});
+
     const onNext = (e) => {
         e.preventDefault();
-        router.push("/job-seeker/profile-setup/step2");
+
+        if (loadingNext) {
+            return;
+        } else {
+            setLoadingNext(true);
+        }
+
+        const hasErrors = validateData();
+
+        if (hasErrors) {
+            setErrorMessage("Please resolve the errors shown");
+            setShowErrorPopup(true);
+            setLoadingNext(false);
+            return;
+        }
+
+        const basicInfosFormData = createFormData();
+
+        Utils.makeRequest(async () => {
+            try {
+                const results = await Utils.postForm(
+                    `${Config.API_URL}/basic_infos`,
+                    basicInfosFormData
+                );
+
+                console.log(results);
+
+                if (results.data.success) {
+                    router.push("/job-seeker/profile-setup/step2");
+                }
+                setLoadingNext(false);
+            } catch (error) {
+                console.log("step 1 Error: ", error);
+                setErrorMessage(error.message);
+                setShowErrorPopup(true);
+                setLoadingNext(false);
+            }
+        });
     };
 
     const onSaveAndExit = (e) => {
         e.preventDefault();
-        alert("save and exit");
+        if (loadingExit) {
+            return;
+        } else {
+            setLoadingExit(true);
+        }
+
+        const hasErrors = validateData();
+
+        if (hasErrors) {
+            setErrorMessage("Please resolve the errors shown");
+            setShowErrorPopup(true);
+            setLoadingNext(false);
+            return;
+        }
+
+        const basicInfosFormData = createFormData();
+
+        Utils.makeRequest(async () => {
+            try {
+                const results = await Utils.postForm(
+                    `${Config.API_URL}/basic_infos`,
+                    basicInfosFormData
+                );
+
+                console.log("Step 1 results: ", results);
+
+                if (results.data.success) {
+                    router.push("/job-seeker/job-search");
+                }
+                setLoadingExit(false);
+            } catch (error) {
+                console.log("step 1 Error: ", error);
+                setErrorMessage(error.message);
+                setShowErrorPopup(true);
+                setLoadingExit(false);
+            }
+        });
     };
+
+    const createFormData = () => {
+        const basicInfosFormData = new FormData();
+
+        const userId = localStorage.getItem("user_id");
+
+        basicInfosFormData.append("user_id", userId);
+        basicInfosFormData.append("fname", basicInfos.firstName);
+        basicInfosFormData.append("lname", basicInfos.lastName);
+        basicInfosFormData.append("email", basicInfos.email);
+        basicInfosFormData.append("phone_no", basicInfos.phoneNumber);
+        basicInfosFormData.append("position", basicInfos.position);
+        basicInfosFormData.append("location", basicInfos.location);
+
+        return basicInfosFormData;
+    };
+
+    const validateData = () => {
+        let hasErrors = false;
+        const theErrors = {};
+
+        if (!basicInfos.firstName) {
+            hasErrors = true;
+            theErrors.firstName = "First Name is Required";
+        }
+        if (!basicInfos.lastName) {
+            hasErrors = true;
+            theErrors.lastName = "Last Name is Required";
+        }
+
+        if (!basicInfos.phoneNumber) {
+            hasErrors = true;
+            theErrors.phoneNumber = "Phone Number is Required";
+        }
+
+        if (!basicInfos.email) {
+            hasErrors = true;
+            theErrors.email = "Email is Required";
+        }
+
+        if (!basicInfos.position) {
+            hasErrors = true;
+            theErrors.position = "Position/Title is Required";
+        }
+
+        if (!basicInfos.location) {
+            hasErrors = true;
+            theErrors.location = "Location is Required";
+        }
+
+        setErrors(theErrors);
+
+        return hasErrors;
+    };
+
+    const onClose = () => {
+        setShowErrorPopup(false);
+    };
+
     return (
         <>
+            <ErrorPopup
+                showPopup={showErrorPopup}
+                onClose={onClose}
+                message={errorMessage}
+            />
             <LogoNavbar />
             <p
                 className="back-btn"
@@ -54,104 +210,177 @@ export default function JobSeekerProfileSetupStep1() {
                 <form className="form">
                     <div className="grid grid-cols-2 gap-6">
                         <div className="form-input-container">
-                            <label
-                                className="form-label-light form-label-required"
-                                for="firstName"
-                            >
+                            <label className="form-label-light form-label-required">
                                 First Name
                             </label>
                             <input
                                 className="form-input"
                                 type={"text"}
                                 placeholder="Jennifer"
+                                required
+                                value={basicInfos.firstName}
+                                onChange={(e) => {
+                                    const value = e.target.value;
+
+                                    setBasicInfos((prevValues) => {
+                                        return {
+                                            ...prevValues,
+                                            firstName: value,
+                                        };
+                                    });
+                                }}
                             />
+                            <p className="text-red-500 text-left py-2 ">
+                                {errors.firstName || ""}
+                            </p>
                         </div>
 
                         <div className="form-input-container">
-                            <label
-                                className="form-label-light form-label-required"
-                                for="lastName"
-                            >
+                            <label className="form-label-light form-label-required">
                                 Last Name
                             </label>
                             <input
                                 className="form-input"
                                 type={"text"}
                                 placeholder="Smith"
+                                required
+                                value={basicInfos.lastName}
+                                onChange={(e) => {
+                                    const value = e.target.value;
+
+                                    setBasicInfos((prevValues) => {
+                                        return {
+                                            ...prevValues,
+                                            lastName: value,
+                                        };
+                                    });
+                                }}
                             />
+                            <p className="text-red-500 text-left py-2 ">
+                                {errors.lastName || ""}
+                            </p>
                         </div>
                     </div>
 
                     <div className=" md:grid md:grid-cols-2 md:gap-6">
                         <div className="form-input-container">
-                            <label
-                                className="form-label-light form-label-required"
-                                for="text"
-                            >
+                            <label className="form-label-light form-label-required">
                                 Phone Number
                             </label>
                             <input
                                 className="form-input"
                                 type={"text"}
                                 placeholder="000-000-0000"
+                                required
+                                value={basicInfos.phoneNumber}
+                                onChange={(e) => {
+                                    const value = e.target.value;
+
+                                    setBasicInfos((prevValues) => {
+                                        return {
+                                            ...prevValues,
+                                            phoneNumber: value,
+                                        };
+                                    });
+                                }}
                             />
+                            <p className="text-red-500 text-left py-2 ">
+                                {errors.phoneNumber || ""}
+                            </p>
                         </div>
 
                         <div className="form-input-container">
-                            <label
-                                className="form-label-light form-label-required"
-                                for="email"
-                            >
+                            <label className="form-label-light form-label-required">
                                 Email
                             </label>
                             <input
                                 className="form-input"
                                 type={"email"}
                                 placeholder="Jennifer@abccompany.com"
+                                required
+                                value={basicInfos.email}
+                                onChange={(e) => {
+                                    const value = e.target.value;
+
+                                    setBasicInfos((prevValues) => {
+                                        return { ...prevValues, email: value };
+                                    });
+                                }}
                             />
+                            <p className="text-red-500 text-left py-2 ">
+                                {errors.email || ""}
+                            </p>
                         </div>
                     </div>
 
                     <div className="form-input-container">
-                        <label
-                            className="form-label-light form-label-required"
-                            for="position-title"
-                        >
+                        <label className="form-label-light form-label-required">
                             Position / Title
                         </label>
                         <input
                             className="form-input"
                             type={"text"}
                             placeholder="talent acquisition specialist"
+                            required
+                            value={basicInfos.position}
+                            onChange={(e) => {
+                                const value = e.target.value;
+
+                                setBasicInfos((prevValues) => {
+                                    return { ...prevValues, position: value };
+                                });
+                            }}
                         />
+                        <p className="text-red-500 text-left py-2 ">
+                            {errors.position || ""}
+                        </p>
                     </div>
 
                     <div className="form-input-container">
-                        <label
-                            className="form-label-light form-label-required"
-                            for="location"
-                        >
+                        <label className="form-label-light form-label-required">
                             Location
                         </label>
                         <input
                             className="form-input"
                             type={"text"}
                             placeholder="Nairobi, Kenya"
+                            required
+                            value={basicInfos.location}
+                            onChange={(e) => {
+                                const value = e.target.value;
+
+                                setBasicInfos((prevValues) => {
+                                    return { ...prevValues, location: value };
+                                });
+                            }}
                         />
+                        <p className="text-red-500 text-left py-2 ">
+                            {errors.location || ""}
+                        </p>
                     </div>
-                    <div>
-                        <input
+
+                    <div className="flex flex-row justify-start">
+                        <button
                             className="submit-btn-secondary mr-3"
-                            value={"Save and Exit"}
                             type={"submit"}
                             onClick={onSaveAndExit}
-                        />
-                        <input
+                        >
+                            {loadingExit && (
+                                <span className="loader-secondary"></span>
+                            )}
+                            {!loadingExit && (
+                                <span className="">Save and Exit</span>
+                            )}
+                        </button>
+
+                        <button
                             className="submit-btn-left ml-3"
                             type={"submit"}
-                            value="Next"
                             onClick={onNext}
-                        />
+                        >
+                            {loadingNext && <span className="loader"></span>}
+                            {!loadingNext && <span className="">Next</span>}
+                        </button>
                     </div>
                 </form>
             </div>

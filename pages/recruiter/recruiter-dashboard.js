@@ -12,6 +12,7 @@ import JobsTable from "../../components/recuriters/jobsTable";
 export default function RecruiterDashbaord() {
     const [jobs, setJobs] = useState();
     const [fname, setFname] = useState("");
+    const [wallet, setWallet] = useState({});
 
     useEffect(() => {
         getJobs();
@@ -20,7 +21,7 @@ export default function RecruiterDashbaord() {
 
     async function getJobs() {
         const userId = localStorage.getItem("user_id");
-        const url = `${Config.BASE_URL}/get_user_jobs/${userId}`;
+        const url = `${Config.API_URL}/get_user_jobs/${userId}`;
 
         try {
             let theJobs = await axios.get(url, {
@@ -42,7 +43,7 @@ export default function RecruiterDashbaord() {
     async function fetchRecruiter() {
         try {
             const userId = localStorage.getItem("user_id");
-            const url = `${Config.BASE_URL}/users/${userId}`;
+            const url = `${Config.API_URL}/users/${userId}`;
             let recruiter = await axios.get(url, {
                 headers: Utils.getHeaders(),
             });
@@ -51,6 +52,10 @@ export default function RecruiterDashbaord() {
 
             if (recruiter.about_recruiter) {
                 setFname(recruiter.about_recruiter.fname);
+            }
+
+            if (recruiter.wallet) {
+                setWallet(recruiter.wallet);
             }
 
             console.log("recruiter: ", recruiter);
@@ -65,7 +70,7 @@ export default function RecruiterDashbaord() {
             <section className="w-4/5 mx-auto my-5">
                 <div className="my-16">
                     <h1 className="text-dark-50 text-3xl text-left font-zilla-slab capitalize my-3">
-                        Welcome, {fname}!
+                        {fname ? ` Welcome, ${fname}!` : "Welcome!"}
                     </h1>
                     <p className="font-medium text-dark-50">
                         Post a job and hire talents now
@@ -100,7 +105,9 @@ export default function RecruiterDashbaord() {
                             <span className="text-dark-50 text-sm">Ksh</span>
                             <span className="text-4xl text-dark-50">
                                 {" "}
-                                0,00{" "}
+                                {wallet.amount
+                                    ? wallet.amount.toFixed(2)
+                                    : "0,00"}{" "}
                             </span>
                         </p>
                         <div className="flex flex-row flex-wrap justify-center items-center">

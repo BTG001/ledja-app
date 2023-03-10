@@ -46,7 +46,7 @@ export default function () {
 
     async function getJobs() {
         const userId = localStorage.getItem("user_id");
-        const url = `${Config.BASE_URL}/get_user_jobs/${userId}`;
+        const url = `${Config.API_URL}/get_user_jobs/${userId}`;
 
         try {
             const theJobs = await axios.get(url, {

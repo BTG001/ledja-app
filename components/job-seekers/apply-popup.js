@@ -41,10 +41,7 @@ export default function ApplyPopup({ showPopup, onClose, onSuccess }) {
                     <section className=" h-max max-h-60-screen overflow-y-scroll pr-6 my-3">
                         <div className="form-input-container ">
                             <p className="flex flex-row flex-nowrap justify-between items-center w-full p-2">
-                                <label
-                                    className="form-label-light"
-                                    for="websites"
-                                >
+                                <label className="form-label-light">
                                     About Me
                                 </label>
                                 <span className="text-primary-70">Edit</span>
@@ -116,10 +113,7 @@ export default function ApplyPopup({ showPopup, onClose, onSuccess }) {
                         </div>
                         <div className="form-input-container ">
                             <div className="flex flex-row flex-nowrap justify-between items-center">
-                                <label
-                                    className="form-label-light"
-                                    for="websites"
-                                >
+                                <label className="form-label-light">
                                     Work Experience
                                 </label>
                                 <span className="text-primary-70 cursor-pointer text-sm">
@@ -182,10 +176,7 @@ export default function ApplyPopup({ showPopup, onClose, onSuccess }) {
 
                         <div className="form-input-container ">
                             <div className="flex flex-row flex-nowrap justify-between items-center">
-                                <label
-                                    className="form-label-light"
-                                    for="websites"
-                                >
+                                <label className="form-label-light">
                                     Education
                                 </label>
                                 <span className="text-primary-70 cursor-pointer text-sm">
@@ -211,10 +202,7 @@ export default function ApplyPopup({ showPopup, onClose, onSuccess }) {
 
                         <div className="form-input-container ">
                             <div className="flex flex-row flex-nowrap justify-between items-center">
-                                <label
-                                    className="form-label-light"
-                                    for="websites"
-                                >
+                                <label className="form-label-light">
                                     Skills
                                 </label>
                                 <span className="text-primary-70 cursor-pointer text-sm">
@@ -240,10 +228,7 @@ export default function ApplyPopup({ showPopup, onClose, onSuccess }) {
 
                         <div className="form-input-container ">
                             <div className="flex flex-row flex-nowrap justify-between items-center">
-                                <label
-                                    className="form-label-light"
-                                    for="websites"
-                                >
+                                <label className="form-label-light">
                                     Assessment Text
                                 </label>
                                 <span className="text-primary-70 cursor-pointer text-sm">
@@ -269,10 +254,7 @@ export default function ApplyPopup({ showPopup, onClose, onSuccess }) {
 
                         <div className="form-input-container ">
                             <div className="flex flex-row flex-nowrap justify-between items-center">
-                                <label
-                                    className="form-label-light"
-                                    for="websites"
-                                >
+                                <label className="form-label-light">
                                     Resume
                                 </label>
                                 <span className="text-primary-70 cursor-pointer text-sm">

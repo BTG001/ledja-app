@@ -1,6 +1,6 @@
 export default {
-    BASE_URL: "http://localhost:8000/api",
-    BASE_URL_NON_API: "http://localhost:8000",
+    API_URL: "http://localhost:8000/api",
+    BASE_URL: "http://localhost:8000",
     RECRUITER_USER_TYPE_ID: 2,
     JOB_SEEKER_USER_TYPE_ID: 1,
     JOB_CATEGORIES: {

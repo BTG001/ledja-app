@@ -46,18 +46,28 @@ export default function JobSeekerProfileIcon() {
                 <div className="grid grid-rows-4 gap-2 text-sm">
                     <Link
                         className="hover:bg-primary-40 py-1 px-2"
+                        href={"/job-seeker/job-search"}
+                    >
+                        Search Jobs
+                    </Link>
+                    <Link
+                        className="hover:bg-primary-40 py-1 px-2"
                         href={"/job-seeker/profile"}
                     >
                         Profile
                     </Link>
-                    <Link className="hover:bg-primary-40 py-1 px-2" href={"/"}>
+                    {/* <Link className="hover:bg-primary-40 py-1 px-2" href={"/"}>
                         Update Profile Image
-                    </Link>
+                    </Link> */}
                     <Link className="hover:bg-primary-40 py-1 px-2" href={"/"}>
                         Reset Password
                     </Link>
 
-                    <Link className="hover:bg-primary-40 py-1 px-2" href={"/"}>
+                    <Link
+                        onClick={onLogout}
+                        className="hover:bg-primary-40 py-1 px-2 cursor-pointer"
+                        href={"/"}
+                    >
                         Log out
                     </Link>
                 </div>

@@ -55,7 +55,7 @@ export default function login() {
             try {
                 axios.defaults.withCredentials = true;
                 const results = await axios.postForm(
-                    `${Config.BASE_URL}/register`,
+                    `${Config.API_URL}/register`,
                     signupFormData
                 );
 
@@ -117,9 +117,7 @@ export default function login() {
                 <h3 className="form-title">Create your account</h3>
                 <form className="form" onSubmit={afterSubmit} ref={signupForm}>
                     <div className="form-input-container">
-                        <label className="form-label" for="email">
-                            Email Address
-                        </label>
+                        <label className="form-label">Email Address</label>
                         <input
                             className="form-input"
                             type={"email"}
@@ -130,9 +128,7 @@ export default function login() {
                     </div>
 
                     <div className="form-input-container">
-                        <label className="form-label" for="password">
-                            Password
-                        </label>
+                        <label className="form-label">Password</label>
                         <input
                             className="form-input"
                             type={"password"}
@@ -142,9 +138,7 @@ export default function login() {
                         />
                     </div>
                     <div className="form-input-container">
-                        <label className="form-label" for="password">
-                            Confirm Password
-                        </label>
+                        <label className="form-label">Confirm Password</label>
                         <input
                             className="form-input"
                             type={"password"}

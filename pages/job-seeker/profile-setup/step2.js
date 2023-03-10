@@ -4,26 +4,167 @@ import Image from "next/image";
 import Footer from "../../../components/Footer";
 import { useRouter } from "next/router";
 import { useState } from "react";
+import ErrorPopup from "../../../components/errorPopup";
+import Config from "../../../Config";
+import Utils from "../../../Utils";
 
 export default function JobSeekerProfileSetupStep2() {
     const router = useRouter();
-
-    const onNext = (e) => {
-        e.preventDefault();
-        router.push("/job-seeker/profile-setup/step3");
-    };
 
     const [websiteFocus, setWebsiteFocus] = useState(false);
     const [linkedinFocus, setLinkedinFocus] = useState(false);
     const [twitterFocus, setTwitterFocus] = useState(false);
     const [facebookFocus, setFacebookFocus] = useState(false);
+    const [loadingNext, setLoadingNext] = useState(false);
+    const [loadingExit, setLoadingExit] = useState(false);
+    const [showErrorPopup, setShowErrorPopup] = useState(false);
+    const [errorMessage, setErrorMessage] = useState("An Error Occured");
+    const [jobSeekerLinks, setJobSeekerLinks] = useState({
+        website: "https://abccompany.com",
+        linkedin: "https://linkedin.com/abc",
+        twitter: "https://twitter.com/abc",
+        facebook: "https://facebook.com/abc",
+    });
+
+    const [errors, setErrors] = useState({});
+
+    const onNext = (e) => {
+        e.preventDefault();
+
+        if (loadingNext) {
+            return;
+        } else {
+            setLoadingNext(true);
+        }
+
+        const hasErrors = validateData();
+
+        if (hasErrors) {
+            setErrorMessage("Please resolve the errors shown");
+            setShowErrorPopup(true);
+            setLoadingNext(false);
+            return;
+        }
+
+        const jobSeekerLinksFormData = createFormData();
+
+        Utils.makeRequest(async () => {
+            try {
+                const results = await Utils.postForm(
+                    `${Config.API_URL}/job_seeker_links`,
+                    jobSeekerLinksFormData
+                );
+
+                console.log("Step 2 results: ", results);
+
+                if (results.data.success) {
+                    router.push("/job-seeker/profile-setup/step3");
+                }
+                setLoadingNext(false);
+            } catch (error) {
+                console.log("step 2 Error: ", error);
+                setErrorMessage(error.message);
+                setShowErrorPopup(true);
+                setLoadingNext(false);
+            }
+        });
+    };
 
     const onSaveAndExit = (e) => {
         e.preventDefault();
-        alert("save and exit");
+        if (loadingExit) {
+            return;
+        } else {
+            setLoadingExit(true);
+        }
+
+        const hasErrors = validateData();
+
+        if (hasErrors) {
+            setErrorMessage("Please resolve the errors shown");
+            setShowErrorPopup(true);
+            setLoadingNext(false);
+            return;
+        }
+
+        const jobSeekerLinksFormData = createFormData();
+
+        Utils.makeRequest(async () => {
+            try {
+                const results = await Utils.postForm(
+                    `${Config.API_URL}/job_seeker_links`,
+                    jobSeekerLinksFormData
+                );
+
+                console.log("Step 2 results: ", results);
+
+                if (results.data.success) {
+                    router.push("/job-seeker/job-search");
+                }
+
+                setLoadingExit(false);
+            } catch (error) {
+                console.log("step 2 Error: ", error);
+                setErrorMessage(error.message);
+                setShowErrorPopup(true);
+                setLoadingExit(false);
+            }
+        });
+    };
+
+    const createFormData = () => {
+        const formData = new FormData();
+
+        const userId = localStorage.getItem("user_id");
+
+        formData.append("user_id", userId);
+        formData.append("websites", jobSeekerLinks.website);
+        formData.append("linked_in", jobSeekerLinks.linkedin);
+        formData.append("twitter", jobSeekerLinks.twitter);
+        formData.append("facebook", jobSeekerLinks.facebook);
+
+        return formData;
+    };
+
+    const validateData = () => {
+        let hasErrors = false;
+        const theErrors = {};
+
+        if (!jobSeekerLinks.website) {
+            hasErrors = true;
+            theErrors.website = "Website is required";
+        }
+
+        if (!jobSeekerLinks.linkedin) {
+            hasErrors = true;
+            theErrors.linkedin = "Linkedin is required";
+        }
+
+        if (!jobSeekerLinks.facebook) {
+            hasErrors = true;
+            theErrors.facebook = "Facebook is required";
+        }
+
+        if (!jobSeekerLinks.twitter) {
+            hasErrors = true;
+            theErrors.twitter = "Twitter is required";
+        }
+
+        setErrors(theErrors);
+
+        return hasErrors;
+    };
+
+    const onClose = () => {
+        setShowErrorPopup(false);
     };
     return (
         <>
+            <ErrorPopup
+                showPopup={showErrorPopup}
+                onClose={onClose}
+                message={errorMessage}
+            />
             <LogoNavbar />
             <p
                 className="back-btn"
@@ -62,9 +203,7 @@ export default function JobSeekerProfileSetupStep2() {
                 <h3 className="form-label">Links</h3>
                 <form className="form">
                     <div className="form-input-container">
-                        <label className="form-label-light" for="websites">
-                            Websites
-                        </label>
+                        <label className="form-label-light">Websites</label>
                         <div
                             className={`mt-4 border border-solid  rounded-sm flex flex-row flex-nowrap justify-center items-center ${
                                 websiteFocus
@@ -77,8 +216,20 @@ export default function JobSeekerProfileSetupStep2() {
                                 onBlur={() => setWebsiteFocus(false)}
                                 className="form-input-with-icon peer"
                                 type={"text"}
-                                placeholder="abccompany.com"
+                                placeholder="https://abccompany.com"
+                                value={jobSeekerLinks.website || ""}
+                                onChange={(e) => {
+                                    const value = e.target.value;
+
+                                    setJobSeekerLinks((prevValues) => {
+                                        return {
+                                            ...prevValues,
+                                            website: value,
+                                        };
+                                    });
+                                }}
                             />
+
                             <Image
                                 src={"/website-icon.svg"}
                                 width={17}
@@ -86,89 +237,150 @@ export default function JobSeekerProfileSetupStep2() {
                                 className="m-2"
                             />
                         </div>
+                        <p className="text-red-500 text-left py-2 ">
+                            {errors.website || ""}
+                        </p>
                     </div>
 
                     <div className="form-input-container">
-                        <label className="form-label-light " for="social-media">
-                            Social Media
-                        </label>
-                        <div
-                            className={`mt-4 border border-solid  rounded-sm flex flex-row flex-nowrap justify-center items-center ${
-                                linkedinFocus
-                                    ? "border-primary-70"
-                                    : "border-my-gray-70"
-                            }`}
-                        >
-                            <input
-                                onFocus={() => setLinkedinFocus(true)}
-                                onBlur={() => setLinkedinFocus(false)}
-                                className="form-input-with-icon peer"
-                                type={"text"}
-                                placeholder="abccompany/linkedin.com"
-                            />
-                            <Image
-                                src={"/linkedin.svg"}
-                                width={14}
-                                height={9}
-                                className="m-2"
-                            />
+                        <div>
+                            <label className="form-label-light ">
+                                Social Media
+                            </label>
+                            <div
+                                className={`mt-4 border border-solid  rounded-sm flex flex-row flex-nowrap justify-center items-center ${
+                                    linkedinFocus
+                                        ? "border-primary-70"
+                                        : "border-my-gray-70"
+                                }`}
+                            >
+                                <input
+                                    onFocus={() => setLinkedinFocus(true)}
+                                    onBlur={() => setLinkedinFocus(false)}
+                                    className="form-input-with-icon peer"
+                                    type={"text"}
+                                    placeholder="https://linkedin.com/abc"
+                                    value={jobSeekerLinks.linkedin || ""}
+                                    onChange={(e) => {
+                                        const value = e.target.value;
+
+                                        setJobSeekerLinks((prevValues) => {
+                                            return {
+                                                ...prevValues,
+                                                linkedin: value,
+                                            };
+                                        });
+                                    }}
+                                />
+                                <Image
+                                    src={"/linkedin.svg"}
+                                    width={14}
+                                    height={9}
+                                    className="m-2"
+                                />
+                            </div>
+                            <p className="text-red-500 text-left py-2 ">
+                                {errors.linkedin || ""}
+                            </p>
                         </div>
-                        <div
-                            className={`mt-4 border border-solid  rounded-sm flex flex-row flex-nowrap justify-center items-center ${
-                                twitterFocus
-                                    ? "border-primary-70"
-                                    : "border-my-gray-70"
-                            }`}
-                        >
-                            <input
-                                onFocus={() => setTwitterFocus(true)}
-                                onBlur={() => setTwitterFocus(false)}
-                                className="form-input-with-icon peer"
-                                type={"text"}
-                                placeholder="abccompany/twitter.com"
-                            />
-                            <Image
-                                src={"/twitter.svg"}
-                                width={13}
-                                height={11}
-                                className="m-2"
-                            />
+                        <div>
+                            <div
+                                className={`mt-4 border border-solid  rounded-sm flex flex-row flex-nowrap justify-center items-center ${
+                                    twitterFocus
+                                        ? "border-primary-70"
+                                        : "border-my-gray-70"
+                                }`}
+                            >
+                                <input
+                                    onFocus={() => setTwitterFocus(true)}
+                                    onBlur={() => setTwitterFocus(false)}
+                                    className="form-input-with-icon peer"
+                                    type={"text"}
+                                    placeholder="https://twitter.com/abc"
+                                    value={jobSeekerLinks.twitter || ""}
+                                    onChange={(e) => {
+                                        const value = e.target.value;
+
+                                        setJobSeekerLinks((prevValues) => {
+                                            return {
+                                                ...prevValues,
+                                                twitter: value,
+                                            };
+                                        });
+                                    }}
+                                />
+                                <Image
+                                    src={"/twitter.svg"}
+                                    width={13}
+                                    height={11}
+                                    className="m-2"
+                                />
+                            </div>
+                            <p className="text-red-500 text-left py-2 ">
+                                {errors.twitter || ""}
+                            </p>
                         </div>
-                        <div
-                            className={`mt-4 border border-solid  rounded-sm flex flex-row flex-nowrap justify-center items-center ${
-                                facebookFocus
-                                    ? "border-primary-70"
-                                    : "border-my-gray-70"
-                            }`}
-                        >
-                            <input
-                                onFocus={() => setFacebookFocus(true)}
-                                onBlur={() => setFacebookFocus(false)}
-                                className="form-input-with-icon peer"
-                                type={"text"}
-                                placeholder="abccompany/facebook.com"
-                            />
-                            <Image
-                                src={"/facebook.svg"}
-                                width={8}
-                                height={6}
-                                className="m-2"
-                            />
+                        <div>
+                            <div
+                                className={`mt-4 border border-solid  rounded-sm flex flex-row flex-nowrap justify-center items-center ${
+                                    facebookFocus
+                                        ? "border-primary-70"
+                                        : "border-my-gray-70"
+                                }`}
+                            >
+                                <input
+                                    onFocus={() => setFacebookFocus(true)}
+                                    onBlur={() => setFacebookFocus(false)}
+                                    className="form-input-with-icon peer"
+                                    type={"text"}
+                                    placeholder="https://facebook.com/abc"
+                                    value={jobSeekerLinks.facebook || ""}
+                                    onChange={(e) => {
+                                        const value = e.target.value;
+
+                                        setJobSeekerLinks((prevValues) => {
+                                            return {
+                                                ...prevValues,
+                                                facebook: value,
+                                            };
+                                        });
+                                    }}
+                                />
+                                <Image
+                                    src={"/facebook.svg"}
+                                    width={8}
+                                    height={6}
+                                    className="m-2"
+                                />
+                            </div>
+                            <p className="text-red-500 text-left py-2 ">
+                                {errors.facebook || ""}
+                            </p>
                         </div>
                     </div>
-                    <div>
-                        <input
+
+                    <div className="flex flex-row justify-start">
+                        <button
                             className="submit-btn-secondary mr-3"
-                            value={"Save and Exit"}
                             type={"submit"}
                             onClick={onSaveAndExit}
-                        />
-                        <input
+                        >
+                            {loadingExit && (
+                                <span className="loader-secondary"></span>
+                            )}
+                            {!loadingExit && (
+                                <span className="">Save and Exit</span>
+                            )}
+                        </button>
+
+                        <button
                             className="submit-btn-left ml-3"
                             type={"submit"}
-                            value="Next"
                             onClick={onNext}
-                        />
+                        >
+                            {loadingNext && <span className="loader"></span>}
+                            {!loadingNext && <span className="">Next</span>}
+                        </button>
                     </div>
                 </form>
             </div>

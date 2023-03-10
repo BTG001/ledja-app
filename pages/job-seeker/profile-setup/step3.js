@@ -78,7 +78,7 @@ export default function JobSeekerProfileSetupStep3() {
                 <h3 className="form-label">Tell me more about yourself</h3>
                 <form className="form">
                     <div className="form-input-container">
-                        <label className="form-label-light" for="websites">
+                        <label className="form-label-light">
                             Work Experience
                         </label>
                         <div
@@ -98,9 +98,7 @@ export default function JobSeekerProfileSetupStep3() {
                     </div>
 
                     <div className="form-input-container">
-                        <label className="form-label-light" for="websites">
-                            Education
-                        </label>
+                        <label className="form-label-light">Education</label>
                         <div
                             className={
                                 "mt-4 px-4 py-1 border border-solid border-my-gray-70  rounded-sm flex flex-row flex-nowrap justify-start items-center"
@@ -117,9 +115,7 @@ export default function JobSeekerProfileSetupStep3() {
                     </div>
 
                     <div className="form-input-container">
-                        <label className="form-label-light" for="websites">
-                            Skills
-                        </label>
+                        <label className="form-label-light">Skills</label>
                         <div
                             className={
                                 "mt-4 px-4 py-1 border border-solid border-my-gray-70  rounded-sm flex flex-row flex-nowrap justify-start items-center"
@@ -135,7 +131,7 @@ export default function JobSeekerProfileSetupStep3() {
                         </div>
                     </div>
 
-                    <div>
+                    <div className="flex flex-row justify-start items-center">
                         <input
                             className="submit-btn-secondary mr-3"
                             value={"Save and Exit"}

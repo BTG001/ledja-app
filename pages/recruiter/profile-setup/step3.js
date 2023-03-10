@@ -36,7 +36,7 @@ export default function RecruiterProfileSetupStep3() {
         Utils.makeRequest(async () => {
             try {
                 const results = await Utils.postForm(
-                    `${Config.BASE_URL}/more_about_recruiters`,
+                    `${Config.API_URL}/more_about_recruiters`,
                     R_step3FormData
                 );
 
@@ -76,7 +76,7 @@ export default function RecruiterProfileSetupStep3() {
         Utils.makeRequest(async () => {
             try {
                 const results = await Utils.postForm(
-                    `${Config.BASE_URL}/more_about_recruiters`,
+                    `${Config.API_URL}/more_about_recruiters`,
                     R_step3FormData
                 );
 

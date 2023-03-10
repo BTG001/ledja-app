@@ -5,17 +5,45 @@ import LeftIconLocationInput from "../../components/navbars/LeftIconLocationInpu
 import LeftIconSearch from "../../components/LeftIconSearch";
 import Image from "next/image";
 import ApplyPopup from "../../components/job-seekers/apply-popup";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import ApplySuccessPopup from "../../components/job-seekers/apply-success-popup";
+import Config from "../../Config";
+import Utils from "../../Utils";
+import axios from "axios";
 
 export default function JobSearch() {
     const [showApplyPopup, setShowApplyPopup] = useState(false);
     const [showSuccessPopup, setShowSuccessPopup] = useState(false);
+    const [jobs, setJobs] = useState([]);
+
+    useEffect(() => {
+        fetchJobs();
+    }, []);
 
     const onApply = (e) => {
         e.preventDefault();
         setShowApplyPopup(true);
     };
+
+    async function fetchJobs(url) {
+        if (!url) {
+            url = `${Config.API_URL}/jobs`;
+        }
+
+        try {
+            let theJobs = await axios.get(url, {
+                headers: Utils.getHeaders(),
+            });
+
+            theJobs = theJobs.data.data;
+
+            setJobs(theJobs);
+
+            console.log("user Jobs: ", theJobs);
+        } catch (error) {
+            console.log("user Jobs request error: ", error);
+        }
+    }
 
     const onCloseApplyPopup = () => {
         setShowApplyPopup(false);
