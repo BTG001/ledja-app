@@ -4,12 +4,21 @@ import Image from "next/image";
 import Footer from "../../../components/Footer";
 import { useRouter } from "next/router";
 import { useState } from "react";
-import AddExperiencePopup from "../../../components/job-seekers/add-experience-popup";
+import AddExperiencePopup from "../../../components/job-seekers/profile-setup-step-3/add-experience-popup";
+import AddEducationPopup from "../../../components/job-seekers/profile-setup-step-3/add-education-popup";
+import AddSkillPopup from "../../../components/job-seekers/profile-setup-step-3/add-skill-popup";
 
 export default function JobSeekerProfileSetupStep3() {
     const router = useRouter();
 
     const [showAddExperiencePopup, setShowAddExperiencePopup] = useState(false);
+    const [workExperiences, setWorkExperiences] = useState([]);
+
+    const [showAddEducationPopup, setShowAddEducationPopup] = useState(false);
+    const [educations, setEducations] = useState([]);
+
+    const [showAddSkillPopup, setShowAddSkillPopup] = useState(false);
+    const [skills, setSkills] = useState([]);
 
     const onNext = (e) => {
         e.preventDefault();
@@ -22,15 +31,43 @@ export default function JobSeekerProfileSetupStep3() {
     };
     const onClose = () => {
         setShowAddExperiencePopup(false);
+        setShowAddEducationPopup(false);
+        setShowAddSkillPopup(false);
     };
 
     const onAddExperience = () => {
         setShowAddExperiencePopup(true);
     };
 
-    const onSuccess = () => {
+    const onAddEducation = () => {
+        setShowAddEducationPopup(true);
+    };
+
+    const onAddSkill = () => {
+        setShowAddSkillPopup(true);
+    };
+
+    const onSuccess = (workExperience) => {
         // e.preventDefault();
         setShowAddExperiencePopup(false);
+
+        setWorkExperiences((prevValues) => {
+            return [...prevValues, workExperience];
+        });
+    };
+
+    const onSuccessEducation = (education) => {
+        setShowAddEducationPopup(false);
+        setEducations((prevValues) => {
+            return [...prevValues, education];
+        });
+    };
+
+    const onSuccessSkill = (skill) => {
+        setShowAddSkillPopup(false);
+        setSkills((prevValues) => {
+            return [...prevValues, skill];
+        });
     };
 
     return (
@@ -40,6 +77,18 @@ export default function JobSeekerProfileSetupStep3() {
                 onClose={onClose}
                 onSuccess={onSuccess}
             />
+
+            <AddEducationPopup
+                showPopup={showAddEducationPopup}
+                onClose={onClose}
+                onSuccess={onSuccessEducation}
+            />
+            <AddSkillPopup
+                showPopup={showAddSkillPopup}
+                onClose={onClose}
+                onSuccess={onSuccessSkill}
+            />
+
             <LogoNavbar />
             <p
                 className="back-btn"
@@ -81,6 +130,31 @@ export default function JobSeekerProfileSetupStep3() {
                         <label className="form-label-light">
                             Work Experience
                         </label>
+
+                        <div
+                            className={` my-2 ${
+                                workExperiences && workExperiences.length > 0
+                                    ? "border-t border-x border-primary-40 border-solid"
+                                    : ""
+                            }`}
+                        >
+                            {workExperiences.map((workExperience, index) => {
+                                return (
+                                    <p
+                                        key={index}
+                                        className="text-primary-70 border-b border-primary-40 p-1"
+                                    >
+                                        <span className="p-2">
+                                            {workExperience.duration}
+                                        </span>
+                                        <span className="p-2">
+                                            {workExperience.title}
+                                        </span>
+                                    </p>
+                                );
+                            })}
+                        </div>
+
                         <div
                             className={
                                 "mt-4 px-4 py-1 border border-solid border-my-gray-70  rounded-sm flex flex-row flex-nowrap justify-start items-center cursor-pointer"
@@ -100,8 +174,35 @@ export default function JobSeekerProfileSetupStep3() {
                     <div className="form-input-container">
                         <label className="form-label-light">Education</label>
                         <div
+                            className={` my-2 ${
+                                educations && educations.length > 0
+                                    ? "border-t border-x border-primary-40 border-solid"
+                                    : ""
+                            }`}
+                        >
+                            {educations.map((education, index) => {
+                                return (
+                                    <p
+                                        key={index}
+                                        className="text-primary-70 border-b border-primary-40"
+                                    >
+                                        <span className="p-2">
+                                            {education.duration}
+                                        </span>
+                                        <span className="p-2">
+                                            {education.certification}
+                                        </span>
+                                        <span className="p-2">
+                                            at {education.institution}
+                                        </span>
+                                    </p>
+                                );
+                            })}
+                        </div>
+                        <div
+                            onClick={onAddEducation}
                             className={
-                                "mt-4 px-4 py-1 border border-solid border-my-gray-70  rounded-sm flex flex-row flex-nowrap justify-start items-center"
+                                "mt-4 px-4 py-1 border border-solid border-my-gray-70  rounded-sm flex flex-row flex-nowrap justify-start items-center cursor-pointer"
                             }
                         >
                             <Image
@@ -117,8 +218,32 @@ export default function JobSeekerProfileSetupStep3() {
                     <div className="form-input-container">
                         <label className="form-label-light">Skills</label>
                         <div
+                            className={` my-2 ${
+                                skills && skills.length > 0
+                                    ? "border-t border-x border-primary-40 border-solid"
+                                    : ""
+                            }`}
+                        >
+                            {skills.map((skill, index) => {
+                                return (
+                                    <p
+                                        key={index}
+                                        className="text-primary-70 border-b border-primary-40 p-1"
+                                    >
+                                        <span className="p-2">
+                                            {skill.proficiency}
+                                        </span>
+                                        <span className="p-2">
+                                            in {skill.name}
+                                        </span>
+                                    </p>
+                                );
+                            })}
+                        </div>
+                        <div
+                            onClick={onAddSkill}
                             className={
-                                "mt-4 px-4 py-1 border border-solid border-my-gray-70  rounded-sm flex flex-row flex-nowrap justify-start items-center"
+                                "mt-4 px-4 py-1 border border-solid border-my-gray-70  rounded-sm flex flex-row flex-nowrap justify-start items-center cursor-pointer"
                             }
                         >
                             <Image
