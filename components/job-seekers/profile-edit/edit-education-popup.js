@@ -3,7 +3,12 @@ import Image from "next/image";
 import Config from "../../../Config";
 import Utils from "../../../Utils";
 
-export default function AddEducationPopup({ showPopup, onClose, onSuccess }) {
+export default function AddEducationPopup({
+    showPopup,
+    onClose,
+    onSuccess,
+    education,
+}) {
     const monthEmptyValue = "Month";
 
     const [education, setEducation] = useState({

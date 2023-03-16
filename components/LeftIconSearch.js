@@ -2,7 +2,7 @@ import Image from "next/image";
 
 import { useState } from "react";
 
-export default function LeftIconSearch({ placeholder, value }) {
+export default function LeftIconSearch({ placeholder, value, onTextChange }) {
     const [searchFocus, setSearchFocus] = useState(false);
     return (
         <div>
@@ -24,6 +24,11 @@ export default function LeftIconSearch({ placeholder, value }) {
                         className="w-full block outline-none border-none focus:outline-none focus:border-none pr-4 py-1 m-2 placeholder:text-dark-50"
                         type={"text"}
                         value={value}
+                        onChange={(e) => {
+                            value = e.target.value;
+
+                            onTextChange(value);
+                        }}
                         placeholder={placeholder}
                     />
                 </div>
