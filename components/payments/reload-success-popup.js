@@ -7,6 +7,8 @@ export default function ReloadSuccessPopup({
     showPopup,
     onAfterPayment,
     onClose,
+    balance,
+    amountReloaded,
 }) {
     useEffect(() => {
         if (showPopup) {
@@ -33,10 +35,10 @@ export default function ReloadSuccessPopup({
                         Reload order is placed
                     </h3>
                     <p className="text-dark-50 font-medium text-md text-center my-3">
-                        Ksh 10,000 will be added to your account
+                        Ksh {amountReloaded} will be added to your account
                     </p>
                     <p className="text-dark-50 text-normal text-center my-3">
-                        Current balance: Ksh 14,0000
+                        Current balance: Ksh {balance}
                     </p>
                     <div
                         onClick={() => {

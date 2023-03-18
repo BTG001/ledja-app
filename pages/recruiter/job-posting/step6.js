@@ -21,8 +21,6 @@ export default function () {
     const [showErrorPopup, setShowErrorPopup] = useState(false);
     const [errorMessageArray, setErrorMessageArray] = useState([]);
 
-    const [reloadSuccessful, setReloadSuccessful] = useState(false);
-
     const [showJobSuccessPopup, setShowJobSuccessPopup] = useState(false);
     const [showNotEnoughCreditPopup, setShowNotEnoughCreditPopup] =
         useState(false);
@@ -31,6 +29,7 @@ export default function () {
     const [wallet, setWallet] = useState({});
     const [localJobPost, setLocalJobPost] = useState({});
     const [activeJobCategoryId, setActiveJobCategoryId] = useState();
+    const [amountReloaded, setAmountReloaded] = useState(0);
 
     useEffect(() => {
         const theLocalJobPost = Utils.getLocalJobPost();
@@ -71,7 +70,7 @@ export default function () {
 
         console.log("the wallet: ", wallet);
 
-        if (wallet.amount < activeCategoryCost && !reloadSuccessful) {
+        if (wallet.amount < activeCategoryCost) {
             setShowNotEnoughCreditPopup(true);
             setLoading(false);
             return;
@@ -124,7 +123,6 @@ export default function () {
                 setShowJobSuccessPopup(true);
                 localStorage.removeItem("job_post");
                 setLoading(false);
-                setReloadSuccessful(false);
             } catch (error) {
                 console.log("Job Error: ", error);
                 setLoading(false);
@@ -187,10 +185,11 @@ export default function () {
         setShowReloadCreditPopup(true);
     };
 
-    const onReloaded = () => {
+    const onReloaded = (wallet, theAmountReloaded) => {
+        setWallet(wallet);
+        setAmountReloaded(theAmountReloaded);
         setShowReloadCreditPopup(false);
         setShowReloadSuccessPopup(true);
-        setReloadSuccessful(true);
     };
 
     const onAfterPayment = () => {
@@ -239,6 +238,8 @@ export default function () {
                 showPopup={showReloadSuccessPopup}
                 onAfterPayment={onAfterPayment}
                 onClose={onNext}
+                balance={wallet.amount}
+                amountReloaded={amountReloaded}
             />
             {/* <input
                 className="hidden"

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 false;
 import Image from "next/image";
 import Footer from "../../components/Footer";
@@ -17,6 +17,7 @@ import { useRouter } from "next/router";
 import CompanyIntroEditPopup from "../../components/recuriters/profile-edit/company-intro-edit-popup";
 import CompanyCultureEditPopup from "../../components/recuriters/profile-edit/company-culture-edit-popup";
 import RecruiterInfoEditPopup from "../../components/recuriters/profile-edit/recruiter-info-edit-popup";
+import { RiImageEditFill } from "react-icons/ri";
 
 export default function Profile() {
     const router = useRouter();
@@ -59,6 +60,15 @@ export default function Profile() {
     const [basicInfoUpdateSuccess, setBasicInfoUpdateSuccess] = useState(false);
     const [linksUpdateSuccess, setLinksUpdateSuccess] = useState(false);
 
+    const recruiterAvatarInput = useRef();
+    const companyAvatarInput = useRef();
+
+    const [hasRecruiterAvatar, setHasRecruiterAvatar] = useState(false);
+    const [hasCompanyAvatar, setHasCompanyAvatar] = useState(false);
+
+    const [recruiterAvatar, setRecruiterAvatar] = useState();
+    const [companyAvatar, setCompanyAvatart] = useState();
+
     useEffect(() => {
         if (basicInfoUpdateSuccess && linksUpdateSuccess) {
             setShowBasicInfoEditPopup(false);
@@ -85,6 +95,20 @@ export default function Profile() {
             if (recruiter.basic_info_recruiter) {
                 setBasicInfo(recruiter.basic_info_recruiter);
                 setHasCompanyInfo(true);
+
+                if (recruiter.basic_info_recruiter.company_avatar_url) {
+                    setHasCompanyAvatar(true);
+                    setCompanyAvatart(
+                        recruiter.basic_info_recruiter.company_avatar_url
+                    );
+                }
+
+                if (recruiter.basic_info_recruiter.avatar_url) {
+                    setHasRecruiterAvatar(true);
+                    setRecruiterAvatar(
+                        recruiter.basic_info_recruiter.avatar_url
+                    );
+                }
             }
 
             if (recruiter.recruiter_link) {
@@ -164,6 +188,66 @@ export default function Profile() {
         }
     }
 
+    const onWantToChangeRecruiterAvatar = () => {
+        recruiterAvatarInput.current.click();
+    };
+
+    const onWantToChangeCompanyAvatar = () => {
+        companyAvatarInput.current.click();
+    };
+
+    const onChangeRecruiterAvatar = () => {
+        const avatarFile = recruiterAvatarInput.current.files[0];
+        console.log("avatar file: ", avatarFile);
+        const avatarFormData = new FormData();
+        avatarFormData.append("avatar", avatarFile);
+        const avatarEditURL = `${Config.API_URL}/recruiter_basic_infos/${basicInfo.id}`;
+
+        Utils.makeRequest(async () => {
+            try {
+                let avatarUpdateResults = await Utils.postForm(
+                    avatarEditURL,
+                    avatarFormData
+                );
+                avatarUpdateResults = avatarUpdateResults.data.data;
+                setHasRecruiterAvatar(true);
+                setRecruiterAvatar(avatarUpdateResults.avatar_url);
+                console.log(
+                    "Recruiter avatar change results: ",
+                    avatarUpdateResults
+                );
+            } catch (error) {
+                console.log("Recruiter avatar change error: ", error);
+            }
+        });
+    };
+
+    const onChangeCompanyAvatar = () => {
+        const avatarFile = companyAvatarInput.current.files[0];
+        console.log("avatar file: ", avatarFile);
+        const avatarFormData = new FormData();
+        avatarFormData.append("avatar", avatarFile);
+        const avatarEditURL = `${Config.API_URL}/recruiter_basic_infos/${basicInfo.id}`;
+
+        Utils.makeRequest(async () => {
+            try {
+                let avatarUpdateResults = await Utils.postForm(
+                    avatarEditURL,
+                    avatarFormData
+                );
+                avatarUpdateResults = avatarUpdateResults.data.data;
+                setHasCompanyAvatar(true);
+                setCompanyAvatart(avatarUpdateResults.avatar_url);
+                console.log(
+                    "company avatar change results: ",
+                    avatarUpdateResults
+                );
+            } catch (error) {
+                console.log("company avatar change error: ", error);
+            }
+        });
+    };
+
     const afterBasicInfoUpdate = (updatedBasicInfos) => {
         setBasicInfo(updatedBasicInfos);
         setBasicInfoUpdateSuccess(true);
@@ -196,6 +280,7 @@ export default function Profile() {
         setShowIncompleteRecruiterProfilePopup(false);
         setShowCompanyIntroEditPopup(false);
         setShowCompanyCultureEditPopup(false);
+        setShowContactInfoEditPopup(false);
     };
 
     return (
@@ -240,6 +325,24 @@ export default function Profile() {
                 showPopup={showIncompleteRecruiterProfilePopup}
                 pathToIncompleteStep={pathToIncompleteStep}
             />
+            <input
+                ref={recruiterAvatarInput}
+                type="file"
+                name="avatar"
+                accept=".png,.jpg,.jpeg"
+                className="hidden"
+                onChange={onChangeRecruiterAvatar}
+            />
+
+            <input
+                ref={companyAvatarInput}
+                type="file"
+                name="avatar"
+                accept=".png,.jpg,.jpeg"
+                className="hidden"
+                onChange={onChangeCompanyAvatar}
+            />
+
             <RecruiterNavbar icon={"user"} dashboardLinks={false} />
             <div className="w-4/5 md:grid grid-cols-3 md:gap-4  mt-5 mb-32 mx-auto md:grid-flow-dense md:dire ">
                 <section className="col-span-2">
@@ -265,7 +368,34 @@ export default function Profile() {
                                     "mt-4 p-5 border border-solid border-my-gray-70  rounded-10 grid grid-cols-3 gap-3 "
                                 }
                             >
-                                <BsBuilding className="w-32 h-32" />
+                                <div className="text-dark-50 grid grid-rows-4 gap-1 justify-center">
+                                    <p className="flex justify-center items-center row-span-3">
+                                        {!hasCompanyAvatar && (
+                                            <BsBuilding className="h-32 text-center block w-full" />
+                                        )}
+
+                                        {hasCompanyAvatar && (
+                                            <Image
+                                                src={companyAvatar}
+                                                width={160}
+                                                height={120}
+                                                className="flex justify-center items-center"
+                                            />
+                                        )}
+                                    </p>
+
+                                    <p
+                                        onClick={onWantToChangeCompanyAvatar}
+                                        className="mx-2 cursor-pointer text-white py-1 px-2 bg-primary-70 flex flex-row flex-nowrap justify-center items-center rounded-lg"
+                                    >
+                                        <RiImageEditFill
+                                            className="text-3xl block cursor-pointer m-1"
+                                            width={10}
+                                            height={10}
+                                        />
+                                        <span>Change</span>
+                                    </p>
+                                </div>
                                 <div className="flex flex-col flex-nowrap justify-start items-start">
                                     <h3 className="font-medium text-xl text-dark-50 my-5"></h3>
                                     <p className="text-sm text-dark-50">
@@ -551,13 +681,34 @@ export default function Profile() {
                                     "mt-4 p-5 border border-solid border-my-gray-70  rounded-10 grid grid-cols-3 gap-3 "
                                 }
                             >
-                                {!hasProfilePic && (
-                                    <BiUserCircle className="w-32 h-32" />
-                                )}
+                                <div className="text-dark-50 grid grid-rows-4 gap-1 justify-center">
+                                    <p className="flex justify-center items-center row-span-3">
+                                        {!hasRecruiterAvatar && (
+                                            <BiUserCircle className="h-32 text-center block w-full" />
+                                        )}
 
-                                {hasProfilePic && (
-                                    <BiUserCircle className="w-32 h-32" />
-                                )}
+                                        {hasRecruiterAvatar && (
+                                            <Image
+                                                src={recruiterAvatar}
+                                                width={160}
+                                                height={120}
+                                                className="flex justify-center items-center"
+                                            />
+                                        )}
+                                    </p>
+
+                                    <p
+                                        onClick={onWantToChangeRecruiterAvatar}
+                                        className="mx-2 cursor-pointer text-white px-2 bg-primary-70 flex flex-row flex-nowrap justify-center items-center rounded-lg"
+                                    >
+                                        <RiImageEditFill
+                                            className="text-3xl block cursor-pointer m-1"
+                                            width={10}
+                                            height={10}
+                                        />
+                                        <span>Change</span>
+                                    </p>
+                                </div>
                                 <div className="flex flex-col flex-nowrap justify-start items-start">
                                     <h3 className="font-medium text-xl text-dark-50 my-5">
                                         {aboutRecruiter.fname}{" "}
@@ -701,9 +852,31 @@ export default function Profile() {
                                 </span>
                                 <span
                                     className={`text-dark-50 text-sm 
-                                ${hasProfilePic ? "line-through" : ""}`}
+                                ${hasRecruiterAvatar ? "line-through" : ""}`}
                                 >
-                                    Add profile picture
+                                    Add Recruiter Profile picture
+                                </span>
+                            </p>
+                            <p
+                                className={`flex flex-row flex-nowrap justify-start items-center`}
+                            >
+                                <span
+                                    className={`block w-4 h-4  bg-white rounded-full border border-grey-70 m-2`}
+                                >
+                                    {hasProfilePic && (
+                                        <Image
+                                            src={"/tick-icon.svg"}
+                                            width={16}
+                                            height={16}
+                                        />
+                                    )}
+                                </span>
+
+                                <span
+                                    className={`text-dark-50 text-sm 
+                                ${hasCompanyAvatar ? "line-through" : ""}`}
+                                >
+                                    Add Company Profile picture
                                 </span>
                             </p>
                             <p

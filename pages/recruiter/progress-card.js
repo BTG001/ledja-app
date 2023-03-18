@@ -61,9 +61,27 @@ export default function () {
         }
     }
 
+    async function getCurrentJobApplications() {
+        const userId = localStorage.getItem("user_id");
+        const url = `${Config.API_URL}/get_user_jobs/${userId}`;
+
+        try {
+            const theJobs = await axios.get(url, {
+                headers: Utils.getHeaders(),
+            });
+
+            setJobs(theJobs.data.data);
+
+            console.log("jobs: ", theJobs.data.data);
+        } catch (error) {
+            console.log("get jobs error: ", error);
+        }
+    }
+
     const onChangeActiveJob = (index) => {
         setActiveJobIndex(index);
     };
+
     return (
         <>
             <RecruiterNavbar active="progress-card" />

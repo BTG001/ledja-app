@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import Footer from "../../components/Footer";
 import JobSeekerNavbar from "../../components/navbars/JobSeekerNavbar";
@@ -12,6 +12,7 @@ import { BiUserCircle } from "react-icons/bi";
 import JobSeekerEditBasicInfoPopup from "../../components/job-seekers/profile-edit/JobSeekerEditBasicInfoPopup";
 import { useRouter } from "next/router";
 import { AiOutlineFileText } from "react-icons/ai";
+import { RiImageEditFill } from "react-icons/ri";
 
 export default function Profile() {
     const router = useRouter();
@@ -36,6 +37,7 @@ export default function Profile() {
     const [resume, setResume] = useState();
     const [otherDocs, setOtherDocs] = useState();
     const [profilePic, setProfilePic] = useState();
+    const profileImageInput = useRef();
 
     const [alreadyShowedIncompletePopups, setAlreadyShowedIncompletePopups] =
         useState(false);
@@ -75,8 +77,8 @@ export default function Profile() {
                 setBasicInfo(jobSeeker.basic_info_jobseeker);
                 setHasBasicInfo(true);
 
-                if (jobSeeker.basic_info_jobseeker.avatar) {
-                    setProfilePic(jobSeeker.basic_info_jobseeker.avatar);
+                if (jobSeeker.basic_info_jobseeker.avatar_url) {
+                    setProfilePic(jobSeeker.basic_info_jobseeker.avatar_url);
                     setHasProfilePic(true);
                 }
             }
@@ -103,17 +105,20 @@ export default function Profile() {
                 }
             }
 
-            if (jobSeeker.work_experiences) {
+            if (
+                jobSeeker.work_experiences &&
+                jobSeeker.work_experiences.length > 0
+            ) {
                 setWorkExperiences(jobSeeker.work_experiences);
                 setHasWorkExperience(true);
             }
 
-            if (jobSeeker.education) {
+            if (jobSeeker.education && jobSeeker.education.length > 0) {
                 setEducations(jobSeeker.education);
                 setHasEducation(true);
             }
 
-            if (jobSeeker.skills) {
+            if (jobSeeker.skills && jobSeeker.skills.length > 0) {
                 setSkills(jobSeeker.skills);
                 setHasSkills(true);
             }
@@ -170,6 +175,33 @@ export default function Profile() {
         fetchJobSeeker();
     };
 
+    const onWantToChangeProfileImage = () => {
+        profileImageInput.current.click();
+    };
+
+    const onChangeProfileImage = () => {
+        const avatarFile = profileImageInput.current.files[0];
+        console.log("avatar file: ", avatarFile);
+        const avatarFormData = new FormData();
+        avatarFormData.append("avatar", avatarFile);
+        const avatarEditURL = `${Config.API_URL}/basic_infos/${basicInfo.id}`;
+
+        Utils.makeRequest(async () => {
+            try {
+                let avatarUpdateResults = await Utils.postForm(
+                    avatarEditURL,
+                    avatarFormData
+                );
+                avatarUpdateResults = avatarUpdateResults.data.data;
+                setHasProfilePic(true);
+                setProfilePic(avatarUpdateResults.avatar_url);
+                console.log("avatar change results: ", avatarUpdateResults);
+            } catch (error) {
+                console.log("avatar change error: ", error);
+            }
+        });
+    };
+
     const onClose = () => {
         setShowBasicInfoEditPopup(false);
         setShowMissingJobSeekerProfilePopup(false);
@@ -194,6 +226,14 @@ export default function Profile() {
                 basicInfos={basicInfo}
                 links={links}
             />
+            <input
+                ref={profileImageInput}
+                type="file"
+                name="avatar"
+                accept=".png,.jpg,.jpeg"
+                className="hidden"
+                onChange={onChangeProfileImage}
+            />
             <JobSeekerNavbar />
             <div className="w-4/5 md:grid grid-cols-3 md:gap-4  mt-5 mb-32 mx-auto ">
                 <section className="col-span-2">
@@ -217,13 +257,34 @@ export default function Profile() {
                                     "mt-4 p-5 border border-solid border-my-gray-70  rounded-10 grid grid-cols-3 gap-3 "
                                 }
                             >
-                                {!hasProfilePic && (
-                                    <BiUserCircle className="w-32 h-32" />
-                                )}
+                                <div className="text-dark-50 grid grid-rows-4 gap-1 justify-center">
+                                    <p className="flex justify-center items-center row-span-3">
+                                        {!hasProfilePic && (
+                                            <BiUserCircle className="h-32 text-center block w-full" />
+                                        )}
 
-                                {hasProfilePic && (
-                                    <BiUserCircle className="w-32 h-32" />
-                                )}
+                                        {hasProfilePic && (
+                                            <Image
+                                                src={profilePic}
+                                                width={160}
+                                                height={120}
+                                                className="flex justify-center items-center"
+                                            />
+                                        )}
+                                    </p>
+
+                                    <p
+                                        onClick={onWantToChangeProfileImage}
+                                        className="mx-2 cursor-pointer text-white py-1 px-2 bg-primary-70 flex flex-row flex-nowrap justify-center items-center rounded-lg"
+                                    >
+                                        <RiImageEditFill
+                                            className="text-3xl block cursor-pointer m-1"
+                                            width={10}
+                                            height={10}
+                                        />
+                                        <span>Change</span>
+                                    </p>
+                                </div>
                                 <div className="flex flex-col flex-nowrap justify-start items-start">
                                     <h3 className="font-medium text-xl text-dark-50 my-5">
                                         {basicInfo.fname || ""}{" "}
@@ -697,7 +758,11 @@ export default function Profile() {
                                 </span>
                                 <span
                                     className={`text-dark-50 text-sm 
-                                ${hasSkills ? "line-through" : ""}`}
+                                ${
+                                    hasSkills && skills.length >= 3
+                                        ? "line-through"
+                                        : ""
+                                }`}
                                 >
                                     Add at least 3 skills
                                 </span>

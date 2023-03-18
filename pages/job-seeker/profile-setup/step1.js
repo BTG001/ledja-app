@@ -3,10 +3,11 @@ import Link from "next/link";
 import Image from "next/image";
 import Footer from "../../../components/Footer";
 import { useRouter } from "next/router";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import Config from "../../../Config";
 import Utils from "../../../Utils";
 import ErrorPopup from "../../../components/errorPopup";
+import { BiCloudUpload } from "react-icons/bi";
 
 export default function JobSeekerProfileSetupStep1() {
     const router = useRouter();
@@ -23,6 +24,8 @@ export default function JobSeekerProfileSetupStep1() {
         position: "Recruitment Specialist",
         location: "Nairobi, Kenya",
     });
+
+    const userAvatarInput = useRef();
 
     const [errors, setErrors] = useState({});
 
@@ -121,6 +124,9 @@ export default function JobSeekerProfileSetupStep1() {
         basicInfosFormData.append("phone_no", basicInfos.phoneNumber);
         basicInfosFormData.append("position", basicInfos.position);
         basicInfosFormData.append("location", basicInfos.location);
+        if (basicInfos.avatar) {
+            basicInfosFormData.append("avatar", basicInfos.avatar);
+        }
 
         return basicInfosFormData;
     };
@@ -357,6 +363,44 @@ export default function JobSeekerProfileSetupStep1() {
                         <p className="text-red-500 text-left py-2 ">
                             {errors.location || ""}
                         </p>
+                    </div>
+
+                    <div className="form-input-container">
+                        {basicInfos.avatar && (
+                            <Image
+                                src={URL.createObjectURL(basicInfos.avatar)}
+                                className="border border-primary-40 border-solid p-1 m-2"
+                                width={160}
+                                height={120}
+                            />
+                        )}
+
+                        <input
+                            className="form-input hidden"
+                            type={"file"}
+                            accept=".png,.jpg,.jpeg"
+                            ref={userAvatarInput}
+                            onChange={(e) => {
+                                const value = e.target.files[0];
+
+                                console.log("avatar: ", value);
+
+                                setBasicInfos((prevValues) => {
+                                    return { ...prevValues, avatar: value };
+                                });
+                            }}
+                        />
+                        <div
+                            onClick={() => {
+                                userAvatarInput.current.click();
+                            }}
+                            className="cursor-pointer flex flex-row justify-center items-center bg-primary-70 m-1 rounded-sm"
+                        >
+                            <BiCloudUpload className="text-8xl text-white p-1 m-2" />
+                            <span className=" text-white p-1 m-2">
+                                Upload Profile Picture{" "}
+                            </span>
+                        </div>
                     </div>
 
                     <div className="flex flex-row justify-start">

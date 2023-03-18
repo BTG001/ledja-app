@@ -132,6 +132,7 @@ export default function JobSearch() {
                 onClose={onCloseApplyPopup}
                 onSuccess={onSuccessfullApplication}
                 onFailure={onFailedApplication}
+                jobId={activeJob.id}
             />
             <ApplySuccessPopup
                 showPopup={showSuccessPopup}
@@ -298,7 +299,26 @@ export default function JobSearch() {
                                                 : ""
                                         }`}
                                         >
-                                            <BsBuilding className="w-28 h-28 p-4" />
+                                            <p className="flex justify-center items-center row-span-3 p-2">
+                                                {!job.user.basic_info_recruiter
+                                                    .company_avatar_url && (
+                                                    <BsBuilding className="h-32 text-center block w-full" />
+                                                )}
+
+                                                {job.user.basic_info_recruiter
+                                                    .company_avatar_url && (
+                                                    <Image
+                                                        src={
+                                                            job.user
+                                                                .basic_info_recruiter
+                                                                .company_avatar_url
+                                                        }
+                                                        width={100}
+                                                        height={80}
+                                                        className="flex justify-center items-center"
+                                                    />
+                                                )}
+                                            </p>
                                             <div>
                                                 <h3 className="font-medium text-xl mb-1">
                                                     {job.title}

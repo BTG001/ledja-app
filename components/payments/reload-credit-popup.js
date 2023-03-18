@@ -59,29 +59,29 @@ export default function ReloadCreditPopup({
 
         const transactionFormData = new FormData();
 
-        transactionFormData.append("user_id", localStorage.getItem("user_id"));
-        transactionFormData.append("type", "Debit");
+        transactionFormData.append("type", "credit");
         transactionFormData.append("amount", amount);
-        transactionFormData.append("wallet_id", wallet.id);
 
-        const url = `${Config.API_URL}/transactions`;
+        const userId = localStorage.getItem("user_id");
+
+        const url = `${Config.API_URL}/transactions/${userId}`;
 
         Utils.makeRequest(async () => {
             try {
-                const transaction = await Utils.postForm(
+                let transaction = await Utils.postForm(
                     url,
                     transactionFormData
                 );
 
+                transaction = transaction.data.data;
+
                 console.log("transaction results: ", transaction);
 
-                // onReloaded();
+                onReloaded(transaction.wallet, amount);
             } catch (error) {
                 console.log("transaction Error: ", error);
             }
         });
-
-        onReloaded(); // should be called only when reload is successful. not here.
     };
 
     async function getJobCategories() {

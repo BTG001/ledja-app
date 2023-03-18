@@ -106,8 +106,8 @@ export default function ApplyPopup({
                 setBasicInfo(jobSeeker.basic_info_jobseeker);
                 setHasBasicInfo(true);
 
-                if (jobSeeker.basic_info_jobseeker.avatar) {
-                    setProfilePic(jobSeeker.basic_info_jobseeker.avatar);
+                if (jobSeeker.basic_info_jobseeker.avatar_url) {
+                    setProfilePic(jobSeeker.basic_info_jobseeker.avatar_url);
                     setHasProfilePic(true);
                 }
             }
@@ -196,13 +196,34 @@ export default function ApplyPopup({
                                         "mt-4 p-5 border border-solid border-my-gray-70  rounded-10 grid grid-cols-3 gap-3 "
                                     }
                                 >
-                                    {!hasProfilePic && (
-                                        <BiUserCircle className="w-32 h-32" />
-                                    )}
+                                    <div className="text-dark-50 grid grid-rows-4 gap-1 justify-center items-center w-full h-full">
+                                        <p className="flex justify-center items-center row-span-4">
+                                            {!hasProfilePic && (
+                                                <BiUserCircle className="h-32 text-center block w-full" />
+                                            )}
 
-                                    {hasProfilePic && (
-                                        <BiUserCircle className="w-32 h-32" />
-                                    )}
+                                            {hasProfilePic && (
+                                                <Image
+                                                    src={profilePic}
+                                                    width={160}
+                                                    height={120}
+                                                    className="flex justify-center items-center"
+                                                />
+                                            )}
+                                        </p>
+
+                                        {/* <p
+                                            onClick={onWantToChangeProfileImage}
+                                            className="mx-2 cursor-pointer text-white py-1 px-2 bg-primary-70 flex flex-row flex-nowrap justify-center items-center rounded-lg"
+                                        >
+                                            <RiImageEditFill
+                                                className="text-3xl block cursor-pointer m-1"
+                                                width={10}
+                                                height={10}
+                                            />
+                                            <span>Change</span>
+                                        </p> */}
+                                    </div>
                                     <div className="flex flex-col flex-nowrap justify-start items-start">
                                         <h3 className="font-medium text-xl text-dark-50 my-5">
                                             {basicInfo.fname || ""}{" "}
