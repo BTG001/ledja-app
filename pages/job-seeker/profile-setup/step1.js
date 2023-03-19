@@ -8,6 +8,8 @@ import Config from "../../../Config";
 import Utils from "../../../Utils";
 import ErrorPopup from "../../../components/errorPopup";
 import { BiCloudUpload } from "react-icons/bi";
+import { AuthContext } from "../../_app";
+import { useContext } from "react";
 
 export default function JobSeekerProfileSetupStep1() {
     const router = useRouter();
@@ -24,6 +26,8 @@ export default function JobSeekerProfileSetupStep1() {
         position: "Recruitment Specialist",
         location: "Nairobi, Kenya",
     });
+
+    const auth = useContext(AuthContext);
 
     const userAvatarInput = useRef();
 
@@ -57,6 +61,20 @@ export default function JobSeekerProfileSetupStep1() {
                 );
 
                 console.log(results);
+
+                if (results.data.data.avatar_url) {
+                    auth.setAuth((prevValues) => {
+                        return {
+                            ...prevValues,
+                            avatarURL: results.data.data.avatar_url,
+                        };
+                    });
+
+                    localStorage.setItem(
+                        "avatar_url",
+                        results.data.data.avatar_url
+                    );
+                }
 
                 if (results.data.success) {
                     router.push("/job-seeker/profile-setup/step2");

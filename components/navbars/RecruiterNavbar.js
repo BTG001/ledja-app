@@ -21,7 +21,7 @@ export default function RecruiterNavbar({
                 <Link href={"/"}>
                     <Image src="/Logo.svg" width={117} height={64} />
                 </Link>
-                <div className="flex flex-row flex-nowrap justify-center items-center rounded-full bg-white w-12 h-12">
+                <div className="flex flex-row flex-nowrap justify-center items-center">
                     {/* <Image
                         className="mx-3 p-2 "
                         src={"/company-icon.svg"}

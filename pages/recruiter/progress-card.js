@@ -9,21 +9,33 @@ import SecondaryBtn from "../../components/buttons/SecondaryBtn";
 import Config from "../../Config";
 import Utils from "../../Utils";
 import axios from "axios";
+import { AiOutlineSave } from "react-icons/ai";
 
 export default function () {
     const [jobsSearchFocus, setJobsSearchFocus] = useState(false);
     const [candidateSearchFocus, setCandidateSearchFocus] = useState(false);
     const [filterFocus, setFilterFocus] = useState(false);
-    const [activeJobIndex, setActiveJobIndex] = useState(0);
+    const [activeJob, setActiveJob] = useState({});
     const [jobs, setJobs] = useState();
     const jobsContainer = useRef();
     const [jobsContainerMouseDown, setJobsContainerMouseDown] = useState(false);
     const [startX, setStartX] = useState(0);
     const [scrollLeft, setScrollLeft] = useState(0);
 
+    const [applications, setApplications] = useState();
+    const [activeApplication, setActiveApplication] = useState();
+
+    const [filters, setFilters] = useState({});
+
     useEffect(() => {
         getJobs();
     }, []);
+
+    useEffect(() => {
+        if (activeJob.id) {
+            filterActiveJobApplications();
+        }
+    }, [filters, activeJob]);
 
     const onJobsContainerMouseMove = (e) => {
         if (!jobsContainerMouseDown) {
@@ -55,31 +67,50 @@ export default function () {
 
             setJobs(theJobs.data.data);
 
+            setActiveJob(theJobs.data.data[0]);
+
             console.log("jobs: ", theJobs.data.data);
         } catch (error) {
             console.log("get jobs error: ", error);
         }
     }
 
-    async function getCurrentJobApplications() {
+    async function filterActiveJobApplications() {
         const userId = localStorage.getItem("user_id");
-        const url = `${Config.API_URL}/get_user_jobs/${userId}`;
+        const url = `${Config.API_URL}/applications/job/${activeJob.id}`;
 
-        try {
-            const theJobs = await axios.get(url, {
-                headers: Utils.getHeaders(),
-            });
+        const filterApplicationsFormData = new FormData();
 
-            setJobs(theJobs.data.data);
-
-            console.log("jobs: ", theJobs.data.data);
-        } catch (error) {
-            console.log("get jobs error: ", error);
+        if (filters.name) {
+            filterApplicationsFormData.append("fname", filters.name);
+            filterApplicationsFormData.append("lname", filters.name);
         }
+
+        if (filters.status) {
+            filterApplicationsFormData.append("status", filters.status);
+        }
+
+        Utils.makeRequest(async () => {
+            try {
+                let theApplications = await Utils.postForm(
+                    url,
+                    filterApplicationsFormData
+                );
+
+                theApplications = theApplications.data.data;
+
+                setApplications(theApplications);
+                setActiveApplication(theApplications[0]);
+
+                console.log("Applications: ", theApplications);
+            } catch (error) {
+                console.log("Filter Applications error: ", error);
+            }
+        });
     }
 
-    const onChangeActiveJob = (index) => {
-        setActiveJobIndex(index);
+    const onChangeActiveJob = (job) => {
+        setActiveJob(job);
     };
 
     return (
@@ -137,11 +168,11 @@ export default function () {
                                 <div
                                     key={index}
                                     onClick={() => {
-                                        onChangeActiveJob(index);
+                                        onChangeActiveJob(job);
                                     }}
                                     className={`min-w-20-screen  rounded-md py-2 px-6 mr-4 border border-primary-40 border-solid
                                     ${
-                                        activeJobIndex == index
+                                        activeJob.id == job.id
                                             ? "bg-primary-40"
                                             : "bg-white"
                                     }`}
@@ -170,6 +201,108 @@ export default function () {
                 <label className="form-label-light" for="websites">
                     Candidate
                 </label>
+                <div className="flex flex-row justify-start items-center ">
+                    <span
+                        onClick={() => {
+                            setFilters((prevValues) => {
+                                return {
+                                    ...prevValues,
+                                    status: null,
+                                };
+                            });
+                        }}
+                        className={`p-4 cursor-pointer ${
+                            !filters.status ? "text-dark-50" : "text-my-gray-70"
+                        }`}
+                    >
+                        All
+                    </span>
+                    <span
+                        onClick={() => {
+                            setFilters((prevValues) => {
+                                return {
+                                    ...prevValues,
+                                    status: "received",
+                                };
+                            });
+                        }}
+                        className={`p-4 cursor-pointer ${
+                            filters.status == "received"
+                                ? "text-dark-50"
+                                : "text-my-gray-70"
+                        }`}
+                    >
+                        Received
+                    </span>
+                    <span
+                        onClick={() => {
+                            setFilters((prevValues) => {
+                                return {
+                                    ...prevValues,
+                                    status: "saved",
+                                };
+                            });
+                        }}
+                        className={`p-4 cursor-pointer ${
+                            filters.status == "saved"
+                                ? "text-dark-50"
+                                : "text-my-gray-70"
+                        }`}
+                    >
+                        Saved
+                    </span>
+                    <span
+                        onClick={() => {
+                            setFilters((prevValues) => {
+                                return {
+                                    ...prevValues,
+                                    status: "contacting",
+                                };
+                            });
+                        }}
+                        className={`p-4 cursor-pointer ${
+                            filters.status == "contacting"
+                                ? "text-dark-50"
+                                : "text-my-gray-70"
+                        }`}
+                    >
+                        Contacting
+                    </span>
+                    <span
+                        onClick={() => {
+                            setFilters((prevValues) => {
+                                return {
+                                    ...prevValues,
+                                    status: "awaiting",
+                                };
+                            });
+                        }}
+                        className={`p-4 cursor-pointer ${
+                            filters.status == "awaiting"
+                                ? "text-dark-50"
+                                : "text-my-gray-70"
+                        }`}
+                    >
+                        Awaiting
+                    </span>
+                    <span
+                        onClick={() => {
+                            setFilters((prevValues) => {
+                                return {
+                                    ...prevValues,
+                                    status: "reviewed",
+                                };
+                            });
+                        }}
+                        className={`p-4 cursor-pointer ${
+                            filters.status == "reviewed"
+                                ? "text-dark-50"
+                                : "text-my-gray-70"
+                        }`}
+                    >
+                        Reviewed
+                    </span>
+                </div>
                 <div className="w-full">
                     <form className="form ">
                         <div className=" flex flex-row flex-wrap justify-between ">
@@ -199,7 +332,7 @@ export default function () {
                                 />
                             </div>
                             <div className="flex flex-row flex-wrap justify-between items-center">
-                                <div
+                                {/* <div
                                     className={`mr-4  mt-4 border border-solid  rounded-md flex flex-row flex-nowrap justify-center items-center ${
                                         filterFocus
                                             ? "border-primary-70"
@@ -215,14 +348,14 @@ export default function () {
                                     <select className="form-input-with-icon mr-1">
                                         <option>Filters</option>
                                     </select>
-                                    {/* <input
+                                    <input
                                         onFocus={() => setFilterFocus(true)}
                                         onBlur={() => setFilterFocus(false)}
                                         className="form-input-with-icon max-w-max "
                                         type={"text"}
                                         placeholder="Filters"
-                                    /> */}
-                                </div>
+                                    />
+                                </div> */}
 
                                 <div className="form-input-container  rounded-md  ">
                                     <select className="form-input  py-3 mr-2">
@@ -237,7 +370,55 @@ export default function () {
                 </div>
                 <div className="md:grid md:grid-cols-3 gap-4 mt-5 mb-16">
                     <sidebar>
-                        <div className="w-full p-3 mx-auto my-3 bg-white border border-my-gray-50 border-solid rounded-10 ">
+                        {!applications && (
+                            <p className="w-full text-center">
+                                No Applications !
+                            </p>
+                        )}
+                        {applications &&
+                            applications.length > 0 &&
+                            applications.map((application) => {
+                                return (
+                                    <div
+                                        className={`w-full p-3 mx-auto my-3  border border-my-gray-50 border-solid rounded-10  
+                                    ${
+                                        activeApplication.id == application.id
+                                            ? "bg-my-gray-50 "
+                                            : "bg-white"
+                                    }`}
+                                    >
+                                        <div className="flex flex-row flex-nowrap justify-between items-center">
+                                            <h3 className="font-semibold text-xl my-2">
+                                                Jennifer Musugu
+                                            </h3>
+                                            <h3 className="flex flex-row flex-nowrap justify-center items-center">
+                                                <Image
+                                                    src={"/star-full-icon.svg"}
+                                                    width={17}
+                                                    height={16}
+                                                    className="m-2"
+                                                />
+                                                <span className="font-semibold text-xl m-2">
+                                                    8.7
+                                                </span>
+                                            </h3>
+                                        </div>
+                                        <p className="text-dark-50 flex flex-row flex-nowrap justify-start items-center">
+                                            <Image
+                                                src={"/contacting-icon.svg"}
+                                                width={12}
+                                                height={12}
+                                                className="mr-3"
+                                            />
+                                            <span>contacting</span>
+                                        </p>
+                                        <p className="text-my-gray-80 mt-5 mb-2">
+                                            Reviewed 2 min ago
+                                        </p>
+                                    </div>
+                                );
+                            })}
+                        {/* <div className="w-full p-3 mx-auto my-3 bg-white border border-my-gray-50 border-solid rounded-10 ">
                             <div className="flex flex-row flex-nowrap justify-between items-center">
                                 <h3 className="font-semibold text-xl my-2">
                                     Jennifer Musugu
@@ -386,7 +567,7 @@ export default function () {
                             <p className="text-my-gray-80 mt-5 mb-2">
                                 Reviewed 2 min ago
                             </p>
-                        </div>
+                        </div> */}
                     </sidebar>
                     <section className="col-span-2 ">
                         <div className="bg-my-gray-50 p-5 my-5 rounded-10">

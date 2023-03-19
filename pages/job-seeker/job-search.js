@@ -300,31 +300,43 @@ export default function JobSearch() {
                                         }`}
                                         >
                                             <p className="flex justify-center items-center row-span-3 p-2">
-                                                {!job.user.basic_info_recruiter
-                                                    .company_avatar_url && (
-                                                    <BsBuilding className="h-32 text-center block w-full" />
+                                                {(!job.user ||
+                                                    !job.user
+                                                        .basic_info_recruiter ||
+                                                    !job.user
+                                                        .basic_info_recruiter
+                                                        .company_avatar_url) && (
+                                                    <BsBuilding className="text-8xl text-center block" />
                                                 )}
 
-                                                {job.user.basic_info_recruiter
-                                                    .company_avatar_url && (
-                                                    <Image
-                                                        src={
-                                                            job.user
-                                                                .basic_info_recruiter
-                                                                .company_avatar_url
-                                                        }
-                                                        width={100}
-                                                        height={80}
-                                                        className="flex justify-center items-center"
-                                                    />
-                                                )}
+                                                {job.user &&
+                                                    job.user
+                                                        .basic_info_recruiter &&
+                                                    job.user
+                                                        .basic_info_recruiter
+                                                        .company_avatar_url && (
+                                                        <Image
+                                                            src={
+                                                                job.user
+                                                                    .basic_info_recruiter
+                                                                    .company_avatar_url
+                                                            }
+                                                            width={100}
+                                                            height={80}
+                                                            className="flex justify-center items-center"
+                                                        />
+                                                    )}
                                             </p>
                                             <div>
                                                 <h3 className="font-medium text-xl mb-1">
                                                     {job.title}
                                                 </h3>
                                                 <p className="text-sm">
-                                                    ABC company
+                                                    {job.recruiter_basic_info
+                                                        ? job
+                                                              .recruiter_basic_info
+                                                              .company_name
+                                                        : ""}
                                                 </p>
                                                 <p className="text-sm">
                                                     {job.location}
@@ -339,7 +351,10 @@ export default function JobSearch() {
                                     {activeJob.title || ""}
                                 </h3>
                                 <p className="text-sm text-my-gray-70">
-                                    ABC company
+                                    {activeJob.recruiter_basic_info
+                                        ? activeJob.recruiter_basic_info
+                                              .company_name
+                                        : ""}
                                 </p>
                                 <p className="text-sm text-my-gray-70 flex flex-row flex-nowrap justify-start items-center">
                                     <Image

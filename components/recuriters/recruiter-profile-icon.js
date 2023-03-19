@@ -22,13 +22,18 @@ export default function RecruiterProfileIcon({ icon }) {
         localStorage.removeItem("user_id");
         localStorage.removeItem("user_type_id");
         localStorage.removeItem("email");
+        localStorage.removeItem("avatar_url");
+        localStorage.removeItem("company_avatar_url");
 
         auth.setAuth((prevValues) => {
             return {
                 ...prevValues,
                 isLoggedIn: false,
+                avatarURL: null,
+                companyAvatarURL: null,
             };
         });
+
         onCloseLinks();
         router.replace("/");
     };
@@ -36,11 +41,40 @@ export default function RecruiterProfileIcon({ icon }) {
     return (
         <div className="relative">
             <div onClick={onShowLinks} className="p-2 cursor-pointer">
-                {icon == "user" && (
-                    <Image src="/user-icon.svg" width={46} height={46} />
+                {icon == "user" && !auth.avatarURL && (
+                    <Image
+                        className="rounded-full object-contain p-1"
+                        src="/user-icon.svg"
+                        width={46}
+                        height={46}
+                    />
                 )}
-                {icon == "company" && (
-                    <Image src="/company-icon.svg" width={46} height={46} />
+
+                {icon == "user" && auth.avatarURL && (
+                    <Image
+                        className="rounded-full object-contain p-1"
+                        src={auth.avatarURL}
+                        width={46}
+                        height={46}
+                    />
+                )}
+
+                {icon == "company" && !auth.companyAvatarURL && (
+                    <Image
+                        className="rounded-full object-contain p-1"
+                        src="/company-icon.svg"
+                        width={46}
+                        height={46}
+                    />
+                )}
+
+                {icon == "company" && auth.companyAvatarURL && (
+                    <Image
+                        className="rounded-full object-contain p-1"
+                        src={auth.companyAvatarURL}
+                        width={46}
+                        height={46}
+                    />
                 )}
             </div>
 

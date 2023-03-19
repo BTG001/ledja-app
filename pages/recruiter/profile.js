@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 false;
 import Image from "next/image";
 import Footer from "../../components/Footer";
@@ -18,6 +18,7 @@ import CompanyIntroEditPopup from "../../components/recuriters/profile-edit/comp
 import CompanyCultureEditPopup from "../../components/recuriters/profile-edit/company-culture-edit-popup";
 import RecruiterInfoEditPopup from "../../components/recuriters/profile-edit/recruiter-info-edit-popup";
 import { RiImageEditFill } from "react-icons/ri";
+import { AuthContext } from "../_app";
 
 export default function Profile() {
     const router = useRouter();
@@ -63,11 +64,13 @@ export default function Profile() {
     const recruiterAvatarInput = useRef();
     const companyAvatarInput = useRef();
 
+    const auth = useContext(AuthContext);
+
     const [hasRecruiterAvatar, setHasRecruiterAvatar] = useState(false);
     const [hasCompanyAvatar, setHasCompanyAvatar] = useState(false);
 
     const [recruiterAvatar, setRecruiterAvatar] = useState();
-    const [companyAvatar, setCompanyAvatart] = useState();
+    const [companyAvatar, setCompanyAvatar] = useState();
 
     useEffect(() => {
         if (basicInfoUpdateSuccess && linksUpdateSuccess) {
@@ -98,7 +101,7 @@ export default function Profile() {
 
                 if (recruiter.basic_info_recruiter.company_avatar_url) {
                     setHasCompanyAvatar(true);
-                    setCompanyAvatart(
+                    setCompanyAvatar(
                         recruiter.basic_info_recruiter.company_avatar_url
                     );
                 }
@@ -199,19 +202,35 @@ export default function Profile() {
     const onChangeRecruiterAvatar = () => {
         const avatarFile = recruiterAvatarInput.current.files[0];
         console.log("avatar file: ", avatarFile);
-        const avatarFormData = new FormData();
-        avatarFormData.append("avatar", avatarFile);
+        const recruiterAvatarFormData = new FormData();
+        recruiterAvatarFormData.append("avatar", avatarFile);
         const avatarEditURL = `${Config.API_URL}/recruiter_basic_infos/${basicInfo.id}`;
 
         Utils.makeRequest(async () => {
             try {
-                let avatarUpdateResults = await Utils.postForm(
+                let recruiterAvatarUpdateResults = await Utils.postForm(
                     avatarEditURL,
-                    avatarFormData
+                    recruiterAvatarFormData
                 );
-                avatarUpdateResults = avatarUpdateResults.data.data;
-                setHasRecruiterAvatar(true);
-                setRecruiterAvatar(avatarUpdateResults.avatar_url);
+                recruiterAvatarUpdateResults =
+                    recruiterAvatarUpdateResults.data.data;
+
+                if (recruiterAvatarUpdateResults.avatar_url) {
+                    setHasRecruiterAvatar(true);
+                    setRecruiterAvatar(recruiterAvatarUpdateResults.avatar_url);
+
+                    auth.setAuth((prevValues) => {
+                        return {
+                            ...prevValues,
+                            avatarURL: recruiterAvatarUpdateResults.avatar_url,
+                        };
+                    });
+
+                    localStorage.setItem(
+                        "avatar_url",
+                        recruiterAvatarUpdateResults.avatar_url
+                    );
+                }
                 console.log(
                     "Recruiter avatar change results: ",
                     avatarUpdateResults
@@ -225,19 +244,36 @@ export default function Profile() {
     const onChangeCompanyAvatar = () => {
         const avatarFile = companyAvatarInput.current.files[0];
         console.log("avatar file: ", avatarFile);
-        const avatarFormData = new FormData();
-        avatarFormData.append("avatar", avatarFile);
+        const companyAvatarFormData = new FormData();
+        companyAvatarFormData.append("company_avatar", avatarFile);
         const avatarEditURL = `${Config.API_URL}/recruiter_basic_infos/${basicInfo.id}`;
 
         Utils.makeRequest(async () => {
             try {
                 let avatarUpdateResults = await Utils.postForm(
                     avatarEditURL,
-                    avatarFormData
+                    companyAvatarFormData
                 );
                 avatarUpdateResults = avatarUpdateResults.data.data;
-                setHasCompanyAvatar(true);
-                setCompanyAvatart(avatarUpdateResults.avatar_url);
+
+                if (avatarUpdateResults.avatar_url) {
+                    setHasCompanyAvatar(true);
+                    setCompanyAvatar(avatarUpdateResults.company_avatar_url);
+
+                    auth.setAuth((prevValues) => {
+                        return {
+                            ...prevValues,
+                            companyAvatarURL:
+                                avatarUpdateResults.company_avatar_url,
+                        };
+                    });
+
+                    localStorage.setItem(
+                        "company_avatar_url",
+                        avatarUpdateResults.company_avatar_url
+                    );
+                }
+
                 console.log(
                     "company avatar change results: ",
                     avatarUpdateResults
@@ -368,8 +404,8 @@ export default function Profile() {
                                     "mt-4 p-5 border border-solid border-my-gray-70  rounded-10 grid grid-cols-3 gap-3 "
                                 }
                             >
-                                <div className="text-dark-50 grid grid-rows-4 gap-1 justify-center">
-                                    <p className="flex justify-center items-center row-span-3">
+                                <div className="text-dark-50 grid grid-rows-5 gap-1 justify-center">
+                                    <p className="flex justify-center items-center row-span-5">
                                         {!hasCompanyAvatar && (
                                             <BsBuilding className="h-32 text-center block w-full" />
                                         )}
@@ -379,7 +415,7 @@ export default function Profile() {
                                                 src={companyAvatar}
                                                 width={160}
                                                 height={120}
-                                                className="flex justify-center items-center"
+                                                className="flex justify-center items-center rounded-sm"
                                             />
                                         )}
                                     </p>
@@ -621,7 +657,18 @@ export default function Profile() {
                                         key={index}
                                         className="grid grid-cols-4 my-3 gap-1 items-center md:w-1/2"
                                     >
-                                        <BsBuilding className="w-20 h-20 p-3" />
+                                        {!hasCompanyAvatar && (
+                                            <BsBuilding className="w-20 h-20 p-3" />
+                                        )}
+
+                                        {hasCompanyAvatar && (
+                                            <Image
+                                                src={companyAvatar}
+                                                width={100}
+                                                height={80}
+                                                className="flex justify-center items-center rounded-sm"
+                                            />
+                                        )}
                                         <div className="col-span-3 flex flex-col flex-nowrap justify-start items-start ">
                                             <h2 className=" mb-2">
                                                 {job.title}
@@ -681,8 +728,8 @@ export default function Profile() {
                                     "mt-4 p-5 border border-solid border-my-gray-70  rounded-10 grid grid-cols-3 gap-3 "
                                 }
                             >
-                                <div className="text-dark-50 grid grid-rows-4 gap-1 justify-center">
-                                    <p className="flex justify-center items-center row-span-3">
+                                <div className="text-dark-50 grid grid-rows-5 gap-1 justify-center">
+                                    <p className="flex justify-center items-center row-span-4">
                                         {!hasRecruiterAvatar && (
                                             <BiUserCircle className="h-32 text-center block w-full" />
                                         )}
@@ -692,7 +739,7 @@ export default function Profile() {
                                                 src={recruiterAvatar}
                                                 width={160}
                                                 height={120}
-                                                className="flex justify-center items-center"
+                                                className="flex justify-center items-center rounded-sm"
                                             />
                                         )}
                                     </p>

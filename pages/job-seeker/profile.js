@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useContext } from "react";
 import Image from "next/image";
 import Footer from "../../components/Footer";
 import JobSeekerNavbar from "../../components/navbars/JobSeekerNavbar";
@@ -13,6 +13,7 @@ import JobSeekerEditBasicInfoPopup from "../../components/job-seekers/profile-ed
 import { useRouter } from "next/router";
 import { AiOutlineFileText } from "react-icons/ai";
 import { RiImageEditFill } from "react-icons/ri";
+import { AuthContext } from "../_app";
 
 export default function Profile() {
     const router = useRouter();
@@ -26,6 +27,7 @@ export default function Profile() {
     const [hasProfilePic, setHasProfilePic] = useState(false);
     const [hasSocialMediaLinks, setHasSocialMediaLinks] = useState(false);
     const [hasAboutJobSeeker, setHasAboutJobSeeker] = useState(false);
+    const auth = useContext(AuthContext);
 
     const [basicInfo, setBasicInfo] = useState({});
     const [links, setLinks] = useState({});
@@ -192,9 +194,23 @@ export default function Profile() {
                     avatarEditURL,
                     avatarFormData
                 );
+
                 avatarUpdateResults = avatarUpdateResults.data.data;
                 setHasProfilePic(true);
                 setProfilePic(avatarUpdateResults.avatar_url);
+
+                auth.setAuth((prevValues) => {
+                    return {
+                        ...prevValues,
+                        avatarURL: avatarUpdateResults.avatar_url,
+                    };
+                });
+
+                localStorage.setItem(
+                    "avatar_url",
+                    avatarUpdateResults.avatar_url
+                );
+
                 console.log("avatar change results: ", avatarUpdateResults);
             } catch (error) {
                 console.log("avatar change error: ", error);
@@ -268,7 +284,7 @@ export default function Profile() {
                                                 src={profilePic}
                                                 width={160}
                                                 height={120}
-                                                className="flex justify-center items-center"
+                                                className="flex justify-center items-center rounded-sm"
                                             />
                                         )}
                                     </p>

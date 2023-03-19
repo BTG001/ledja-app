@@ -9,6 +9,9 @@ import Utils from "../../../Utils";
 import Config from "../../../Config";
 import { useState } from "react";
 import ErrorPopup from "../../../components/errorPopup";
+import { BiCloudUpload } from "react-icons/bi";
+import { AuthContext } from "../../_app";
+import { useContext } from "react";
 
 export default function RecruiterProfileSetupStep1() {
     const router = useRouter();
@@ -19,6 +22,10 @@ export default function RecruiterProfileSetupStep1() {
     const [loadingExit, setLoadingExit] = useState(false);
     const [showErrorPopup, setShowErrorPopup] = useState(false);
     const [errorMessage, setErrorMessage] = useState("An Error Occured");
+    const [basicInfos, setBasicInfos] = useState({});
+    const recruiterAvatarInput = useRef();
+    const companyAvatarInput = useRef();
+    const auth = useContext(AuthContext);
 
     const onNext = async (e) => {
         e.preventDefault();
@@ -43,6 +50,8 @@ export default function RecruiterProfileSetupStep1() {
                 );
 
                 console.log(results);
+
+                setAvatars(results);
 
                 if (results.data.success) {
                     router.push("/recruiter/profile-setup/step2");
@@ -80,6 +89,8 @@ export default function RecruiterProfileSetupStep1() {
 
                 console.log(results);
 
+                setAvatars(results);
+
                 if (results.data.success) {
                     router.push("/recruiter/recruiter-dashboard");
                 }
@@ -95,6 +106,33 @@ export default function RecruiterProfileSetupStep1() {
 
     const onClose = () => {
         setShowErrorPopup(false);
+    };
+
+    const setAvatars = (results) => {
+        if (results.data.data.avatar_url) {
+            auth.setAuth((prevValues) => {
+                return {
+                    ...prevValues,
+                    avatarURL: results.data.data.avatar_url,
+                };
+            });
+
+            localStorage.setItem("avatar_url", results.data.data.avatar_url);
+        }
+
+        if (results.data.data.company_avatar_url) {
+            auth.setAuth((prevValues) => {
+                return {
+                    ...prevValues,
+                    companyAvatarURL: results.data.data.company_avatar_url,
+                };
+            });
+
+            localStorage.setItem(
+                "company_avatar_url",
+                results.data.data.company_avatar_url
+            );
+        }
     };
 
     return (
@@ -248,6 +286,96 @@ export default function RecruiterProfileSetupStep1() {
                                 name="ceo"
                                 // value={"Frank Jessy"}
                             />
+                        </div>
+                    </div>
+
+                    <div className="md:grid md:grid-cols-2 md:gap-1 justify-center items-center ">
+                        <div className="form-input-container grid grid-rows-2 justify-center items-center">
+                            {basicInfos.avatar && (
+                                <div className="w-full m-auto flex justify-center items-center">
+                                    <Image
+                                        src={URL.createObjectURL(
+                                            basicInfos.avatar
+                                        )}
+                                        className="border border-primary-40 border-solid p-1 m-2"
+                                        width={160}
+                                        height={120}
+                                    />
+                                </div>
+                            )}
+
+                            <input
+                                className="form-input hidden"
+                                type={"file"}
+                                accept=".png,.jpg,.jpeg"
+                                ref={recruiterAvatarInput}
+                                name="avatar"
+                                onChange={(e) => {
+                                    const value = e.target.files[0];
+
+                                    console.log("avatar: ", value);
+
+                                    setBasicInfos((prevValues) => {
+                                        return { ...prevValues, avatar: value };
+                                    });
+                                }}
+                            />
+                            <div
+                                onClick={() => {
+                                    recruiterAvatarInput.current.click();
+                                }}
+                                className="cursor-pointer flex flex-row justify-center items-center bg-primary-70 m-1 rounded-md"
+                            >
+                                <BiCloudUpload className="text-8xl text-white p-1 m-2" />
+                                <span className=" text-white p-1 m-2">
+                                    Upload Profile Picture{" "}
+                                </span>
+                            </div>
+                        </div>
+                        <div className="form-input-container grid grid-rows-2 justify-center items-center">
+                            {basicInfos.companyAvatar && (
+                                <div className="w-full m-auto flex justify-center items-center">
+                                    <Image
+                                        src={URL.createObjectURL(
+                                            basicInfos.companyAvatar
+                                        )}
+                                        className="border border-primary-40 border-solid p-1 m-2"
+                                        width={160}
+                                        height={120}
+                                    />
+                                </div>
+                            )}
+
+                            <input
+                                className="form-input hidden"
+                                type={"file"}
+                                accept=".png,.jpg,.jpeg"
+                                ref={companyAvatarInput}
+                                name="company_avatar"
+                                onChange={(e) => {
+                                    const value = e.target.files[0];
+
+                                    console.log("company avatar: ", value);
+
+                                    setBasicInfos((prevValues) => {
+                                        return {
+                                            ...prevValues,
+                                            companyAvatar: value,
+                                        };
+                                    });
+                                }}
+                            />
+                            <div
+                                onClick={() => {
+                                    companyAvatarInput.current.click();
+                                }}
+                                className="cursor-pointer flex flex-row justify-center items-center bg-primary-70 m-1 rounded-md"
+                            >
+                                <BiCloudUpload className="text-8xl text-white p-1 m-2" />
+                                <span className=" text-white p-1 m-2">
+                                    Upload Company Profile Picture{" "}
+                                </span>
+                            </div>
                         </div>
                     </div>
 

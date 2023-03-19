@@ -22,10 +22,14 @@ export default function JobSeekerProfileIcon() {
         localStorage.removeItem("user_id");
         localStorage.removeItem("user_type_id");
         localStorage.removeItem("email");
+        localStorage.removeItem("avatar_url");
+        localStorage.removeItem("company_avatar_url");
         auth.setAuth((prevValues) => {
             return {
                 ...prevValues,
                 isLoggedIn: false,
+                avatarURL: null,
+                companyAvatarURL: null,
             };
         });
         onCloseLinks();
@@ -35,7 +39,22 @@ export default function JobSeekerProfileIcon() {
     return (
         <div className="relative">
             <div onClick={onShowLinks} className="p-2 cursor-pointer">
-                <Image src="/user-icon.svg" width={46} height={46} />
+                {!auth.avatarURL && (
+                    <Image
+                        className="rounded-full object-contain p-1"
+                        src="/user-icon.svg"
+                        width={46}
+                        height={46}
+                    />
+                )}
+                {auth.avatarURL && (
+                    <Image
+                        className="rounded-full object-contain p-1 w-full"
+                        src={auth.avatarURL}
+                        width={46}
+                        height={46}
+                    />
+                )}
             </div>
 
             <div
