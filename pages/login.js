@@ -45,10 +45,34 @@ export default function login() {
                     const userTypeId = results.data.data.user.user_type_id;
                     localStorage.setItem("user_type_id", userTypeId);
 
+                    let avatarURL = null;
+                    let companyAvatarURL = null;
+
+                    const basicInfos =
+                        results.data.data.user.basic_info_jobseeker ||
+                        results.data.data.user.basic_info_recruiter;
+
+                    console.log("basic infos", basicInfos);
+
+                    if (basicInfos) {
+                        avatarURL = basicInfos.avatar_url;
+                        localStorage.setItem("avatar_url", avatarURL);
+
+                        if (basicInfos.company_avatar_url) {
+                            companyAvatarURL = basicInfos.company_avatar_url;
+                            localStorage.setItem(
+                                "company_avatar_url",
+                                companyAvatarURL
+                            );
+                        }
+                    }
+
                     auth.setAuth((prevValues) => {
                         return {
                             ...prevValues,
                             isLoggedIn: true,
+                            avatarURL: avatarURL,
+                            companyAvatarURL: companyAvatarURL,
                         };
                     });
 

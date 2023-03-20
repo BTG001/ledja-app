@@ -19,12 +19,12 @@ export default function JobSeekerProfileSetupStep1() {
     const [showErrorPopup, setShowErrorPopup] = useState(false);
     const [errorMessage, setErrorMessage] = useState("An Error Occured");
     const [basicInfos, setBasicInfos] = useState({
-        firstName: "Jane",
-        lastName: "Doe",
-        phoneNumber: "000-000-000",
-        email: "jane@gmail.com",
-        position: "Recruitment Specialist",
-        location: "Nairobi, Kenya",
+        // firstName: "Jane",
+        // lastName: "Doe",
+        // phoneNumber: "000-000-000",
+        // email: "jane@gmail.com",
+        // position: "Recruitment Specialist",
+        // location: "Nairobi, Kenya",
     });
 
     const auth = useContext(AuthContext);

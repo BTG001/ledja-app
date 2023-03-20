@@ -11,17 +11,17 @@ export default function AddExperiencePopup({ showPopup, onClose, onSuccess }) {
     const monthEmptyValue = "Month";
 
     const [workExperience, setWorkExperience] = useState({
-        currentlyOnJob: false,
-        title: "Sales Manager",
-        companyName: "ABC LTD.",
-        employmentType: "Type 1",
-        startYear: 2020,
-        startMonth: "January",
-        endYear: 2021,
-        endMonth: "December",
-        industry: "IT Services",
-        description: "This is a description",
-        location: "Nairobi, Kenya",
+        // currentlyOnJob: false,
+        // title: "Sales Manager",
+        // companyName: "ABC LTD.",
+        // employmentType: "Type 1",
+        // startYear: 2020,
+        // startMonth: "January",
+        // endYear: 2021,
+        // endMonth: "December",
+        // industry: "IT Services",
+        // description: "This is a description",
+        // location: "Nairobi, Kenya",
     });
 
     const [errors, setErrors] = useState({});

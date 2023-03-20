@@ -20,10 +20,10 @@ export default function JobSeekerProfileSetupStep2() {
     const [showErrorPopup, setShowErrorPopup] = useState(false);
     const [errorMessage, setErrorMessage] = useState("An Error Occured");
     const [jobSeekerLinks, setJobSeekerLinks] = useState({
-        website: "https://abccompany.com",
-        linkedin: "https://linkedin.com/abc",
-        twitter: "https://twitter.com/abc",
-        facebook: "https://facebook.com/abc",
+        // website: "https://abccompany.com",
+        // linkedin: "https://linkedin.com/abc",
+        // twitter: "https://twitter.com/abc",
+        // facebook: "https://facebook.com/abc",
     });
 
     const [errors, setErrors] = useState({});

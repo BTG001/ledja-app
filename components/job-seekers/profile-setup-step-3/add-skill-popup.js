@@ -8,9 +8,9 @@ export default function AddSkillPopup({ showPopup, onClose, onSuccess }) {
     const selectEmptyValue = "Please Select";
 
     const [skill, setSkill] = useState({
-        name: "Javascript",
-        certification: "BSC. Computer Science",
-        proficiency: "Expert",
+        // name: "Javascript",
+        // certification: "BSC. Computer Science",
+        // proficiency: "Expert",
     });
 
     const [errors, setErrors] = useState({});
@@ -122,7 +122,7 @@ export default function AddSkillPopup({ showPopup, onClose, onSuccess }) {
                             <input
                                 className="form-input"
                                 type={"text"}
-                                placeholder="Ex: Sales manager"
+                                placeholder="Ex: Javascript"
                                 name="name"
                                 value={skill.name}
                                 onChange={(e) => {
@@ -187,7 +187,7 @@ export default function AddSkillPopup({ showPopup, onClose, onSuccess }) {
                             <input
                                 className="form-input"
                                 type={"text"}
-                                placeholder="Ex: Microsoft"
+                                placeholder="Ex: BSC. IT"
                                 name="company_name"
                                 value={skill.certification}
                                 onChange={(e) => {

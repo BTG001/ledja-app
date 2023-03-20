@@ -7,12 +7,12 @@ export default function AddEducationPopup({ showPopup, onClose, onSuccess }) {
     const monthEmptyValue = "Month";
 
     const [education, setEducation] = useState({
-        certification: "BSC. Law",
-        institution: "Harvard UNiversity",
-        startYear: 2020,
-        startMonth: "January",
-        endYear: 2021,
-        endMonth: "December",
+        // certification: "BSC. Law",
+        // institution: "Harvard UNiversity",
+        // startYear: 2020,
+        // startMonth: "January",
+        // endYear: 2021,
+        // endMonth: "December",
     });
 
     const [errors, setErrors] = useState({});
@@ -171,7 +171,7 @@ export default function AddEducationPopup({ showPopup, onClose, onSuccess }) {
                             <input
                                 className="form-input"
                                 type={"text"}
-                                placeholder="Ex: Microsoft"
+                                placeholder="Ex: Harvard University"
                                 name="company_name"
                                 value={education.institution}
                                 onChange={(e) => {
