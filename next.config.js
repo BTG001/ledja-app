@@ -8,7 +8,7 @@ const nextConfig = {
         ignoreDuringBuilds: true,
     },
     images: {
-        domains: ["localhost", "127.0.0.1"],
+        domains: ["localhost", "127.0.0.1", "http://34.118.66.234"],
     },
 };
 
