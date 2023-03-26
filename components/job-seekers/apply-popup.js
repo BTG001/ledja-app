@@ -62,7 +62,7 @@ export default function ApplyPopup({
 
         applicationFormData.append("user_id", userId);
         applicationFormData.append("job_id", jobId);
-        applicationFormData.append("status", "received");
+        applicationFormData.append("status", "awaiting");
         applicationFormData.append("cover_letter", "the cover letter");
 
         Utils.makeRequest(async () => {

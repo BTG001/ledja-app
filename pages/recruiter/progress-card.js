@@ -23,7 +23,7 @@ export default function () {
     const [scrollLeft, setScrollLeft] = useState(0);
 
     const [applications, setApplications] = useState();
-    const [activeApplication, setActiveApplication] = useState();
+    const [activeApplication, setActiveApplication] = useState({});
 
     const [filters, setFilters] = useState({});
 
@@ -98,9 +98,14 @@ export default function () {
                 );
 
                 theApplications = theApplications.data.data;
-
                 setApplications(theApplications);
-                setActiveApplication(theApplications[0]);
+                if (theApplications && theApplications.length > 0) {
+                    setActiveApplication(theApplications[0]);
+
+                    if (theApplications[0].status == "awaiting") {
+                        updateStatus("reviewed", theApplications[0].id);
+                    }
+                }
 
                 console.log("Applications: ", theApplications);
             } catch (error) {
@@ -111,6 +116,41 @@ export default function () {
 
     const onChangeActiveJob = (job) => {
         setActiveJob(job);
+    };
+
+    const showStatusIcon = (status) => {
+        return (
+            <Image
+                src={`/${status}-icon.svg`}
+                width={12}
+                height={12}
+                className="mr-3"
+            />
+        );
+    };
+
+    const updateStatus = (status, applicationId) => {
+        const statusFormData = new FormData();
+        statusFormData.append("status", status);
+
+        Utils.makeRequest(async () => {
+            try {
+                const statusURL = `${Config.API_URL}/applications/${applicationId}`;
+
+                let updateStatusResults = await Utils.putForm(
+                    statusURL,
+                    statusFormData
+                );
+
+                updateStatusResults = updateStatusResults.data.data;
+
+                setActiveApplication(updateStatusResults);
+
+                console.log("update status results: ", updateStatusResults);
+            } catch (error) {
+                console.log("updateStatus: ", error);
+            }
+        });
     };
 
     return (
@@ -136,6 +176,9 @@ export default function () {
                                     className="form-input-with-icon peer"
                                     type={"text"}
                                     placeholder="Search job title"
+                                    onChange={(e) => {
+                                        const value = e.target.value;
+                                    }}
                                 />
                                 <Image
                                     src={"/search-icon.svg"}
@@ -217,7 +260,7 @@ export default function () {
                     >
                         All
                     </span>
-                    <span
+                    {/* <span
                         onClick={() => {
                             setFilters((prevValues) => {
                                 return {
@@ -233,6 +276,40 @@ export default function () {
                         }`}
                     >
                         Received
+                    </span> */}
+                    <span
+                        onClick={() => {
+                            setFilters((prevValues) => {
+                                return {
+                                    ...prevValues,
+                                    status: "awaiting",
+                                };
+                            });
+                        }}
+                        className={`p-4 cursor-pointer ${
+                            filters.status == "awaiting"
+                                ? "text-dark-50"
+                                : "text-my-gray-70"
+                        }`}
+                    >
+                        Awaiting
+                    </span>
+                    <span
+                        onClick={() => {
+                            setFilters((prevValues) => {
+                                return {
+                                    ...prevValues,
+                                    status: "reviewed",
+                                };
+                            });
+                        }}
+                        className={`p-4 cursor-pointer ${
+                            filters.status == "reviewed"
+                                ? "text-dark-50"
+                                : "text-my-gray-70"
+                        }`}
+                    >
+                        Reviewed
                     </span>
                     <span
                         onClick={() => {
@@ -268,40 +345,6 @@ export default function () {
                     >
                         Contacting
                     </span>
-                    <span
-                        onClick={() => {
-                            setFilters((prevValues) => {
-                                return {
-                                    ...prevValues,
-                                    status: "awaiting",
-                                };
-                            });
-                        }}
-                        className={`p-4 cursor-pointer ${
-                            filters.status == "awaiting"
-                                ? "text-dark-50"
-                                : "text-my-gray-70"
-                        }`}
-                    >
-                        Awaiting
-                    </span>
-                    <span
-                        onClick={() => {
-                            setFilters((prevValues) => {
-                                return {
-                                    ...prevValues,
-                                    status: "reviewed",
-                                };
-                            });
-                        }}
-                        className={`p-4 cursor-pointer ${
-                            filters.status == "reviewed"
-                                ? "text-dark-50"
-                                : "text-my-gray-70"
-                        }`}
-                    >
-                        Reviewed
-                    </span>
                 </div>
                 <div className="w-full">
                     <form className="form ">
@@ -323,13 +366,27 @@ export default function () {
                                     className="form-input-with-icon"
                                     type={"text"}
                                     placeholder="Search candidate’s name"
+                                    onChange={(e) => {
+                                        const value = e.target.value;
+                                        setFilters((prevValues) => {
+                                            return {
+                                                ...prevValues,
+                                                name: value,
+                                            };
+                                        });
+                                    }}
+                                    onSubmit={(e) => {
+                                        e.preventDefault();
+                                        filterActiveJobApplications();
+                                    }}
                                 />
-                                <Image
+                                {/* <Image
+                                    onClick={filterActiveJobApplications}
                                     src={"/search-icon.svg"}
                                     width={17}
                                     height={9}
                                     className="mx-2 cursor-pointer"
-                                />
+                                /> */}
                             </div>
                             <div className="flex flex-row flex-wrap justify-between items-center">
                                 {/* <div
@@ -380,6 +437,17 @@ export default function () {
                             applications.map((application) => {
                                 return (
                                     <div
+                                        onClick={() => {
+                                            setActiveApplication(application);
+                                            if (
+                                                application.status == "awaiting"
+                                            ) {
+                                                updateStatus(
+                                                    "reviewed",
+                                                    application.id
+                                                );
+                                            }
+                                        }}
                                         className={`w-full p-3 mx-auto my-3  border border-my-gray-50 border-solid rounded-10  
                                     ${
                                         activeApplication.id == application.id
@@ -389,7 +457,9 @@ export default function () {
                                     >
                                         <div className="flex flex-row flex-nowrap justify-between items-center">
                                             <h3 className="font-semibold text-xl my-2">
-                                                Jennifer Musugu
+                                                {application.jobseeker_basic_info
+                                                    ? `${application.jobseeker_basic_info.fname} ${application.jobseeker_basic_info.lname}`
+                                                    : ""}
                                             </h3>
                                             <h3 className="flex flex-row flex-nowrap justify-center items-center">
                                                 <Image
@@ -404,16 +474,16 @@ export default function () {
                                             </h3>
                                         </div>
                                         <p className="text-dark-50 flex flex-row flex-nowrap justify-start items-center">
-                                            <Image
-                                                src={"/contacting-icon.svg"}
-                                                width={12}
-                                                height={12}
-                                                className="mr-3"
-                                            />
-                                            <span>contacting</span>
+                                            {showStatusIcon(application.status)}
+                                            <span>
+                                                {application.status || ""}
+                                            </span>
                                         </p>
                                         <p className="text-my-gray-80 mt-5 mb-2">
-                                            Reviewed 2 min ago
+                                            {Utils.calculateTimeLapse(
+                                                application.updated_at
+                                            )}{" "}
+                                            ago
                                         </p>
                                     </div>
                                 );
@@ -572,7 +642,11 @@ export default function () {
                     <section className="col-span-2 ">
                         <div className="bg-my-gray-50 p-5 my-5 rounded-10">
                             <div className="flex flex-row flex-nowrap justify-between items-center">
-                                <h3 className="">Kaison Nolan</h3>
+                                <h3 className="">
+                                    {activeApplication.jobseeker_basic_info
+                                        ? `${activeApplication.jobseeker_basic_info.fname} ${activeApplication.jobseeker_basic_info.lname}`
+                                        : ""}
+                                </h3>
                                 <h3 className="font-semibold flex flex-row flex-nowrap justify-end items-center">
                                     <Image
                                         src={"/star-full-icon.svg"}
@@ -593,13 +667,26 @@ export default function () {
                                         height={12}
                                         className="mr-3"
                                     />
-                                    <span>Toronto, Canada</span>
+                                    <span>
+                                        {activeApplication.job
+                                            ? activeApplication.job.location
+                                            : ""}
+                                    </span>
                                 </p>
                                 <p className="text-right"># 09/100</p>
                             </div>
                             <div className="flex flex-row flex-nowrap justify-between items-center">
                                 <p className="flex flex-row flex-nowrap justify-start items-center">
-                                    Applied on Oct 14
+                                    Applied on{" "}
+                                    {`${
+                                        Config.MONTH_NAMES[
+                                            new Date(
+                                                activeApplication.created_at
+                                            ).getMonth()
+                                        ]
+                                    } ${new Date(
+                                        activeApplication.created_at
+                                    ).getDate()}`}
                                 </p>
                                 <p className=" flex flex-row flex-nowrap justify-end items-center my-2">
                                     <AiOutlineInfoCircle />
@@ -636,13 +723,59 @@ export default function () {
                                     items-center"
                                 >
                                     <Image
-                                        src={"/love-icon.svg"}
+                                        onClick={() => {
+                                            if (
+                                                activeApplication.status ==
+                                                    "saved" ||
+                                                activeApplication.status ==
+                                                    "contacting"
+                                            ) {
+                                                updateStatus(
+                                                    "reviewed",
+                                                    activeApplication.id
+                                                );
+                                            } else {
+                                                updateStatus(
+                                                    "saved",
+                                                    activeApplication.id
+                                                );
+                                            }
+                                        }}
+                                        src={
+                                            activeApplication.status ==
+                                                "saved" ||
+                                            activeApplication.status ==
+                                                "contacting"
+                                                ? "/love-fill-icon.svg"
+                                                : "/love-icon.svg"
+                                        }
                                         width={30}
                                         height={26}
                                         className="mr-3"
                                     />
                                     <Image
-                                        src={"/not-interested-icon.svg"}
+                                        onClick={() => {
+                                            if (
+                                                activeApplication.status ==
+                                                "rejected"
+                                            ) {
+                                                updateStatus(
+                                                    "reviewed",
+                                                    activeApplication.id
+                                                );
+                                            } else {
+                                                updateStatus(
+                                                    "rejected",
+                                                    activeApplication.id
+                                                );
+                                            }
+                                        }}
+                                        src={
+                                            activeApplication.status ==
+                                            "rejected"
+                                                ? "/not-interested-active-icon.svg"
+                                                : "/not-interested-icon.svg"
+                                        }
                                         width={30}
                                         height={30}
                                         className="mr-3"

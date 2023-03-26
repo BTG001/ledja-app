@@ -889,7 +889,7 @@ export default function Profile() {
                                 <span
                                     className={`block w-4 h-4  bg-white rounded-full border border-grey-70 m-2`}
                                 >
-                                    {hasProfilePic && (
+                                    {hasRecruiterAvatar && (
                                         <Image
                                             src={"/tick-icon.svg"}
                                             width={16}
@@ -910,7 +910,7 @@ export default function Profile() {
                                 <span
                                     className={`block w-4 h-4  bg-white rounded-full border border-grey-70 m-2`}
                                 >
-                                    {hasProfilePic && (
+                                    {hasCompanyAvatar && (
                                         <Image
                                             src={"/tick-icon.svg"}
                                             width={16}

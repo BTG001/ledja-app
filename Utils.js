@@ -98,4 +98,40 @@ export default class Utils {
             params: params,
         });
     }
+
+    static calculateTimeLapse(fromTime) {
+        const now = new Date().getTime();
+        fromTime = new Date(fromTime).getTime();
+        console.log("Difference: ", now, fromTime, (now - fromTime) / 60000);
+        const difference = Math.floor((now - fromTime) / 60000);
+
+        const toReturn = {
+            value: difference,
+            label: "minutes",
+        };
+
+        if (difference == 1) {
+            toReturn.label = "minute";
+        }
+
+        if (difference >= 60 && difference < 120) {
+            toReturn.label = "hour";
+        }
+
+        if (difference > 119) {
+            toReturn.label = "hours";
+            toReturn.value = Math.floor(difference / 60);
+        }
+
+        if (difference >= 1440 && difference < 2880) {
+            toReturn.label = "day";
+        }
+
+        if (difference > 2879) {
+            toReturn.label = "days";
+            toReturn.value = Math.floor(difference / 1440);
+        }
+
+        return `${toReturn.value} ${toReturn.label}`;
+    }
 }

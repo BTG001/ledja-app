@@ -38,21 +38,24 @@ export default function JobSeekerProfileIcon() {
 
     return (
         <div className="relative">
-            <div onClick={onShowLinks} className="p-2 cursor-pointer">
+            <div
+                onClick={onShowLinks}
+                className="p-1 cursor-pointer bg-white  w-16 h-16 rounded-full flex justify-center items-center"
+            >
                 {!auth.avatarURL && (
                     <Image
-                        className="rounded-full object-contain p-1"
+                        className="object-cover h-full w-full max-w-full rounded-full"
                         src="/user-icon.svg"
-                        width={46}
-                        height={46}
+                        width={72}
+                        height={72}
                     />
                 )}
                 {auth.avatarURL && (
                     <Image
-                        className="rounded-full object-contain p-1 w-full"
+                        className="object-cover h-full w-full max-w-full rounded-full"
                         src={auth.avatarURL}
-                        width={46}
-                        height={46}
+                        width={72}
+                        height={72}
                     />
                 )}
             </div>

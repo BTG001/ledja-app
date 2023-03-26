@@ -40,40 +40,43 @@ export default function RecruiterProfileIcon({ icon }) {
 
     return (
         <div className="relative">
-            <div onClick={onShowLinks} className="p-2 cursor-pointer">
+            <div
+                onClick={onShowLinks}
+                className="p-1 cursor-pointer bg-white  w-16 h-16 rounded-full flex justify-center items-center"
+            >
                 {icon == "user" && !auth.avatarURL && (
                     <Image
-                        className="rounded-full object-contain p-1"
+                        className="object-cover h-full w-full max-w-full rounded-full"
                         src="/user-icon.svg"
-                        width={46}
-                        height={46}
+                        width={72}
+                        height={72}
                     />
                 )}
 
                 {icon == "user" && auth.avatarURL && (
                     <Image
-                        className="rounded-full object-contain p-1"
+                        className="object-cover h-full w-full max-w-full rounded-full"
                         src={auth.avatarURL}
-                        width={46}
-                        height={46}
+                        width={72}
+                        height={72}
                     />
                 )}
 
                 {icon == "company" && !auth.companyAvatarURL && (
                     <Image
-                        className="rounded-full object-contain p-1"
+                        className="object-cover h-full w-full max-w-full rounded-full"
                         src="/company-icon.svg"
-                        width={46}
-                        height={46}
+                        width={72}
+                        height={72}
                     />
                 )}
 
                 {icon == "company" && auth.companyAvatarURL && (
                     <Image
-                        className="rounded-full object-contain p-1"
+                        className="object-cover h-full w-full max-w-full rounded-full"
                         src={auth.companyAvatarURL}
-                        width={46}
-                        height={46}
+                        width={72}
+                        height={72}
                     />
                 )}
             </div>
