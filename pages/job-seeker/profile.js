@@ -449,6 +449,11 @@ export default function Profile() {
 
                         {!hasWorkExperience && (
                             <div
+                                onClick={() => {
+                                    router.push(
+                                        "/job-seeker/profile-setup/step3"
+                                    );
+                                }}
                                 className={
                                     "mt-4 px-4 py-1 border border-solid border-my-gray-70  rounded-md flex flex-row flex-nowrap justify-start items-center cursor-pointer"
                                 }
@@ -486,7 +491,7 @@ export default function Profile() {
                         {hasEducation && (
                             <div
                                 className={
-                                    "mt-4 px-4 py-1 border border-solid border-my-gray-70  rounded-md "
+                                    "mt-4 px-4 py-1 border border-solid border-my-gray-70  rounded-md cursor-pointer "
                                 }
                             >
                                 {hasEducation &&
@@ -510,8 +515,13 @@ export default function Profile() {
 
                         {!hasEducation && (
                             <div
+                                onClick={() => {
+                                    router.push(
+                                        "/job-seeker/profile-setup/step3"
+                                    );
+                                }}
                                 className={
-                                    "mt-4 px-4 py-1 border border-solid border-my-gray-70  rounded-md flex flex-row flex-nowrap justify-start items-center"
+                                    "mt-4 px-4 py-1 border border-solid border-my-gray-70  rounded-md flex flex-row flex-nowrap justify-start items-center cursor-pointer"
                                 }
                             >
                                 <Image
@@ -559,8 +569,13 @@ export default function Profile() {
 
                         {!hasSkills && (
                             <div
+                                onClick={() => {
+                                    router.push(
+                                        "/job-seeker/profile-setup/step3"
+                                    );
+                                }}
                                 className={
-                                    "mt-4 px-4 py-1 border border-solid border-my-gray-70  rounded-md flex flex-row flex-nowrap justify-start items-center"
+                                    "mt-4 px-4 py-1 border border-solid border-my-gray-70  rounded-md flex flex-row flex-nowrap justify-start items-center cursor-pointer"
                                 }
                             >
                                 <Image
@@ -625,8 +640,13 @@ export default function Profile() {
 
                         {!hasResume && (
                             <div
+                                onClick={() => {
+                                    router.push(
+                                        "/job-seeker/profile-setup/step4"
+                                    );
+                                }}
                                 className={
-                                    "mt-4 px-4 py-1 border border-solid border-my-gray-70  rounded-md flex flex-row flex-nowrap justify-start items-center"
+                                    "mt-4 px-4 py-1 border border-solid border-my-gray-70  rounded-md flex flex-row flex-nowrap justify-start items-center cursor-pointer"
                                 }
                             >
                                 <Image
