@@ -15,6 +15,7 @@ export default function RecruiterDashbaord() {
     const [wallet, setWallet] = useState({});
 
     useEffect(() => {
+        // console.log("jobs: ", jobs);
         getJobs();
         fetchRecruiter();
     }, []);
@@ -248,3 +249,32 @@ export default function RecruiterDashbaord() {
         </>
     );
 }
+
+// export async function getServerSideProps(context) {
+//     console.log("context: ", context);
+//     // const userId = localStorage.getItem("user_id");
+//     const userId = 2;
+//     const url = `${Config.API_URL}/get_user_jobs/${userId}`;
+
+//     try {
+//         let theJobs = await axios.get(url, {
+//             // headers: Utils.getHeaders(),
+//         });
+
+//         theJobs = theJobs.data.data;
+
+//         // if (theJobs && theJobs.length > 0) {
+//         //     setJobs(theJobs);
+//         // }
+
+//         console.log("jobs: ", theJobs);
+//         return {
+//             props: { jobs: theJobs || null }, // will be passed to the page component as props
+//         };
+//     } catch (error) {
+//         console.log("get jobs error: ", error);
+//         return {
+//             props: { jobs: null }, // will be passed to the page component as props
+//         };
+//     }
+// }

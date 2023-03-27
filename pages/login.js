@@ -39,6 +39,8 @@ export default function login() {
 
                 if (results.data.success) {
                     localStorage.setItem("token", results.data.data.token);
+                    const AUTH_TOKEN = `Bearer ${results.data.data.token}`;
+                    axios.defaults.headers.common["Authorization"] = AUTH_TOKEN;
                     localStorage.setItem("email", results.data.data.email);
 
                     localStorage.setItem("user_id", results.data.data.user.id);
