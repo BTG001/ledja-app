@@ -8,6 +8,12 @@ const nextConfig = {
         ignoreDuringBuilds: true,
     },
     images: {
+        remotePatterns: [
+            {
+                protocol: "https",
+                hostname: "api.direktory.biz",
+            },
+        ],
         domains: [
             "localhost",
             "127.0.0.1",
