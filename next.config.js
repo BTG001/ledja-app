@@ -14,6 +14,7 @@ const nextConfig = {
             "http://34.118.66.234",
             "https://api.direktory.biz",
             "https://api.direktory.biz/",
+            "api.direktory.biz",
         ],
     },
 };
