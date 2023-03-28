@@ -52,7 +52,7 @@ export default function AddExperiencePopup({ showPopup, onClose, onSuccess }) {
 
         const userId = localStorage.getItem("user_id");
 
-        const duration = `${workExperience.startMonth}${workExperience.startYear} - ${workExperience.endMonth} ${workExperience.endYear}`;
+        const duration = `${workExperience.startMonth} ${workExperience.startYear} - ${workExperience.endMonth} ${workExperience.endYear}`;
 
         const experienceFormData = new FormData();
 
@@ -60,6 +60,7 @@ export default function AddExperiencePopup({ showPopup, onClose, onSuccess }) {
         experienceFormData.append("title", workExperience.title);
         experienceFormData.append("company", workExperience.companyName);
         experienceFormData.append("duration", duration);
+        experienceFormData.append("description", workExperience.description);
 
         Utils.makeRequest(async () => {
             try {
@@ -88,6 +89,7 @@ export default function AddExperiencePopup({ showPopup, onClose, onSuccess }) {
     const validateValues = () => {
         const theErrors = {};
         let hasErrors = false;
+        console.log("in validator: ", workExperience);
         if (!workExperience.title) {
             hasErrors = true;
             theErrors.title = "Title is required";
@@ -98,15 +100,15 @@ export default function AddExperiencePopup({ showPopup, onClose, onSuccess }) {
             theErrors.companyName = "Company Name is required";
         }
 
-        if (!workExperience.employmentType) {
-            hasErrors = true;
-            theErrors.title = "Employment type is required";
-        }
+        // if (!workExperience.employmentType) {
+        //     hasErrors = true;
+        //     theErrors.employmentType = "Employment type is required";
+        // }
 
-        if (!workExperience.location) {
-            hasErrors = true;
-            theErrors.location = "Location is required";
-        }
+        // if (!workExperience.location) {
+        //     hasErrors = true;
+        //     theErrors.location = "Location is required";
+        // }
 
         if (!workExperience.startYear) {
             hasErrors = true;
@@ -128,10 +130,10 @@ export default function AddExperiencePopup({ showPopup, onClose, onSuccess }) {
             theErrors.endMonth = "End month is required";
         }
 
-        if (!workExperience.industry) {
-            hasErrors = true;
-            theErrors.industry = "Industry is required";
-        }
+        // if (!workExperience.industry) {
+        //     hasErrors = true;
+        //     theErrors.industry = "Industry is required";
+        // }
 
         if (!workExperience.description) {
             hasErrors = true;
@@ -194,7 +196,7 @@ export default function AddExperiencePopup({ showPopup, onClose, onSuccess }) {
                             </p>
                         </div>
 
-                        <div className="form-input-container my-3 p-2">
+                        {/* <div className="form-input-container my-3 p-2">
                             <label className="form-label-light">
                                 Employment type
                             </label>
@@ -228,7 +230,7 @@ export default function AddExperiencePopup({ showPopup, onClose, onSuccess }) {
                             <p className="text-red-500 text-left  ">
                                 {errors.employmentType || ""}
                             </p>
-                        </div>
+                        </div> */}
 
                         <div className="form-input-container my-3 p-2">
                             <label className="form-label-light form-label-required">
@@ -256,7 +258,7 @@ export default function AddExperiencePopup({ showPopup, onClose, onSuccess }) {
                             </p>
                         </div>
 
-                        <div className="form-input-container my-3 p-2">
+                        {/* <div className="form-input-container my-3 p-2">
                             <label className="form-label-light">Location</label>
                             <input
                                 className="form-input"
@@ -278,7 +280,7 @@ export default function AddExperiencePopup({ showPopup, onClose, onSuccess }) {
                             <p className="text-red-500 text-left  ">
                                 {errors.location || ""}
                             </p>
-                        </div>
+                        </div> */}
                         <div className="flex flex-row flex-nowrap justify-start items-center">
                             <input
                                 className="m-2"
@@ -446,7 +448,7 @@ export default function AddExperiencePopup({ showPopup, onClose, onSuccess }) {
                                 </div>
                             </div>
                         </div>
-                        <div className="form-input-container my-3 p-2">
+                        {/* <div className="form-input-container my-3 p-2">
                             <label className="form-label-light form-label-required">
                                 Industry
                             </label>
@@ -470,7 +472,7 @@ export default function AddExperiencePopup({ showPopup, onClose, onSuccess }) {
                             <p className="text-red-500 text-left  ">
                                 {errors.industry || ""}
                             </p>
-                        </div>
+                        </div> */}
 
                         <div className="form-input-container p-2">
                             <label className="form-label-light">

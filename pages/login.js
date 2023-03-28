@@ -20,6 +20,7 @@ export default function login() {
     const auth = useContext(AuthContext);
 
     const onLoginSubmit = async (e) => {
+        e.preventDefault();
         console.log("auth: ", auth);
         if (loading) {
             return;
@@ -27,7 +28,6 @@ export default function login() {
             setLoading(true);
         }
         const loginFormData = new FormData(loginForm.current);
-        e.preventDefault();
 
         Utils.makeRequest(async () => {
             try {

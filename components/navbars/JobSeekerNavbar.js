@@ -6,7 +6,7 @@ export default function JobSeekerNavbar({ active }) {
     console.log("active: ", active);
     return (
         <div
-            className="px-12 py-6 bg-my-gray-50
+            className="px-12 py-2 bg-my-gray-50
             flex
             flex-row
             flex-nowrap

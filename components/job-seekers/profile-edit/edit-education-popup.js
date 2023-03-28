@@ -3,21 +3,21 @@ import Image from "next/image";
 import Config from "../../../Config";
 import Utils from "../../../Utils";
 
-export default function AddEducationPopup({
+export default function EditEducationPopup({
     showPopup,
     onClose,
     onSuccess,
-    education,
+    education: propEducation,
 }) {
     const monthEmptyValue = "Month";
 
     const [education, setEducation] = useState({
-        certification: "BSC. Law",
-        institution: "Harvard UNiversity",
-        startYear: 2020,
-        startMonth: "January",
-        endYear: 2021,
-        endMonth: "December",
+        // certification: "BSC. Law",
+        // institution: "Harvard UNiversity",
+        // startYear: 2020,
+        // startMonth: "January",
+        // endYear: 2021,
+        // endMonth: "December",
     });
 
     const [errors, setErrors] = useState({});
@@ -30,6 +30,27 @@ export default function AddEducationPopup({
             document.body.style.overflowY = "visible";
         }
     }, [showPopup]);
+
+    useEffect(() => {
+        updateEducationState(propEducation);
+    }, [propEducation]);
+
+    const updateEducationState = (source) => {
+        if (source) {
+            const durationArray = source.duration.trim().split("-");
+            console.log("duratin array: ", durationArray);
+            const startArray = durationArray[0].trim().split(" ");
+            const endArray = durationArray[1].trim().split(" ");
+            setEducation({
+                certification: source.certification,
+                institution: source.institution,
+                startMonth: startArray[0],
+                startYear: startArray[1],
+                endMonth: endArray[0],
+                endYear: endArray[1],
+            });
+        }
+    };
 
     const onSave = (e) => {
         e.preventDefault();
@@ -59,22 +80,24 @@ export default function AddEducationPopup({
 
         Utils.makeRequest(async () => {
             try {
-                const educationURL = `${Config.API_URL}/education`;
+                const educationURL = `${Config.API_URL}/education/${propEducation.id}`;
 
-                let addEducationResults = await Utils.postForm(
+                let editEducationResults = await Utils.putForm(
                     educationURL,
                     educationFormData
                 );
 
-                addEducationResults = addEducationResults.data.data;
+                editEducationResults = editEducationResults.data.data;
 
-                console.log("Add Education Results: ", addEducationResults);
+                console.log("edit Education Results: ", editEducationResults);
 
                 setLoading(false);
 
-                onSuccess(addEducationResults);
+                updateEducationState(editEducationResults);
+
+                onSuccess(editEducationResults);
             } catch (error) {
-                console.log("Add Education Error: ", error);
+                console.log("edit Education Error: ", error);
 
                 setLoading(false);
             }
@@ -123,15 +146,19 @@ export default function AddEducationPopup({
         return hasErrors;
     };
 
+    const doOnClose = () => {
+        onClose();
+    };
+
     return (
         showPopup && (
             <>
                 <div className="fixed bg-my-gray-70 opacity-40 w-full h-full top-0 left-0 bottom-0 right-0 "></div>
                 <div className="z-50 fixed w-4/5 md:w-3/4 lg:w-2/3 left-1/2 -translate-x-1/2 top-0  p-10 bg-white opacity-100 rounded-10 shadow-md  my-10">
                     <p className="w-full flex flex-row justify-between flex-wrap-reverse items-center text-lg font-medium">
-                        <span>Add Education</span>
+                        <span>Edit Education</span>
                         <Image
-                            onClick={onClose}
+                            onClick={doOnClose}
                             src={"/x-icon.svg"}
                             className="cursor-pointer mb-2"
                             width={27}

@@ -74,14 +74,14 @@ export default function JobSeekerProfileSetupStep4() {
             setLoadingExit(true);
         }
 
-        const hasErrors = validateData();
+        // const hasErrors = validateData();
 
-        if (hasErrors) {
-            setErrorMessage("Please resolve the errors shown");
-            setShowErrorPopup(true);
-            setLoadingNext(false);
-            return;
-        }
+        // if (hasErrors) {
+        //     setErrorMessage("Please resolve the errors shown");
+        //     setShowErrorPopup(true);
+        //     setLoadingNext(false);
+        //     return;
+        // }
 
         const uploadJobsFormData = createFormData();
 
@@ -129,10 +129,10 @@ export default function JobSeekerProfileSetupStep4() {
             theErrors.resume = "Resume is required";
         }
 
-        if (!uploadJobs.others) {
-            hasErrors = true;
-            theErrors.others = "Certificate and other documents are required";
-        }
+        // if (!uploadJobs.others) {
+        //     hasErrors = true;
+        //     theErrors.others = "Certificate and other documents are required";
+        // }
 
         setErrors(theErrors);
 
@@ -285,7 +285,7 @@ export default function JobSeekerProfileSetupStep4() {
                         <input
                             ref={otherInput}
                             className="hidden"
-                            name="other_docs"
+                            name="other_docs[]"
                             accept=".pdf,.doc,.docx"
                             type={"file"}
                             multiple

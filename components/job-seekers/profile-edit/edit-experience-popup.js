@@ -5,24 +5,17 @@ import Image from "next/image";
 import Config from "../../../Config";
 import Utils from "../../../Utils";
 
-export default function AddExperiencePopup({ showPopup, onClose, onSuccess }) {
+export default function EditWorkExperiencePopup({
+    showPopup,
+    onClose,
+    onSuccess,
+    workExperience: propWorkExperience,
+}) {
     const selectEmptyValue = "Please Select";
     const yearEmptyValue = "Year";
     const monthEmptyValue = "Month";
 
-    const [workExperience, setWorkExperience] = useState({
-        currentlyOnJob: false,
-        title: "Sales Manager",
-        companyName: "ABC LTD.",
-        employmentType: "Type 1",
-        startYear: 2020,
-        startMonth: "January",
-        endYear: 2021,
-        endMonth: "December",
-        industry: "IT Services",
-        description: "This is a description",
-        location: "Nairobi, Kenya",
-    });
+    const [workExperience, setWorkExperience] = useState({});
 
     const [errors, setErrors] = useState({});
     const [loading, setLoading] = useState(false);
@@ -35,7 +28,32 @@ export default function AddExperiencePopup({ showPopup, onClose, onSuccess }) {
         }
     }, [showPopup]);
 
+    useEffect(() => {
+        console.log("Inpute work experience: ", propWorkExperience);
+        updatedWorkExperienceState(propWorkExperience);
+    }, [propWorkExperience]);
+
+    const updatedWorkExperienceState = (source) => {
+        if (source) {
+            const durationArray = source.duration.trim().split("-");
+            console.log("duratin array: ", durationArray);
+            const startArray = durationArray[0].trim().split(" ");
+            const endArray = durationArray[1].trim().split(" ");
+            setWorkExperience({
+                companyName: source.company,
+                title: source.title,
+                description: source.description,
+                startMonth: startArray[0],
+                startYear: startArray[1],
+                endMonth: endArray[0],
+                endYear: endArray[1],
+            });
+        }
+    };
+
     const onSave = (e) => {
+        console.log("--------saved------called", workExperience);
+
         e.preventDefault();
         if (loading) {
             return;
@@ -52,7 +70,7 @@ export default function AddExperiencePopup({ showPopup, onClose, onSuccess }) {
 
         const userId = localStorage.getItem("user_id");
 
-        const duration = `${workExperience.startMonth}${workExperience.startYear} - ${workExperience.endMonth} ${workExperience.endYear}`;
+        const duration = `${workExperience.startMonth} ${workExperience.startYear} - ${workExperience.endMonth} ${workExperience.endYear}`;
 
         const experienceFormData = new FormData();
 
@@ -60,12 +78,13 @@ export default function AddExperiencePopup({ showPopup, onClose, onSuccess }) {
         experienceFormData.append("title", workExperience.title);
         experienceFormData.append("company", workExperience.companyName);
         experienceFormData.append("duration", duration);
+        experienceFormData.append("description", workExperience.description);
 
         Utils.makeRequest(async () => {
             try {
-                const experienceURL = `${Config.API_URL}/work_experiences`;
+                const experienceURL = `${Config.API_URL}/work_experiences/${propWorkExperience.id}`;
 
-                let addExperienceResults = await Utils.postForm(
+                let addExperienceResults = await Utils.putForm(
                     experienceURL,
                     experienceFormData
                 );
@@ -75,6 +94,7 @@ export default function AddExperiencePopup({ showPopup, onClose, onSuccess }) {
                 console.log("Add Experience Results: ", addExperienceResults);
 
                 setLoading(false);
+                updatedWorkExperienceState(addExperienceResults);
 
                 onSuccess(addExperienceResults);
             } catch (error) {
@@ -98,15 +118,15 @@ export default function AddExperiencePopup({ showPopup, onClose, onSuccess }) {
             theErrors.companyName = "Company Name is required";
         }
 
-        if (!workExperience.employmentType) {
-            hasErrors = true;
-            theErrors.title = "Employment type is required";
-        }
+        // if (!workExperience.employmentType) {
+        //     hasErrors = true;
+        //     theErrors.employmentType = "Employment type is required";
+        // }
 
-        if (!workExperience.location) {
-            hasErrors = true;
-            theErrors.location = "Location is required";
-        }
+        // if (!workExperience.location) {
+        //     hasErrors = true;
+        //     theErrors.location = "Location is required";
+        // }
 
         if (!workExperience.startYear) {
             hasErrors = true;
@@ -128,10 +148,10 @@ export default function AddExperiencePopup({ showPopup, onClose, onSuccess }) {
             theErrors.endMonth = "End month is required";
         }
 
-        if (!workExperience.industry) {
-            hasErrors = true;
-            theErrors.industry = "Industry is required";
-        }
+        // if (!workExperience.industry) {
+        //     hasErrors = true;
+        //     theErrors.industry = "Industry is required";
+        // }
 
         if (!workExperience.description) {
             hasErrors = true;
@@ -148,15 +168,19 @@ export default function AddExperiencePopup({ showPopup, onClose, onSuccess }) {
         return hasErrors;
     };
 
+    const doOnClose = () => {
+        onClose();
+    };
+
     return (
         showPopup && (
             <>
                 <div className="fixed bg-my-gray-70 opacity-40 w-full h-full top-0 left-0 bottom-0 right-0 "></div>
                 <div className="z-50 fixed w-4/5 md:w-3/4 lg:w-2/3 left-1/2 -translate-x-1/2 top-0  p-10 bg-white opacity-100 rounded-10 shadow-md  my-10">
                     <p className="w-full flex flex-row justify-between flex-wrap-reverse items-center text-lg font-medium">
-                        <span>Add Experience</span>
+                        <span>Edit Work Experience</span>
                         <Image
-                            onClick={onClose}
+                            onClick={doOnClose}
                             src={"/x-icon.svg"}
                             className="cursor-pointer mb-2"
                             width={27}
@@ -194,7 +218,7 @@ export default function AddExperiencePopup({ showPopup, onClose, onSuccess }) {
                             </p>
                         </div>
 
-                        <div className="form-input-container my-3 p-2">
+                        {/* <div className="form-input-container my-3 p-2">
                             <label className="form-label-light">
                                 Employment type
                             </label>
@@ -228,7 +252,7 @@ export default function AddExperiencePopup({ showPopup, onClose, onSuccess }) {
                             <p className="text-red-500 text-left  ">
                                 {errors.employmentType || ""}
                             </p>
-                        </div>
+                        </div> */}
 
                         <div className="form-input-container my-3 p-2">
                             <label className="form-label-light form-label-required">
@@ -256,7 +280,7 @@ export default function AddExperiencePopup({ showPopup, onClose, onSuccess }) {
                             </p>
                         </div>
 
-                        <div className="form-input-container my-3 p-2">
+                        {/* <div className="form-input-container my-3 p-2">
                             <label className="form-label-light">Location</label>
                             <input
                                 className="form-input"
@@ -278,7 +302,7 @@ export default function AddExperiencePopup({ showPopup, onClose, onSuccess }) {
                             <p className="text-red-500 text-left  ">
                                 {errors.location || ""}
                             </p>
-                        </div>
+                        </div> */}
                         <div className="flex flex-row flex-nowrap justify-start items-center">
                             <input
                                 className="m-2"
@@ -446,7 +470,7 @@ export default function AddExperiencePopup({ showPopup, onClose, onSuccess }) {
                                 </div>
                             </div>
                         </div>
-                        <div className="form-input-container my-3 p-2">
+                        {/* <div className="form-input-container my-3 p-2">
                             <label className="form-label-light form-label-required">
                                 Industry
                             </label>
@@ -470,7 +494,7 @@ export default function AddExperiencePopup({ showPopup, onClose, onSuccess }) {
                             <p className="text-red-500 text-left  ">
                                 {errors.industry || ""}
                             </p>
-                        </div>
+                        </div> */}
 
                         <div className="form-input-container p-2">
                             <label className="form-label-light">

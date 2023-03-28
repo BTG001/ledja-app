@@ -14,6 +14,12 @@ import { useRouter } from "next/router";
 import { AiOutlineFileText } from "react-icons/ai";
 import { RiImageEditFill } from "react-icons/ri";
 import { AuthContext } from "../_app";
+import { HiOutlineTrash } from "react-icons/hi";
+import { TbEdit } from "react-icons/tb";
+import EditWorkExperiencePopup from "../../components/job-seekers/profile-edit/edit-experience-popup";
+import EditEducationPopup from "../../components/job-seekers/profile-edit/edit-education-popup";
+import { MdOutlineOpenInNew } from "react-icons/md";
+import EditSkillPopup from "../../components/job-seekers/profile-edit/edit-skill-popup";
 
 export default function Profile() {
     const router = useRouter();
@@ -57,7 +63,27 @@ export default function Profile() {
         setShowIncompleteJobSeekerProfilePopup,
     ] = useState(false);
 
+    const [showWorkExperienceEditPopup, setShowWorkExperienceEditPopup] =
+        useState();
+    const [activeWorkExperience, setActiveWorkExperience] = useState();
+    const [activeWorkExperienceIndex, setActiveWorkExperienceIndex] =
+        useState();
+
+    const [showEducationEditPopup, setShowEducationEditPopup] = useState();
+    const [activeEducation, setActiveEducation] = useState();
+    const [activeEducationIndex, setActiveEducationIndex] = useState();
+
+    const [showSkillEditPopup, setShowSkillsEditPopup] = useState();
+    const [activeSkill, setActiveSkill] = useState();
+    const [activeSkillIndex, setActiveSkillIndex] = useState();
+
     const [pathToIncompleteStep, setPathToIncompleteStep] = useState();
+
+    const resumeInput = useRef();
+    const [uploadJobs, setUploadJobs] = useState();
+    const [uploadJobsId, setUploadJobsId] = useState();
+
+    const otherDocsInput = useRef();
 
     useEffect(() => {
         fetchJobSeeker();
@@ -97,14 +123,19 @@ export default function Profile() {
 
             if (jobSeeker.upload_job) {
                 if (jobSeeker.upload_job.resume) {
-                    setResume(jobSeeker.upload_job.resume);
+                    setResume(jobSeeker.upload_job.resume_url);
                     setHasResume(true);
                 }
 
                 if (jobSeeker.upload_job.other_docs) {
-                    setOtherDocs(jobSeeker.upload_job.resume);
+                    const otherDocsArray = jobSeeker.upload_job.other_docs_urls
+                        .trim()
+                        .split("|");
+                    setOtherDocs(otherDocsArray);
                     setHasOtherDocs(true);
                 }
+
+                setUploadJobsId(jobSeeker.upload_job.id);
             }
 
             if (
@@ -222,6 +253,111 @@ export default function Profile() {
         setShowBasicInfoEditPopup(false);
         setShowMissingJobSeekerProfilePopup(false);
         setShowIncompleteJobSeekerProfilePopup(false);
+        setShowWorkExperienceEditPopup(false);
+        setShowEducationEditPopup(false);
+        setShowSkillsEditPopup(false);
+    };
+
+    const onExperienceUpdated = (updatedWorkExperience) => {
+        setShowWorkExperienceEditPopup(false);
+        console.log("updated work experience", updatedWorkExperience);
+        fetchJobSeeker();
+    };
+
+    const onEducationUpdate = (updatedEducation) => {
+        setShowEducationEditPopup(false);
+        console.log("updated education", updatedEducation);
+        fetchJobSeeker();
+    };
+
+    const onSkillUpdate = (updatedSkill) => {
+        setShowSkillsEditPopup(false);
+        console.log("updated skill", updatedSkill);
+        fetchJobSeeker();
+    };
+
+    const deleteWorkExperience = (itemIndex) => {
+        console.log("work experience to delete", workExperiences[itemIndex]);
+    };
+
+    const deleteEducation = (itemIndex) => {
+        console.log("education To Delete", educations[itemIndex]);
+    };
+
+    const deleteSkill = (itemIndex) => {
+        console.log("delete Skill", skills[itemIndex]);
+    };
+
+    const updateResume = () => {
+        const uploadJobsFormData = new FormData();
+
+        uploadJobsFormData.append("resume", resumeInput.current.files[0]);
+
+        // const userId = localStorage.getItem("user_id");
+
+        // uploadJobsFormData.append("user_id", userId);
+
+        Utils.makeRequest(async () => {
+            try {
+                const results = await Utils.putForm(
+                    `${Config.API_URL}/upload_jobs/${uploadJobsId}`,
+                    uploadJobsFormData
+                );
+
+                const updatedResume = results.data.data.resume_url;
+
+                console.log("update resume results: ", results, updateResume);
+
+                setResume(updateResume);
+
+                // setLoadingExit(false);
+            } catch (error) {
+                console.log("update resume Error: ", error);
+                // setErrorMessage(error.message);
+                // setShowErrorPopup(true);
+                // setLoadingExit(false);
+            }
+        });
+    };
+
+    const updateOtherDocs = () => {
+        const uploadJobsFormData = new FormData();
+
+        for (const file of otherDocsInput.current.files) {
+            uploadJobsFormData.append("other_docs[]", file);
+        }
+
+        // const userId = localStorage.getItem("user_id");
+
+        // uploadJobsFormData.append("user_id", userId);
+
+        Utils.makeRequest(async () => {
+            try {
+                const results = await Utils.putForm(
+                    `${Config.API_URL}/upload_jobs/${uploadJobsId}`,
+                    uploadJobsFormData
+                );
+
+                const updatedDocsArray = results.data.data.other_docs_urls
+                    .trim()
+                    .split("|");
+
+                console.log(
+                    "update other docs results: ",
+                    results,
+                    updatedDocsArray
+                );
+
+                setOtherDocs(updatedDocsArray);
+
+                // setLoadingExit(false);
+            } catch (error) {
+                console.log("update resume Error: ", error);
+                // setErrorMessage(error.message);
+                // setShowErrorPopup(true);
+                // setLoadingExit(false);
+            }
+        });
     };
 
     return (
@@ -242,6 +378,26 @@ export default function Profile() {
                 basicInfos={basicInfo}
                 links={links}
             />
+            <EditWorkExperiencePopup
+                showPopup={showWorkExperienceEditPopup}
+                onClose={onClose}
+                onSuccess={onExperienceUpdated}
+                workExperience={activeWorkExperience}
+            />
+            <EditEducationPopup
+                showPopup={showEducationEditPopup}
+                onClose={onClose}
+                onSuccess={onEducationUpdate}
+                education={activeEducation}
+            />
+
+            <EditSkillPopup
+                showPopup={showSkillEditPopup}
+                onClose={onClose}
+                onSuccess={onSkillUpdate}
+                skill={activeSkill}
+            />
+
             <input
                 ref={profileImageInput}
                 type="file"
@@ -403,7 +559,7 @@ export default function Profile() {
                             <label className="form-label-light">
                                 Work Experience
                             </label>
-                            {hasWorkExperience && (
+                            {/* {hasWorkExperience && (
                                 <span
                                     onClick={() => {
                                         setShowWorkExperienceEditPopup(true);
@@ -412,38 +568,62 @@ export default function Profile() {
                                 >
                                     Edit
                                 </span>
-                            )}
+                            )} */}
                         </div>
                         {hasWorkExperience && (
                             <div className="mt-4 px-4 py-1 border border-solid border-my-gray-70  rounded-md">
-                                {workExperiences.map((workExperience) => {
-                                    return (
-                                        <div className="my-2">
-                                            <p className="text-lg my-1 ">
-                                                {workExperience.title}
-                                            </p>
-                                            <p className=" my-1">
-                                                {workExperience.company}
-                                            </p>
-                                            <p className="my-1 text-my-gray-70 text-sm">
-                                                {workExperience.duration}
-                                            </p>
-                                            {/* <p classname="text-sm">{workExperience.description}</p> */}
-                                            <p className="text-sm">
-                                                Lorem ipsum dolor sit amet,
-                                                consectetur adipiscing elit.
-                                                Cras vehicula nisi at euismod
-                                                auctor. Duis sed mi ut odio
-                                                ornare euismod. Duis eu lectus
-                                                porttitor, aliquam arcu vel,
-                                                tincidunt diam. Duis in purus
-                                                nec eros posuere tincidunt
-                                                euismod nec ex. Nunc at auctor
-                                                nulla.{" "}
-                                            </p>
-                                        </div>
-                                    );
-                                })}
+                                {workExperiences.map(
+                                    (workExperience, index) => {
+                                        return (
+                                            <div className="my-4" key={index}>
+                                                <p className="text-lg my-1 ">
+                                                    {workExperience.title}
+                                                </p>
+                                                <p className=" my-1">
+                                                    {workExperience.company}
+                                                </p>
+                                                <p className="my-1 text-my-gray-70 text-sm">
+                                                    {workExperience.duration}
+                                                </p>
+                                                {/* <p classname="text-sm">{workExperience.description}</p> */}
+                                                <p className="text-sm">
+                                                    {workExperience.description ||
+                                                        ""}
+                                                </p>
+                                                <div className="flex flex-row flex-nowrap justify-start items-center py-2">
+                                                    <TbEdit
+                                                        onClick={() => {
+                                                            setActiveWorkExperience(
+                                                                workExperience
+                                                            );
+                                                            setActiveWorkExperienceIndex(
+                                                                index
+                                                            );
+                                                            setShowWorkExperienceEditPopup(
+                                                                true
+                                                            );
+                                                        }}
+                                                        className="text-3xl p-1 mr-1 text-primary-70 cursor-pointer"
+                                                    />
+                                                    <HiOutlineTrash
+                                                        onClick={() => {
+                                                            setActiveWorkExperience(
+                                                                workExperience
+                                                            );
+                                                            setActiveWorkExperienceIndex(
+                                                                index
+                                                            );
+                                                            deleteWorkExperience(
+                                                                index
+                                                            );
+                                                        }}
+                                                        className="text-3xl p-1 mx-1 text-red-500 cursor-pointer"
+                                                    />
+                                                </div>
+                                            </div>
+                                        );
+                                    }
+                                )}
                             </div>
                         )}
 
@@ -476,7 +656,7 @@ export default function Profile() {
                             <label className="form-label-light">
                                 Education
                             </label>
-                            {hasEducation && (
+                            {/* {hasEducation && (
                                 <span
                                     onClick={() => {
                                         setShowEducationEditPopup(true);
@@ -485,7 +665,7 @@ export default function Profile() {
                                 >
                                     Edit
                                 </span>
-                            )}
+                            )} */}
                         </div>
 
                         {hasEducation && (
@@ -495,9 +675,9 @@ export default function Profile() {
                                 }
                             >
                                 {hasEducation &&
-                                    educations.map((education) => {
+                                    educations.map((education, index) => {
                                         return (
-                                            <>
+                                            <div key={index}>
                                                 <p className="my-1 ">
                                                     {education.certification}
                                                 </p>
@@ -507,7 +687,37 @@ export default function Profile() {
                                                 <p className="my-1 text-my-gray-70 text-xs">
                                                     {education.duration}
                                                 </p>
-                                            </>
+                                                <div className="flex flex-row flex-nowrap justify-start items-center py-2">
+                                                    <TbEdit
+                                                        onClick={() => {
+                                                            setActiveEducation(
+                                                                education
+                                                            );
+                                                            setActiveEducationIndex(
+                                                                index
+                                                            );
+                                                            setShowEducationEditPopup(
+                                                                true
+                                                            );
+                                                        }}
+                                                        className="text-3xl p-1 mr-1 text-primary-70 cursor-pointer"
+                                                    />
+                                                    <HiOutlineTrash
+                                                        onClick={() => {
+                                                            setActiveEducation(
+                                                                education
+                                                            );
+                                                            setActiveEducationIndex(
+                                                                index
+                                                            );
+                                                            deleteEducation(
+                                                                index
+                                                            );
+                                                        }}
+                                                        className="text-3xl p-1 mx-1 text-red-500 cursor-pointer"
+                                                    />
+                                                </div>
+                                            </div>
                                         );
                                     })}
                             </div>
@@ -540,7 +750,7 @@ export default function Profile() {
                     <div className="form-input-container ">
                         <div className="flex flex-row justify-between p-2">
                             <label className="form-label-light">Skills</label>
-                            {hasSkills && (
+                            {/* {hasSkills && (
                                 <span
                                     onClick={() => {
                                         setShowSkillsEditPopup(true);
@@ -549,19 +759,43 @@ export default function Profile() {
                                 >
                                     Edit
                                 </span>
-                            )}
+                            )} */}
                         </div>
                         {hasSkills && (
                             <div
                                 className={
-                                    "mt-4 border border-solid border-my-gray-70  rounded-md p-4 flex- flex-row justify-start items-center "
+                                    "mt-4 border border-solid border-my-gray-70  rounded-md p-4 flex flex-row justify-start items-center "
                                 }
                             >
-                                {skills.map((skill) => {
+                                {skills.map((skill, index) => {
                                     return (
-                                        <span className="px-4 py-2 bg-my-gray-50 rounded-lg m-2">
-                                            {skill.name}
-                                        </span>
+                                        <div
+                                            key={index}
+                                            className="flex flex-row flex-nowrap justify-start items-center  px-4 bg-my-gray-50 rounded-lg m-2 py-2 w-max"
+                                        >
+                                            <span className="">
+                                                {skill.name}
+                                            </span>
+                                            <TbEdit
+                                                onClick={() => {
+                                                    setActiveSkill(skill);
+                                                    setActiveSkillIndex(index);
+
+                                                    setShowSkillsEditPopup(
+                                                        true
+                                                    );
+                                                }}
+                                                className="text-3xl p-1 ml-2 text-primary-70 cursor-pointer"
+                                            />
+                                            <HiOutlineTrash
+                                                onClick={() => {
+                                                    setActiveSkill(skill);
+                                                    setActiveSkillIndex(index);
+                                                    deleteSkill(index);
+                                                }}
+                                                className="text-3xl p-1  text-red-500 cursor-pointer"
+                                            />
+                                        </div>
                                     );
                                 })}
                             </div>
@@ -616,7 +850,7 @@ export default function Profile() {
                             {hasResume && (
                                 <span
                                     onClick={() => {
-                                        setShowResumeEditPopup(true);
+                                        resumeInput.current.click();
                                     }}
                                     className="text-primary-70 cursor-pointer"
                                 >
@@ -631,10 +865,119 @@ export default function Profile() {
                                     "mt-4 px-4 py-1 border border-solid border-my-gray-70  rounded-md flex flex-row flex-nowrap justify-start items-center"
                                 }
                             >
-                                <AiOutlineFileText />
-                                <span className="text-xs text-primary-70 p-2">
-                                    Resumer_{basicInfo.fname}
+                                <Link
+                                    href={resume}
+                                    target="_blank"
+                                    className="flex flex-row flex-nowrap justify-start items-center"
+                                >
+                                    <AiOutlineFileText />
+                                    <span className="text-xs text-primary-70 p-2">
+                                        Resume_{basicInfo.fname}
+                                    </span>
+                                    <MdOutlineOpenInNew className="ml-2 text-primary-70" />
+                                </Link>
+                                <input
+                                    ref={resumeInput}
+                                    className="hidden"
+                                    name="resume"
+                                    accept=".pdf,.doc,.docx"
+                                    type={"file"}
+                                    onChange={(e) => {
+                                        const value = e.target.files[0];
+                                        setUploadJobs((prevValues) => {
+                                            return {
+                                                ...prevValues,
+                                                resume: value,
+                                            };
+                                        });
+
+                                        updateResume();
+                                    }}
+                                />
+                            </div>
+                        )}
+
+                        {!hasResume && (
+                            <div
+                                onClick={() => {
+                                    router.push(
+                                        "/job-seeker/profile-setup/step4"
+                                    );
+                                }}
+                                className={
+                                    "mt-4 px-4 py-1 border border-solid border-my-gray-70  rounded-md flex flex-row flex-nowrap justify-start items-center cursor-pointer"
+                                }
+                            >
+                                <Image
+                                    src={"/plus-icon.svg"}
+                                    width={9}
+                                    height={9}
+                                    className="m-2"
+                                />
+                                <span className="text-xs text-primary-70">
+                                    Add
                                 </span>
+                            </div>
+                        )}
+                    </div>
+                    <div className="form-input-container ">
+                        <div className="flex flex-row justify-between p-2">
+                            <label className="form-label-light">
+                                Cerficiates / Other Documents
+                            </label>
+                            {hasOtherDocs && (
+                                <span
+                                    onClick={() => {
+                                        otherDocsInput.current.click();
+                                    }}
+                                    className="text-primary-70 cursor-pointer"
+                                >
+                                    Edit
+                                </span>
+                            )}
+                        </div>
+
+                        {hasOtherDocs && (
+                            <div
+                                className={
+                                    "mt-4 px-4 py-1 border border-solid border-my-gray-70  rounded-md flex flex-col justify-start items-start"
+                                }
+                            >
+                                {otherDocs.map((otherDoc, index) => {
+                                    return (
+                                        <Link
+                                            key={index}
+                                            href={otherDoc}
+                                            target="_blank"
+                                            className="flex flex-row flex-nowrap justify-start items-center"
+                                        >
+                                            <AiOutlineFileText />
+                                            <span className="text-xs text-primary-70 p-2">
+                                                Other Doc_{index + 1}
+                                            </span>
+                                            <MdOutlineOpenInNew className="ml-2 text-primary-70" />
+                                        </Link>
+                                    );
+                                })}
+                                <input
+                                    ref={otherDocsInput}
+                                    className="hidden"
+                                    name="other_docs[]"
+                                    accept=".pdf,.doc,.docx"
+                                    type={"file"}
+                                    multiple
+                                    onChange={(e) => {
+                                        const value = e.target.files;
+                                        console.log(value);
+                                        setUploadJobs((prevValues) => {
+                                            return {
+                                                ...prevValues,
+                                                others: value,
+                                            };
+                                        });
+                                        updateOtherDocs();
+                                    }}
+                                />
                             </div>
                         )}
 

@@ -4,13 +4,18 @@ import Image from "next/image";
 import Config from "../../../Config";
 import Utils from "../../../Utils";
 
-export default function AddSkillPopup({ showPopup, onClose, onSuccess }) {
+export default function EditSkillPopup({
+    showPopup,
+    onClose,
+    onSuccess,
+    skill: propSkill,
+}) {
     const selectEmptyValue = "Please Select";
 
     const [skill, setSkill] = useState({
-        name: "Javascript",
-        certification: "BSC. Computer Science",
-        proficiency: "Expert",
+        // name: "Javascript",
+        // certification: "BSC. Computer Science",
+        // proficiency: "Expert",
     });
 
     const [errors, setErrors] = useState({});
@@ -23,6 +28,12 @@ export default function AddSkillPopup({ showPopup, onClose, onSuccess }) {
             document.body.style.overflowY = "visible";
         }
     }, [showPopup]);
+
+    useEffect(() => {
+        if (propSkill) {
+            setSkill(propSkill);
+        }
+    }, [propSkill]);
 
     const onSave = (e) => {
         e.preventDefault();
@@ -50,22 +61,24 @@ export default function AddSkillPopup({ showPopup, onClose, onSuccess }) {
 
         Utils.makeRequest(async () => {
             try {
-                const skillsURL = `${Config.API_URL}/skills`;
+                const skillsURL = `${Config.API_URL}/skills/${propSkill.id}`;
 
-                let addSkillResults = await Utils.postForm(
+                let editSkillResults = await Utils.putForm(
                     skillsURL,
                     skillsFormData
                 );
 
-                addSkillResults = addSkillResults.data.data;
+                editSkillResults = editSkillResults.data.data;
 
-                console.log("Add Skill Results: ", addSkillResults);
+                console.log("edit Skill Results: ", editSkillResults);
 
                 setLoading(false);
 
-                onSuccess(addSkillResults);
+                setSkill(editSkillResults);
+
+                onSuccess(editSkillResults);
             } catch (error) {
-                console.log("Add Skill Error: ", error);
+                console.log("edit Skill Error: ", error);
 
                 setLoading(false);
             }
@@ -101,7 +114,7 @@ export default function AddSkillPopup({ showPopup, onClose, onSuccess }) {
                 <div className="fixed bg-my-gray-70 opacity-40 w-full h-full top-0 left-0 bottom-0 right-0 "></div>
                 <div className="z-50 fixed w-4/5 md:w-3/4 lg:w-2/3 left-1/2 -translate-x-1/2 top-0  p-10 bg-white opacity-100 rounded-10 shadow-md  my-10">
                     <p className="w-full flex flex-row justify-between flex-wrap-reverse items-center text-lg font-medium">
-                        <span>Add Skill</span>
+                        <span>Edit Skill</span>
                         <Image
                             onClick={onClose}
                             src={"/x-icon.svg"}
