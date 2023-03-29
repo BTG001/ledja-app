@@ -426,7 +426,7 @@ export default function Profile() {
                         {hasBasicInfo && (
                             <div
                                 className={
-                                    "mt-4 p-5 border border-solid border-my-gray-70  rounded-10 grid grid-cols-3 gap-3 "
+                                    "mt-4 p-5 border border-solid border-my-gray-70  rounded-10 md:grid md:grid-cols-3 md:gap-3 "
                                 }
                             >
                                 <div className="text-dark-50 grid grid-rows-4 gap-1 justify-center">
@@ -457,7 +457,7 @@ export default function Profile() {
                                         <span>Change</span>
                                     </p>
                                 </div>
-                                <div className="flex flex-col flex-nowrap justify-start items-start">
+                                <div className="flex flex-col flex-nowrap justify-center items-center md:justify-start md:items-start">
                                     <h3 className="font-medium text-xl text-dark-50 my-5">
                                         {basicInfo.fname || ""}{" "}
                                         {basicInfo.lname || ""}
@@ -923,7 +923,7 @@ export default function Profile() {
                     <div className="form-input-container ">
                         <div className="flex flex-row justify-between p-2">
                             <label className="form-label-light">
-                                Cerficiates / Other Documents
+                                Cerficates / Other Documents
                             </label>
                             {hasOtherDocs && (
                                 <span

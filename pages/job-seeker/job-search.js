@@ -21,6 +21,7 @@ export default function JobSearch() {
     const [activeJobIndex, setActiveJobIndex] = useState(0);
     const [filters, setFilters] = useState({});
     const [loading, setLoading] = useState(false);
+    const [jobsLoading, setJobsLoading] = useState(true);
 
     const [showErrorPopup, setShowErrorPopup] = useState(false);
     const [errorMessage, setErrorMessage] = useState("An Error Occured");
@@ -35,6 +36,7 @@ export default function JobSearch() {
     };
 
     const onSearch = () => {
+        setJobsLoading(true);
         if (loading) {
             return;
         } else {
@@ -70,15 +72,18 @@ export default function JobSearch() {
                 }
 
                 console.log("filter results: ", filterResults);
+                setJobsLoading(false);
                 setLoading(false);
             } catch (error) {
                 console.log("filter Error: ", error);
                 setLoading(false);
+                setJobsLoading(false);
             }
         });
     };
 
     async function fetchJobs(url) {
+        setJobsLoading(true);
         if (!url) {
             url = `${Config.API_URL}/jobs`;
         }
@@ -97,7 +102,9 @@ export default function JobSearch() {
             }
 
             console.log("user Jobs: ", theJobs);
+            setJobsLoading(false);
         } catch (error) {
+            setJobsLoading(false);
             console.log("user Jobs request error: ", error);
         }
     }
@@ -271,7 +278,7 @@ export default function JobSearch() {
             <p className="w-full h-1-px bg-my-gray-70 mt-5 mb-8"></p>
             <div className="w-4/5 mx-auto my-5">
                 {!jobs ||
-                    (jobs.length <= 0 && (
+                    (jobs.length <= 0 && !jobsLoading && (
                         <p className="w-full text-center text-lg">
                             No Jobs Yet!
                         </p>
@@ -282,8 +289,8 @@ export default function JobSearch() {
                         <p className="text-dark-50 py-3">
                             Recently posted jobs
                         </p>
-                        <div className="grid grid-cols-5 border-b border-x border-t  border-solid border-my-gray-70 min-h-40-screen rounded-sm mb-16">
-                            <sidebar className="col-span-2 h-full">
+                        <div className="md:grid md:grid-cols-5 border-b border-x border-t  border-solid border-my-gray-70 min-h-40-screen rounded-sm mb-16">
+                            <sidebar className="col-span-2 h-full flex flex-row flex-nowrap overflow-x-auto md:block p-2 md:p-0">
                                 {jobs.map((job, index) => {
                                     return (
                                         <div
@@ -292,7 +299,7 @@ export default function JobSearch() {
                                                 setActiveJobIndex(index);
                                             }}
                                             key={index}
-                                            className={`hover:bg-primary-40 cursor-pointer flex flex-row flex-nowrap justify-start items-center p-2  border-b border-solid border-my-gray-70
+                                            className={`min-w-60-screen sm:min-w-40-screen md:min-w-10-screen hover:bg-primary-40 cursor-pointer flex flex-row flex-nowrap justify-start items-center p-2  md:border-b border-solid border-my-gray-70
                                         ${
                                             activeJobIndex == index
                                                 ? "bg-my-gray-50"
@@ -346,7 +353,7 @@ export default function JobSearch() {
                                     );
                                 })}
                             </sidebar>
-                            <section className="col-span-3 p-4 border-l border-my-gray-70 border-solid">
+                            <section className="col-span-3 p-4 md:border-l border-t md:border-t-0 border-my-gray-70 border-solid">
                                 <h3 className="font-medium text-xl">
                                     {activeJob.title || ""}
                                 </h3>

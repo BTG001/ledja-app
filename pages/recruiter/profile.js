@@ -401,7 +401,7 @@ export default function Profile() {
                         {hasCompanyInfo && (
                             <div
                                 className={
-                                    "mt-4 p-5 border border-solid border-my-gray-70  rounded-10 grid grid-cols-3 gap-3 "
+                                    "mt-4 p-5 border border-solid border-my-gray-70  rounded-10 md:grid md:grid-cols-3 md:gap-3 "
                                 }
                             >
                                 <div className="text-dark-50 grid grid-rows-5 gap-1 justify-center">
@@ -432,7 +432,7 @@ export default function Profile() {
                                         <span>Change</span>
                                     </p>
                                 </div>
-                                <div className="flex flex-col flex-nowrap justify-start items-start">
+                                <div className="flex flex-col flex-nowrap justify-start items-start w-max md:w-full m-auto">
                                     <h3 className="font-medium text-xl text-dark-50 my-5"></h3>
                                     <p className="text-sm text-dark-50">
                                         {basicInfo.company_name || ""}
@@ -725,7 +725,7 @@ export default function Profile() {
                         {hasContactInfo && (
                             <div
                                 className={
-                                    "mt-4 p-5 border border-solid border-my-gray-70  rounded-10 grid grid-cols-3 gap-3 "
+                                    "mt-4 p-5 border border-solid border-my-gray-70  rounded-10 md:grid md:grid-cols-3 md:gap-3 "
                                 }
                             >
                                 <div className="text-dark-50 grid grid-rows-5 gap-1 justify-center">
@@ -756,7 +756,7 @@ export default function Profile() {
                                         <span>Change</span>
                                     </p>
                                 </div>
-                                <div className="flex flex-col flex-nowrap justify-start items-start">
+                                <div className="flex flex-col flex-nowrap justify-center items-center md:justify-start md:items-start">
                                     <h3 className="font-medium text-xl text-dark-50 my-5">
                                         {aboutRecruiter.fname}{" "}
                                         {aboutRecruiter.lname}

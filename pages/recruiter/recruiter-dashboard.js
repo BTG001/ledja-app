@@ -68,7 +68,7 @@ export default function RecruiterDashbaord() {
     return (
         <>
             <RecruiterNavbar />
-            <section className="w-4/5 mx-auto my-5">
+            <section className="md:w-4/5 w-5/6 mx-auto my-5">
                 <div className="my-16">
                     <h1 className="text-dark-50 text-3xl text-left font-zilla-slab capitalize my-3">
                         {fname ? ` Welcome, ${fname}!` : "Welcome!"}
@@ -192,12 +192,12 @@ export default function RecruiterDashbaord() {
                         </p>
                     </div>
                 </div>
-                <div className="md:grid md:grid-cols-2 shadow-md my-3 p-4 rounded-10 min-h-20-screen flex border border-solid border-my-gray-40">
+                <div className="md:grid md:grid-cols-2 shadow-md my-3 p-4 rounded-10 min-h-20-screen border border-solid border-my-gray-40">
                     <div>
-                        <p className="text-sm left ">
+                        <p className="text-sm text-center md:text-left ">
                             Advertise your jobs in your social networks
                         </p>
-                        <div className="border border-solid border-my-gray-70 my-3 px-4 py-2 rounded-md flex flex-row flex-nowrap justify-between items-center">
+                        <div className="border border-solid border-my-gray-70 my-3 px-4 py-2 rounded-md flex flex-row flex-wrap justify-between items-center">
                             <span className="text-my-gray-70 text-xs">
                                 https://www.ledja.co.ke/employer/sign-up?ref=064d8569
                             </span>

@@ -88,3 +88,18 @@ body {
         transform: rotate(360deg);
     }
 }
+
+::-webkit-scrollbar {
+    @apply w-1 h-0;
+}
+
+::-webkit-scrollbar-track {
+    margin-block: 0.5em;
+    border-radius: 100vw;
+    background: white;
+}
+
+::-webkit-scrollbar-thumb {
+    border-radius: 100vw;
+    background-color: #c4c9d2;
+}
