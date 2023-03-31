@@ -12,6 +12,7 @@ import Utils from "../../Utils";
 import axios from "axios";
 import { BsBuilding } from "react-icons/bs";
 import ErrorPopup from "../../components/errorPopup";
+import SearchJobsJobsSkeletonLoader from "../../components/skeleton-loaders/search-jobs-jobs-loader";
 
 export default function JobSearch() {
     const [showApplyPopup, setShowApplyPopup] = useState(false);
@@ -277,12 +278,11 @@ export default function JobSearch() {
             </div>
             <p className="w-full h-1-px bg-my-gray-70 mt-5 mb-8"></p>
             <div className="w-4/5 mx-auto my-5">
-                {!jobs ||
-                    (jobs.length <= 0 && !jobsLoading && (
-                        <p className="w-full text-center text-lg">
-                            No Jobs Yet!
-                        </p>
-                    ))}
+                {jobsLoading && <SearchJobsJobsSkeletonLoader />}
+                {(!jobs || jobs.length <= 0) && !jobsLoading && (
+                    <p className="w-full text-center text-lg">No Jobs Yet!</p>
+                )}
+
                 {jobs && jobs.length > 0 && (
                     <>
                         {" "}
@@ -386,12 +386,12 @@ export default function JobSearch() {
                                 </p>
                                 <div className="flex flex-row flex-wrap justify-start items-center my-3">
                                     <p
-                                        className="w-max my-2 mx-4 py-2 px-5 bg-primary-70 text-white rounded-10 cursor-pointer"
+                                        className="w-max my-2 mr-4 py-2 px-5 bg-primary-70 text-white rounded-10 cursor-pointer"
                                         onClick={onApply}
                                     >
                                         Apply
                                     </p>
-                                    <p className="w-max my-2 mx-4 py-2 px-5 bg-white text-primary-70 border border-solid border-primary-70 hover:border-primary-60 rounded-10">
+                                    <p className="w-max my-2 mr-4 py-2 px-5 bg-white text-primary-70 border border-solid border-primary-70 hover:border-primary-60 rounded-10">
                                         Save
                                     </p>
                                 </div>

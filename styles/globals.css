@@ -103,3 +103,16 @@ body {
     border-radius: 100vw;
     background-color: #c4c9d2;
 }
+
+@keyframes shine {
+    to {
+        background-position-x: -200%;
+    }
+}
+
+.skeleton-loading {
+    background: #e7edf2;
+    background: linear-gradient(110deg, #ececec 8%, #f5f5f5 18%, #ececec 33%);
+    background-size: 200% 100%;
+    animation: 1.5s shine linear infinite;
+}

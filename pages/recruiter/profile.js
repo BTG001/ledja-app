@@ -19,6 +19,7 @@ import CompanyCultureEditPopup from "../../components/recuriters/profile-edit/co
 import RecruiterInfoEditPopup from "../../components/recuriters/profile-edit/recruiter-info-edit-popup";
 import { RiImageEditFill } from "react-icons/ri";
 import { AuthContext } from "../_app";
+import RecruiterProfileLoader from "../../components/skeleton-loaders/recruiter-profile-loader";
 
 export default function Profile() {
     const router = useRouter();
@@ -72,6 +73,8 @@ export default function Profile() {
     const [recruiterAvatar, setRecruiterAvatar] = useState();
     const [companyAvatar, setCompanyAvatar] = useState();
 
+    const [profileLoading, setProfileLoading] = useState(false);
+
     useEffect(() => {
         if (basicInfoUpdateSuccess && linksUpdateSuccess) {
             setShowBasicInfoEditPopup(false);
@@ -86,6 +89,7 @@ export default function Profile() {
     }, []);
 
     async function fetchRecruiter() {
+        setProfileLoading(true);
         try {
             const userId = localStorage.getItem("user_id");
             const url = `${Config.API_URL}/users/${userId}`;
@@ -138,6 +142,7 @@ export default function Profile() {
             console.log("recruiter: ", recruiter);
 
             if (alreadyShowedIncompletePopups) {
+                setProfileLoading(false);
                 return;
             }
 
@@ -165,7 +170,9 @@ export default function Profile() {
             }
 
             setAlreadyShowedIncompletePopups(true);
+            setProfileLoading(false);
         } catch (error) {
+            setProfileLoading(false);
             console.log("recruiter profile Error: ", error);
         }
     }
@@ -381,460 +388,162 @@ export default function Profile() {
 
             <RecruiterNavbar icon={"user"} dashboardLinks={false} />
             <div className="w-4/5 md:grid grid-cols-3 md:gap-4  mt-5 mb-32 mx-auto md:grid-flow-dense md:dire ">
-                <section className="col-span-2">
-                    <div className="form-input-container ">
-                        <p className="flex flex-row flex-nowrap justify-between items-center w-full p-2">
-                            <label className="font-medium text-my-gray-70">
-                                Basic Info
-                            </label>
+                {profileLoading && (
+                    <section className="col-span-2">
+                        <RecruiterProfileLoader />
+                    </section>
+                )}
+                {!profileLoading && (
+                    <section className="col-span-2">
+                        <div className="form-input-container ">
+                            <p className="flex flex-row flex-nowrap justify-between items-center w-full p-2">
+                                <label className="font-medium text-my-gray-70">
+                                    Basic Info
+                                </label>
+                                {hasCompanyInfo && (
+                                    <span
+                                        onClick={() => {
+                                            setShowBasicInfoEditPopup(true);
+                                        }}
+                                        className="text-primary-70 cursor-pointer"
+                                    >
+                                        Edit
+                                    </span>
+                                )}
+                            </p>
                             {hasCompanyInfo && (
-                                <span
-                                    onClick={() => {
-                                        setShowBasicInfoEditPopup(true);
-                                    }}
-                                    className="text-primary-70 cursor-pointer"
+                                <div
+                                    className={
+                                        "mt-4 p-5 border border-solid border-my-gray-70  rounded-10 md:grid md:grid-cols-3 md:gap-3 "
+                                    }
                                 >
-                                    Edit
-                                </span>
-                            )}
-                        </p>
-                        {hasCompanyInfo && (
-                            <div
-                                className={
-                                    "mt-4 p-5 border border-solid border-my-gray-70  rounded-10 md:grid md:grid-cols-3 md:gap-3 "
-                                }
-                            >
-                                <div className="text-dark-50 grid grid-rows-5 gap-1 justify-center">
-                                    <p className="flex justify-center items-center row-span-5">
-                                        {!hasCompanyAvatar && (
-                                            <BsBuilding className="h-32 text-center block w-full" />
-                                        )}
+                                    <div className="text-dark-50 grid grid-rows-5 gap-1 justify-center">
+                                        <p className="flex justify-center items-center row-span-5">
+                                            {!hasCompanyAvatar && (
+                                                <BsBuilding className="h-32 text-center block w-full" />
+                                            )}
 
-                                        {hasCompanyAvatar && (
-                                            <Image
-                                                src={companyAvatar}
-                                                width={160}
-                                                height={120}
-                                                className="flex justify-center items-center rounded-sm"
-                                            />
-                                        )}
-                                    </p>
+                                            {hasCompanyAvatar && (
+                                                <Image
+                                                    src={companyAvatar}
+                                                    width={160}
+                                                    height={120}
+                                                    className="flex justify-center items-center rounded-sm"
+                                                />
+                                            )}
+                                        </p>
 
-                                    <p
-                                        onClick={onWantToChangeCompanyAvatar}
-                                        className="mx-2 cursor-pointer text-white py-1 px-2 bg-primary-70 flex flex-row flex-nowrap justify-center items-center rounded-lg"
-                                    >
-                                        <RiImageEditFill
-                                            className="text-3xl block cursor-pointer m-1"
-                                            width={10}
-                                            height={10}
-                                        />
-                                        <span>Change</span>
-                                    </p>
-                                </div>
-                                <div className="flex flex-col flex-nowrap justify-start items-start w-max md:w-full m-auto">
-                                    <h3 className="font-medium text-xl text-dark-50 my-5"></h3>
-                                    <p className="text-sm text-dark-50">
-                                        {basicInfo.company_name || ""}
-                                    </p>
-                                    <p className="text-sm text-dark-50">
-                                        {basicInfo.location || ""}
-                                    </p>
-                                    <p className="grid grid-cols-2 gap-2 w-fit mt-5 mb-2">
-                                        <span className="text-primary-70 text-sm">
-                                            Website
-                                        </span>
-                                        <Link
-                                            target={"_blank"}
-                                            className="underline"
-                                            href={links.websites || ""}
+                                        <p
+                                            onClick={
+                                                onWantToChangeCompanyAvatar
+                                            }
+                                            className="mx-2 cursor-pointer text-white py-1 px-2 bg-primary-70 flex flex-row flex-nowrap justify-center items-center rounded-lg"
                                         >
-                                            {links.websites || ""}
-                                        </Link>
-                                    </p>
-
-                                    <p className="grid grid-cols-2 gap-2 w-fit mt-5 mb-2">
-                                        <span className="text-primary-70 text-sm">
-                                            Founded
-                                        </span>
-                                        <span className="text-sm">
-                                            {basicInfo.founded_on || ""}
-                                        </span>
-                                    </p>
-                                    <p className="grid grid-cols-3 gap-2 w-fit mt-5 mb-2">
-                                        <span className="text-primary-70 text-sm">
-                                            Size
-                                        </span>
-                                        <span className="text-sm line row-span-2">
-                                            {basicInfo.company_size || ""}
-                                        </span>
-                                    </p>
-                                    <p className="grid grid-cols-2 gap-2 w-fit mt-5 mb-2">
-                                        <span className="text-primary-70 text-sm">
-                                            Revenue
-                                        </span>
-                                        <span className="text-sm">
-                                            {basicInfo.revenue || ""}
-                                        </span>
-                                    </p>
-                                </div>
-
-                                <div className="flex flex-row flex-nowrap justify-center items-start my-3">
-                                    <div className="flex justify-center items-center  mx-2">
-                                        <Link
-                                            target={"_blank"}
-                                            className="flex justify-center items-center w-8 h-8 rounded-full bg-my-gray-50"
-                                            href={links.linked_in || ""}
-                                        >
-                                            <Image
-                                                src={"/linkedin.svg"}
-                                                width={14}
-                                                height={9}
+                                            <RiImageEditFill
+                                                className="text-3xl block cursor-pointer m-1"
+                                                width={10}
+                                                height={10}
                                             />
-                                        </Link>
+                                            <span>Change</span>
+                                        </p>
                                     </div>
-                                    <div className="flex justify-center items-center mx-2">
-                                        <Link
-                                            target={"_blank"}
-                                            className="flex justify-center items-center w-8 h-8 rounded-full bg-my-gray-50"
-                                            href={links.twitter || ""}
-                                        >
-                                            <Image
-                                                src={"/twitter.svg"}
-                                                width={13}
-                                                height={11}
-                                            />
-                                        </Link>
+                                    <div className="flex flex-col flex-nowrap justify-start items-start w-max md:w-full m-auto">
+                                        <h3 className="font-medium text-xl text-dark-50 my-5"></h3>
+                                        <p className="text-sm text-dark-50">
+                                            {basicInfo.company_name || ""}
+                                        </p>
+                                        <p className="text-sm text-dark-50">
+                                            {basicInfo.location || ""}
+                                        </p>
+                                        <p className="grid grid-cols-2 gap-2 w-fit mt-5 mb-2">
+                                            <span className="text-primary-70 text-sm">
+                                                Website
+                                            </span>
+                                            <Link
+                                                target={"_blank"}
+                                                className="underline"
+                                                href={links.websites || ""}
+                                            >
+                                                {links.websites || ""}
+                                            </Link>
+                                        </p>
+
+                                        <p className="grid grid-cols-2 gap-2 w-fit mt-5 mb-2">
+                                            <span className="text-primary-70 text-sm">
+                                                Founded
+                                            </span>
+                                            <span className="text-sm">
+                                                {basicInfo.founded_on || ""}
+                                            </span>
+                                        </p>
+                                        <p className="grid grid-cols-3 gap-2 w-fit mt-5 mb-2">
+                                            <span className="text-primary-70 text-sm">
+                                                Size
+                                            </span>
+                                            <span className="text-sm line row-span-2">
+                                                {basicInfo.company_size || ""}
+                                            </span>
+                                        </p>
+                                        <p className="grid grid-cols-2 gap-2 w-fit mt-5 mb-2">
+                                            <span className="text-primary-70 text-sm">
+                                                Revenue
+                                            </span>
+                                            <span className="text-sm">
+                                                {basicInfo.revenue || ""}
+                                            </span>
+                                        </p>
                                     </div>
-                                    <div className="flex justify-center items-center  mx-2">
-                                        <Link
-                                            target={"_blank"}
-                                            className="flex justify-center items-center w-8 h-8 rounded-full bg-my-gray-50"
-                                            href={links.facebook || ""}
-                                        >
-                                            <Image
-                                                src={"/facebook.svg"}
-                                                width={8}
-                                                height={6}
-                                            />
-                                        </Link>
-                                    </div>
-                                </div>
-                            </div>
-                        )}
-                    </div>
 
-                    {!hasCompanyInfo && (
-                        <div
-                            onClick={() => {
-                                router.push("/recruiter/profile-setup/step1");
-                            }}
-                            className={
-                                "mt-4 px-4 py-1 border border-solid border-my-gray-70  rounded-md flex flex-row flex-nowrap justify-start items-center cursor-pointer"
-                            }
-                        >
-                            <Image
-                                src={"/plus-icon.svg"}
-                                width={9}
-                                height={9}
-                                className="m-2"
-                            />
-                            <span className="text-xs text-primary-70">
-                                Add company basic information and social links
-                            </span>
-                        </div>
-                    )}
-                    <div className="form-input-container ">
-                        <div className="flex flex-row flex-nowrap justify-between items-center w-full p-2">
-                            <p className="text-my-gray-70 font-medium">
-                                Company introduction
-                            </p>
-                            {hasCompanyIntro && (
-                                <span
-                                    onClick={() => {
-                                        setShowCompanyIntroEditPopup(true);
-                                    }}
-                                    className="text-primary-70 cursor-pointer"
-                                >
-                                    Edit
-                                </span>
-                            )}
-                        </div>
-
-                        {hasCompanyIntro && (
-                            <div
-                                className={
-                                    "mt-4 px-4 py-1 border border-solid border-my-gray-70  rounded-md flex flex-row flex-nowrap justify-start items-center"
-                                }
-                            >
-                                <p>{moreAboutCompany.company_intro || ""}</p>
-                            </div>
-                        )}
-                        {!hasCompanyIntro && (
-                            <div
-                                onClick={() => {
-                                    router.push(
-                                        "/recruiter/profile-setup/step3"
-                                    );
-                                }}
-                                className={
-                                    "mt-4 px-4 py-1 border border-solid border-my-gray-70  rounded-md flex flex-row flex-nowrap justify-start items-center cursor-pointer"
-                                }
-                            >
-                                <Image
-                                    src={"/plus-icon.svg"}
-                                    width={9}
-                                    height={9}
-                                    className="m-2"
-                                />
-                                <span className="text-xs text-primary-70">
-                                    Add
-                                </span>
-                            </div>
-                        )}
-                    </div>
-
-                    <div className="form-input-container ">
-                        <div className="flex flex-row flex-nowrap justify-between items-center w-full p-2">
-                            <p className="text-my-gray-70 font-medium">
-                                Culture & Values
-                            </p>
-                            {hasCompanyCulture && (
-                                <span
-                                    onClick={() => {
-                                        setShowCompanyCultureEditPopup(true);
-                                    }}
-                                    className="text-primary-70 cursor-pointer"
-                                >
-                                    Edit
-                                </span>
-                            )}
-                        </div>
-
-                        {hasCompanyCulture && (
-                            <div
-                                className={
-                                    "mt-4 px-4 py-1 border border-solid border-my-gray-70  rounded-md flex flex-row flex-nowrap justify-start items-center"
-                                }
-                            >
-                                <p>{moreAboutCompany.company_culture || ""}</p>
-                            </div>
-                        )}
-                        {!hasCompanyCulture && (
-                            <div
-                                onClick={() => {
-                                    router.push(
-                                        "/recruiter/profile-setup/step3"
-                                    );
-                                }}
-                                className={
-                                    "mt-4 px-4 py-1 border border-solid border-my-gray-70  rounded-md flex flex-row flex-nowrap justify-start items-center cursor-pointer"
-                                }
-                            >
-                                <Image
-                                    src={"/plus-icon.svg"}
-                                    width={9}
-                                    height={9}
-                                    className="m-2"
-                                />
-                                <span className="text-xs text-primary-70">
-                                    Add
-                                </span>
-                            </div>
-                        )}
-                    </div>
-                    <div className="flex flex-row flex-nowrap justify-between items-center w-full p-2">
-                        <p className="text-my-gray-70 font-medium">
-                            Jobs Available
-                        </p>
-                        {/* <span className="text-primary-70">Edit</span> */}
-                    </div>
-                    <div className="form-input-container border border-solid rounded-md border-my-gray-70 py-2 px-4 my-3">
-                        {jobs &&
-                            jobs.map((job, index) => {
-                                return (
-                                    <div
-                                        key={index}
-                                        className="grid grid-cols-4 my-3 gap-1 items-center md:w-1/2"
-                                    >
-                                        {!hasCompanyAvatar && (
-                                            <BsBuilding className="w-20 h-20 p-3" />
-                                        )}
-
-                                        {hasCompanyAvatar && (
-                                            <Image
-                                                src={companyAvatar}
-                                                width={100}
-                                                height={80}
-                                                className="flex justify-center items-center rounded-sm"
-                                            />
-                                        )}
-                                        <div className="col-span-3 flex flex-col flex-nowrap justify-start items-start ">
-                                            <h2 className=" mb-2">
-                                                {job.title}
-                                            </h2>
-                                            <p className="text-sm text-my-gray-70">
-                                                {job.location} ({job.type})
-                                            </p>
+                                    <div className="flex flex-row flex-nowrap justify-center items-start my-3">
+                                        <div className="flex justify-center items-center  mx-2">
+                                            <Link
+                                                target={"_blank"}
+                                                className="flex justify-center items-center w-8 h-8 rounded-full bg-my-gray-50"
+                                                href={links.linked_in || ""}
+                                            >
+                                                <Image
+                                                    src={"/linkedin.svg"}
+                                                    width={14}
+                                                    height={9}
+                                                />
+                                            </Link>
+                                        </div>
+                                        <div className="flex justify-center items-center mx-2">
+                                            <Link
+                                                target={"_blank"}
+                                                className="flex justify-center items-center w-8 h-8 rounded-full bg-my-gray-50"
+                                                href={links.twitter || ""}
+                                            >
+                                                <Image
+                                                    src={"/twitter.svg"}
+                                                    width={13}
+                                                    height={11}
+                                                />
+                                            </Link>
+                                        </div>
+                                        <div className="flex justify-center items-center  mx-2">
+                                            <Link
+                                                target={"_blank"}
+                                                className="flex justify-center items-center w-8 h-8 rounded-full bg-my-gray-50"
+                                                href={links.facebook || ""}
+                                            >
+                                                <Image
+                                                    src={"/facebook.svg"}
+                                                    width={8}
+                                                    height={6}
+                                                />
+                                            </Link>
                                         </div>
                                     </div>
-                                );
-                            })}
-                        {!jobs ||
-                            (jobs.length < 1 && (
-                                <p className="text-primary-70 text-center py-2">
-                                    You have not posted any jobs yet!
-                                </p>
-                            ))}
-
-                        <div
-                            onClick={() => {
-                                router.push("/recruiter/job-posting/step1");
-                            }}
-                            className={
-                                "mt-4 px-4 py-1 flex flex-row flex-nowrap justify-start items-center cursor-pointer"
-                            }
-                        >
-                            <Image
-                                src={"/plus-icon.svg"}
-                                width={9}
-                                height={9}
-                                className="m-2"
-                            />
-                            <span className="text-xs text-primary-70">
-                                Post new jobs
-                            </span>
-                        </div>
-                    </div>
-                    <div className="form-input-container ">
-                        <p className="flex flex-row flex-nowrap justify-between items-center w-full p-2">
-                            <label className=" font-medium text-my-gray-70">
-                                Contact Info
-                            </label>
-                            {hasContactInfo && (
-                                <span
-                                    onClick={() => {
-                                        setShowContactInfoEditPopup(true);
-                                    }}
-                                    className="text-primary-70 cursor-pointer"
-                                >
-                                    Edit
-                                </span>
+                                </div>
                             )}
-                        </p>
-                        {hasContactInfo && (
-                            <div
-                                className={
-                                    "mt-4 p-5 border border-solid border-my-gray-70  rounded-10 md:grid md:grid-cols-3 md:gap-3 "
-                                }
-                            >
-                                <div className="text-dark-50 grid grid-rows-5 gap-1 justify-center">
-                                    <p className="flex justify-center items-center row-span-4">
-                                        {!hasRecruiterAvatar && (
-                                            <BiUserCircle className="h-32 text-center block w-full" />
-                                        )}
+                        </div>
 
-                                        {hasRecruiterAvatar && (
-                                            <Image
-                                                src={recruiterAvatar}
-                                                width={160}
-                                                height={120}
-                                                className="flex justify-center items-center rounded-sm"
-                                            />
-                                        )}
-                                    </p>
-
-                                    <p
-                                        onClick={onWantToChangeRecruiterAvatar}
-                                        className="mx-2 cursor-pointer text-white px-2 bg-primary-70 flex flex-row flex-nowrap justify-center items-center rounded-lg"
-                                    >
-                                        <RiImageEditFill
-                                            className="text-3xl block cursor-pointer m-1"
-                                            width={10}
-                                            height={10}
-                                        />
-                                        <span>Change</span>
-                                    </p>
-                                </div>
-                                <div className="flex flex-col flex-nowrap justify-center items-center md:justify-start md:items-start">
-                                    <h3 className="font-medium text-xl text-dark-50 my-5">
-                                        {aboutRecruiter.fname}{" "}
-                                        {aboutRecruiter.lname}
-                                    </h3>
-                                    <p className="text-sm text-dark-50">
-                                        {aboutRecruiter.company_position}
-                                    </p>
-                                    {/* <p className="text-sm text-dark-50">
-                                    Nairobi, Kenya
-                                </p> */}
-                                    <p className="flex flex-row flex-nowrap justify-between items-center my-5 ">
-                                        <Image
-                                            src={"/email.svg"}
-                                            width={20}
-                                            height={20}
-                                            className="mr-3"
-                                        />
-                                        <Image
-                                            src={"/phone.svg"}
-                                            width={20}
-                                            height={20}
-                                            className="ml-3"
-                                        />
-                                    </p>
-                                    <SecondaryBtn
-                                        text={"Message"}
-                                        path="/message"
-                                    />
-                                </div>
-
-                                <div className="flex flex-row flex-nowrap justify-center items-start my-3">
-                                    <div className="flex justify-center items-center  mx-2">
-                                        <Link
-                                            target={"_blank"}
-                                            className="flex justify-center items-center w-8 h-8 rounded-full bg-my-gray-50"
-                                            href={links.linked_in || ""}
-                                        >
-                                            <Image
-                                                src={"/linkedin.svg"}
-                                                width={14}
-                                                height={9}
-                                            />
-                                        </Link>
-                                    </div>
-                                    <div className="flex justify-center items-center  mx-2">
-                                        <Link
-                                            target={"_blank"}
-                                            className="flex justify-center items-center w-8 h-8 rounded-full bg-my-gray-50"
-                                            href={links.twitter || ""}
-                                        >
-                                            <Image
-                                                src={"/twitter.svg"}
-                                                width={13}
-                                                height={11}
-                                            />
-                                        </Link>
-                                    </div>
-                                    <div className="flex justify-center items-center  mx-2">
-                                        <Link
-                                            target={"_blank"}
-                                            className="flex justify-center items-center w-8 h-8 rounded-full bg-my-gray-50"
-                                            href={links.facebook || ""}
-                                        >
-                                            <Image
-                                                src={"/facebook.svg"}
-                                                width={8}
-                                                height={6}
-                                            />
-                                        </Link>
-                                    </div>
-                                </div>
-                            </div>
-                        )}
-                        {!hasContactInfo && (
+                        {!hasCompanyInfo && (
                             <div
                                 onClick={() => {
                                     router.push(
-                                        "/recruiter/profile-setup/step4"
+                                        "/recruiter/profile-setup/step1"
                                     );
                                 }}
                                 className={
@@ -848,12 +557,330 @@ export default function Profile() {
                                     className="m-2"
                                 />
                                 <span className="text-xs text-primary-70">
-                                    Add your contact info
+                                    Add company basic information and social
+                                    links
                                 </span>
                             </div>
                         )}
-                    </div>
-                </section>
+                        <div className="form-input-container ">
+                            <div className="flex flex-row flex-nowrap justify-between items-center w-full p-2">
+                                <p className="text-my-gray-70 font-medium">
+                                    Company introduction
+                                </p>
+                                {hasCompanyIntro && (
+                                    <span
+                                        onClick={() => {
+                                            setShowCompanyIntroEditPopup(true);
+                                        }}
+                                        className="text-primary-70 cursor-pointer"
+                                    >
+                                        Edit
+                                    </span>
+                                )}
+                            </div>
+
+                            {hasCompanyIntro && (
+                                <div
+                                    className={
+                                        "mt-4 px-4 py-1 border border-solid border-my-gray-70  rounded-md flex flex-row flex-nowrap justify-start items-center"
+                                    }
+                                >
+                                    <p>
+                                        {moreAboutCompany.company_intro || ""}
+                                    </p>
+                                </div>
+                            )}
+                            {!hasCompanyIntro && (
+                                <div
+                                    onClick={() => {
+                                        router.push(
+                                            "/recruiter/profile-setup/step3"
+                                        );
+                                    }}
+                                    className={
+                                        "mt-4 px-4 py-1 border border-solid border-my-gray-70  rounded-md flex flex-row flex-nowrap justify-start items-center cursor-pointer"
+                                    }
+                                >
+                                    <Image
+                                        src={"/plus-icon.svg"}
+                                        width={9}
+                                        height={9}
+                                        className="m-2"
+                                    />
+                                    <span className="text-xs text-primary-70">
+                                        Add
+                                    </span>
+                                </div>
+                            )}
+                        </div>
+
+                        <div className="form-input-container ">
+                            <div className="flex flex-row flex-nowrap justify-between items-center w-full p-2">
+                                <p className="text-my-gray-70 font-medium">
+                                    Culture & Values
+                                </p>
+                                {hasCompanyCulture && (
+                                    <span
+                                        onClick={() => {
+                                            setShowCompanyCultureEditPopup(
+                                                true
+                                            );
+                                        }}
+                                        className="text-primary-70 cursor-pointer"
+                                    >
+                                        Edit
+                                    </span>
+                                )}
+                            </div>
+
+                            {hasCompanyCulture && (
+                                <div
+                                    className={
+                                        "mt-4 px-4 py-1 border border-solid border-my-gray-70  rounded-md flex flex-row flex-nowrap justify-start items-center"
+                                    }
+                                >
+                                    <p>
+                                        {moreAboutCompany.company_culture || ""}
+                                    </p>
+                                </div>
+                            )}
+                            {!hasCompanyCulture && (
+                                <div
+                                    onClick={() => {
+                                        router.push(
+                                            "/recruiter/profile-setup/step3"
+                                        );
+                                    }}
+                                    className={
+                                        "mt-4 px-4 py-1 border border-solid border-my-gray-70  rounded-md flex flex-row flex-nowrap justify-start items-center cursor-pointer"
+                                    }
+                                >
+                                    <Image
+                                        src={"/plus-icon.svg"}
+                                        width={9}
+                                        height={9}
+                                        className="m-2"
+                                    />
+                                    <span className="text-xs text-primary-70">
+                                        Add
+                                    </span>
+                                </div>
+                            )}
+                        </div>
+                        <div className="flex flex-row flex-nowrap justify-between items-center w-full p-2">
+                            <p className="text-my-gray-70 font-medium">
+                                Jobs Available
+                            </p>
+                            {/* <span className="text-primary-70">Edit</span> */}
+                        </div>
+                        <div className="form-input-container border border-solid rounded-md border-my-gray-70 py-2 px-4 my-3">
+                            {jobs &&
+                                jobs.map((job, index) => {
+                                    return (
+                                        <div
+                                            key={index}
+                                            className="grid grid-cols-4 my-3 gap-1 items-center md:w-1/2"
+                                        >
+                                            {!hasCompanyAvatar && (
+                                                <BsBuilding className="w-20 h-20 p-3" />
+                                            )}
+
+                                            {hasCompanyAvatar && (
+                                                <Image
+                                                    src={companyAvatar}
+                                                    width={100}
+                                                    height={80}
+                                                    className="flex justify-center items-center rounded-sm"
+                                                />
+                                            )}
+                                            <div className="col-span-3 flex flex-col flex-nowrap justify-start items-start ">
+                                                <h2 className=" mb-2">
+                                                    {job.title}
+                                                </h2>
+                                                <p className="text-sm text-my-gray-70">
+                                                    {job.location} ({job.type})
+                                                </p>
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            {!jobs ||
+                                (jobs.length < 1 && (
+                                    <p className="text-primary-70 text-center py-2">
+                                        You have not posted any jobs yet!
+                                    </p>
+                                ))}
+
+                            <div
+                                onClick={() => {
+                                    router.push("/recruiter/job-posting/step1");
+                                }}
+                                className={
+                                    "mt-4 px-4 py-1 flex flex-row flex-nowrap justify-start items-center cursor-pointer"
+                                }
+                            >
+                                <Image
+                                    src={"/plus-icon.svg"}
+                                    width={9}
+                                    height={9}
+                                    className="m-2"
+                                />
+                                <span className="text-xs text-primary-70">
+                                    Post new jobs
+                                </span>
+                            </div>
+                        </div>
+                        <div className="form-input-container ">
+                            <p className="flex flex-row flex-nowrap justify-between items-center w-full p-2">
+                                <label className=" font-medium text-my-gray-70">
+                                    Contact Info
+                                </label>
+                                {hasContactInfo && (
+                                    <span
+                                        onClick={() => {
+                                            setShowContactInfoEditPopup(true);
+                                        }}
+                                        className="text-primary-70 cursor-pointer"
+                                    >
+                                        Edit
+                                    </span>
+                                )}
+                            </p>
+                            {hasContactInfo && (
+                                <div
+                                    className={
+                                        "mt-4 p-5 border border-solid border-my-gray-70  rounded-10 md:grid md:grid-cols-3 md:gap-3 "
+                                    }
+                                >
+                                    <div className="text-dark-50 grid grid-rows-5 gap-1 justify-center">
+                                        <p className="flex justify-center items-center row-span-4">
+                                            {!hasRecruiterAvatar && (
+                                                <BiUserCircle className="h-32 text-center block w-full" />
+                                            )}
+
+                                            {hasRecruiterAvatar && (
+                                                <Image
+                                                    src={recruiterAvatar}
+                                                    width={160}
+                                                    height={120}
+                                                    className="flex justify-center items-center rounded-sm"
+                                                />
+                                            )}
+                                        </p>
+
+                                        <p
+                                            onClick={
+                                                onWantToChangeRecruiterAvatar
+                                            }
+                                            className="mx-2 cursor-pointer text-white px-2 bg-primary-70 flex flex-row flex-nowrap justify-center items-center rounded-lg"
+                                        >
+                                            <RiImageEditFill
+                                                className="text-3xl block cursor-pointer m-1"
+                                                width={10}
+                                                height={10}
+                                            />
+                                            <span>Change</span>
+                                        </p>
+                                    </div>
+                                    <div className="flex flex-col flex-nowrap justify-center items-center md:justify-start md:items-start">
+                                        <h3 className="font-medium text-xl text-dark-50 my-5">
+                                            {aboutRecruiter.fname}{" "}
+                                            {aboutRecruiter.lname}
+                                        </h3>
+                                        <p className="text-sm text-dark-50">
+                                            {aboutRecruiter.company_position}
+                                        </p>
+                                        {/* <p className="text-sm text-dark-50">
+                                    Nairobi, Kenya
+                                </p> */}
+                                        <p className="flex flex-row flex-nowrap justify-between items-center my-5 ">
+                                            <Image
+                                                src={"/email.svg"}
+                                                width={20}
+                                                height={20}
+                                                className="mr-3"
+                                            />
+                                            <Image
+                                                src={"/phone.svg"}
+                                                width={20}
+                                                height={20}
+                                                className="ml-3"
+                                            />
+                                        </p>
+                                        <SecondaryBtn
+                                            text={"Message"}
+                                            path="/message"
+                                        />
+                                    </div>
+
+                                    <div className="flex flex-row flex-nowrap justify-center items-start my-3">
+                                        <div className="flex justify-center items-center  mx-2">
+                                            <Link
+                                                target={"_blank"}
+                                                className="flex justify-center items-center w-8 h-8 rounded-full bg-my-gray-50"
+                                                href={links.linked_in || ""}
+                                            >
+                                                <Image
+                                                    src={"/linkedin.svg"}
+                                                    width={14}
+                                                    height={9}
+                                                />
+                                            </Link>
+                                        </div>
+                                        <div className="flex justify-center items-center  mx-2">
+                                            <Link
+                                                target={"_blank"}
+                                                className="flex justify-center items-center w-8 h-8 rounded-full bg-my-gray-50"
+                                                href={links.twitter || ""}
+                                            >
+                                                <Image
+                                                    src={"/twitter.svg"}
+                                                    width={13}
+                                                    height={11}
+                                                />
+                                            </Link>
+                                        </div>
+                                        <div className="flex justify-center items-center  mx-2">
+                                            <Link
+                                                target={"_blank"}
+                                                className="flex justify-center items-center w-8 h-8 rounded-full bg-my-gray-50"
+                                                href={links.facebook || ""}
+                                            >
+                                                <Image
+                                                    src={"/facebook.svg"}
+                                                    width={8}
+                                                    height={6}
+                                                />
+                                            </Link>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+                            {!hasContactInfo && (
+                                <div
+                                    onClick={() => {
+                                        router.push(
+                                            "/recruiter/profile-setup/step4"
+                                        );
+                                    }}
+                                    className={
+                                        "mt-4 px-4 py-1 border border-solid border-my-gray-70  rounded-md flex flex-row flex-nowrap justify-start items-center cursor-pointer"
+                                    }
+                                >
+                                    <Image
+                                        src={"/plus-icon.svg"}
+                                        width={9}
+                                        height={9}
+                                        className="m-2"
+                                    />
+                                    <span className="text-xs text-primary-70">
+                                        Add your contact info
+                                    </span>
+                                </div>
+                            )}
+                        </div>
+                    </section>
+                )}
 
                 <sidebar className="py-16 hidden md:block">
                     <div className="border border-my-gray-70 border-solid rounded-10 p-5">

@@ -20,6 +20,7 @@ import EditWorkExperiencePopup from "../../components/job-seekers/profile-edit/e
 import EditEducationPopup from "../../components/job-seekers/profile-edit/edit-education-popup";
 import { MdOutlineOpenInNew } from "react-icons/md";
 import EditSkillPopup from "../../components/job-seekers/profile-edit/edit-skill-popup";
+import JobSeekerProfileLoader from "../../components/skeleton-loaders/jobseeker-profile-loader";
 
 export default function Profile() {
     const router = useRouter();
@@ -53,6 +54,8 @@ export default function Profile() {
     const [showBasicInfoEditPopup, setShowBasicInfoEditPopup] = useState(false);
     const [showProfilePicChangeform, setShowProfilePicChangeform] =
         useState(false);
+
+    const [profileLoading, setProfileLoading] = useState(true);
 
     const [
         showMissingJobSeekerProfilePopup,
@@ -90,6 +93,7 @@ export default function Profile() {
     }, []);
 
     async function fetchJobSeeker() {
+        setProfileLoading(true);
         try {
             const userId = localStorage.getItem("user_id");
             const url = `${Config.API_URL}/users/${userId}`;
@@ -159,6 +163,7 @@ export default function Profile() {
             console.log("jobSeeker: ", jobSeeker);
 
             if (alreadyShowedIncompletePopups) {
+                setProfileLoading(false);
                 return;
             }
 
@@ -197,7 +202,9 @@ export default function Profile() {
             }
 
             setAlreadyShowedIncompletePopups(true);
+            setProfileLoading(false);
         } catch (error) {
+            setProfileLoading(false);
             console.log("jobSeeker profile Error: ", error);
         }
     }
@@ -408,158 +415,167 @@ export default function Profile() {
             />
             <JobSeekerNavbar />
             <div className="w-4/5 md:grid grid-cols-3 md:gap-4  mt-5 mb-32 mx-auto ">
-                <section className="col-span-2">
-                    <div className="form-input-container ">
-                        <p className="flex flex-row flex-nowrap justify-between items-center w-full p-2">
-                            <label className="form-label-light">About Me</label>
-                            {hasBasicInfo && (
-                                <span
-                                    onClick={() => {
-                                        setShowBasicInfoEditPopup(true);
-                                    }}
-                                    className="text-primary-70 cursor-pointer"
-                                >
-                                    Edit
-                                </span>
-                            )}
-                        </p>
-                        {hasBasicInfo && (
-                            <div
-                                className={
-                                    "mt-4 p-5 border border-solid border-my-gray-70  rounded-10 md:grid md:grid-cols-3 md:gap-3 "
-                                }
-                            >
-                                <div className="text-dark-50 grid grid-rows-4 gap-1 justify-center">
-                                    <p className="flex justify-center items-center row-span-3">
-                                        {!hasProfilePic && (
-                                            <BiUserCircle className="h-32 text-center block w-full" />
-                                        )}
-
-                                        {hasProfilePic && (
-                                            <Image
-                                                src={profilePic}
-                                                width={160}
-                                                height={120}
-                                                className="flex justify-center items-center rounded-sm"
-                                            />
-                                        )}
-                                    </p>
-
-                                    <p
-                                        onClick={onWantToChangeProfileImage}
-                                        className="mx-2 cursor-pointer text-white py-1 px-2 bg-primary-70 flex flex-row flex-nowrap justify-center items-center rounded-lg"
-                                    >
-                                        <RiImageEditFill
-                                            className="text-3xl block cursor-pointer m-1"
-                                            width={10}
-                                            height={10}
-                                        />
-                                        <span>Change</span>
-                                    </p>
-                                </div>
-                                <div className="flex flex-col flex-nowrap justify-center items-center md:justify-start md:items-start">
-                                    <h3 className="font-medium text-xl text-dark-50 my-5">
-                                        {basicInfo.fname || ""}{" "}
-                                        {basicInfo.lname || ""}
-                                    </h3>
-                                    <p className="text-sm text-dark-50">
-                                        {basicInfo.position || ""}
-                                    </p>
-                                    <p className="text-sm text-dark-50">
-                                        {basicInfo.location || ""}
-                                    </p>
-                                    <p className="flex flex-row flex-nowrap justify-between items-center mt-5 mb-2">
-                                        <Image
-                                            src={"/email.svg"}
-                                            width={15}
-                                            height={15}
-                                            className="mr-3"
-                                        />
-                                        <span>{email}</span>
-                                    </p>
-                                    <p className="flex flex-row flex-nowrap justify-between items-center">
-                                        <Image
-                                            src={"/phone.svg"}
-                                            width={15}
-                                            height={15}
-                                            className="mr-3"
-                                        />
-                                        <span>{basicInfo.phone_no}</span>
-                                    </p>
-                                </div>
-
-                                <div className="flex flex-row flex-nowrap justify-center items-start my-3">
-                                    <div className="flex justify-center items-center mx-2">
-                                        <Link
-                                            target={"_blank"}
-                                            href={links.linked_in || ""}
-                                            className="flex justify-center items-center w-8 h-8 rounded-full bg-my-gray-50"
-                                        >
-                                            <Image
-                                                src={"/linkedin.svg"}
-                                                width={14}
-                                                height={9}
-                                            />
-                                        </Link>
-                                    </div>
-                                    <div className="flex justify-center items-center mx-2">
-                                        <Link
-                                            target={"_blank"}
-                                            href={links.twitter || ""}
-                                            className="flex justify-center items-center w-8 h-8 rounded-full bg-my-gray-50"
-                                        >
-                                            <Image
-                                                src={"/twitter.svg"}
-                                                width={13}
-                                                height={11}
-                                            />
-                                        </Link>
-                                    </div>
-                                    <div className="flex justify-center items-cente mx-2">
-                                        <Link
-                                            target={"_blank"}
-                                            href={links.facebook || ""}
-                                            className="flex justify-center items-center w-8 h-8 rounded-full bg-my-gray-50"
-                                        >
-                                            <Image
-                                                src={"/facebook.svg"}
-                                                width={8}
-                                                height={6}
-                                            />
-                                        </Link>
-                                    </div>
-                                </div>
-                            </div>
-                        )}
-                        {!hasBasicInfo && (
-                            <div
-                                onClick={() => {
-                                    router.push(
-                                        "/job-seeker/profile-setup/step1"
-                                    );
-                                }}
-                                className={
-                                    "mt-4 px-4 py-1 border border-solid border-my-gray-70  rounded-md flex flex-row flex-nowrap justify-start items-center cursor-pointer"
-                                }
-                            >
-                                <Image
-                                    src={"/plus-icon.svg"}
-                                    width={9}
-                                    height={9}
-                                    className="m-2"
-                                />
-                                <span className="text-xs text-primary-70">
-                                    Add your basic info and social links
-                                </span>
-                            </div>
-                        )}
+                {profileLoading && (
+                    <div className="col-span-2">
+                        <JobSeekerProfileLoader />
                     </div>
-                    <div className="form-input-container ">
-                        <div className="flex flex-row justify-between p-2">
-                            <label className="form-label-light">
-                                Work Experience
-                            </label>
-                            {/* {hasWorkExperience && (
+                )}
+
+                {!profileLoading && (
+                    <section className="col-span-2">
+                        <div className="form-input-container ">
+                            <p className="flex flex-row flex-nowrap justify-between items-center w-full p-2">
+                                <label className="form-label-light">
+                                    About Me
+                                </label>
+                                {hasBasicInfo && (
+                                    <span
+                                        onClick={() => {
+                                            setShowBasicInfoEditPopup(true);
+                                        }}
+                                        className="text-primary-70 cursor-pointer"
+                                    >
+                                        Edit
+                                    </span>
+                                )}
+                            </p>
+                            {hasBasicInfo && (
+                                <div
+                                    className={
+                                        "mt-4 p-5 border border-solid border-my-gray-70  rounded-10 md:grid md:grid-cols-3 md:gap-3 "
+                                    }
+                                >
+                                    <div className="text-dark-50 grid grid-rows-4 gap-1 justify-center">
+                                        <p className="flex justify-center items-center row-span-3">
+                                            {!hasProfilePic && (
+                                                <BiUserCircle className="h-32 text-center block w-full" />
+                                            )}
+
+                                            {hasProfilePic && (
+                                                <Image
+                                                    src={profilePic}
+                                                    width={160}
+                                                    height={120}
+                                                    className="flex justify-center items-center rounded-sm"
+                                                />
+                                            )}
+                                        </p>
+
+                                        <p
+                                            onClick={onWantToChangeProfileImage}
+                                            className="mx-2 cursor-pointer text-white py-1 px-2 bg-primary-70 flex flex-row flex-nowrap justify-center items-center rounded-lg"
+                                        >
+                                            <RiImageEditFill
+                                                className="text-3xl block cursor-pointer m-1"
+                                                width={10}
+                                                height={10}
+                                            />
+                                            <span>Change</span>
+                                        </p>
+                                    </div>
+                                    <div className="flex flex-col flex-nowrap justify-center items-center md:justify-start md:items-start">
+                                        <h3 className="font-medium text-xl text-dark-50 my-5">
+                                            {basicInfo.fname || ""}{" "}
+                                            {basicInfo.lname || ""}
+                                        </h3>
+                                        <p className="text-sm text-dark-50">
+                                            {basicInfo.position || ""}
+                                        </p>
+                                        <p className="text-sm text-dark-50">
+                                            {basicInfo.location || ""}
+                                        </p>
+                                        <p className="flex flex-row flex-nowrap justify-between items-center mt-5 mb-2">
+                                            <Image
+                                                src={"/email.svg"}
+                                                width={15}
+                                                height={15}
+                                                className="mr-3"
+                                            />
+                                            <span>{email}</span>
+                                        </p>
+                                        <p className="flex flex-row flex-nowrap justify-between items-center">
+                                            <Image
+                                                src={"/phone.svg"}
+                                                width={15}
+                                                height={15}
+                                                className="mr-3"
+                                            />
+                                            <span>{basicInfo.phone_no}</span>
+                                        </p>
+                                    </div>
+
+                                    <div className="flex flex-row flex-nowrap justify-center items-start my-3">
+                                        <div className="flex justify-center items-center mx-2">
+                                            <Link
+                                                target={"_blank"}
+                                                href={links.linked_in || ""}
+                                                className="flex justify-center items-center w-8 h-8 rounded-full bg-my-gray-50"
+                                            >
+                                                <Image
+                                                    src={"/linkedin.svg"}
+                                                    width={14}
+                                                    height={9}
+                                                />
+                                            </Link>
+                                        </div>
+                                        <div className="flex justify-center items-center mx-2">
+                                            <Link
+                                                target={"_blank"}
+                                                href={links.twitter || ""}
+                                                className="flex justify-center items-center w-8 h-8 rounded-full bg-my-gray-50"
+                                            >
+                                                <Image
+                                                    src={"/twitter.svg"}
+                                                    width={13}
+                                                    height={11}
+                                                />
+                                            </Link>
+                                        </div>
+                                        <div className="flex justify-center items-cente mx-2">
+                                            <Link
+                                                target={"_blank"}
+                                                href={links.facebook || ""}
+                                                className="flex justify-center items-center w-8 h-8 rounded-full bg-my-gray-50"
+                                            >
+                                                <Image
+                                                    src={"/facebook.svg"}
+                                                    width={8}
+                                                    height={6}
+                                                />
+                                            </Link>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+                            {!hasBasicInfo && (
+                                <div
+                                    onClick={() => {
+                                        router.push(
+                                            "/job-seeker/profile-setup/step1"
+                                        );
+                                    }}
+                                    className={
+                                        "mt-4 px-4 py-1 border border-solid border-my-gray-70  rounded-md flex flex-row flex-nowrap justify-start items-center cursor-pointer"
+                                    }
+                                >
+                                    <Image
+                                        src={"/plus-icon.svg"}
+                                        width={9}
+                                        height={9}
+                                        className="m-2"
+                                    />
+                                    <span className="text-xs text-primary-70">
+                                        Add your basic info and social links
+                                    </span>
+                                </div>
+                            )}
+                        </div>
+                        <div className="form-input-container ">
+                            <div className="flex flex-row justify-between p-2">
+                                <label className="form-label-light">
+                                    Work Experience
+                                </label>
+                                {/* {hasWorkExperience && (
                                 <span
                                     onClick={() => {
                                         setShowWorkExperienceEditPopup(true);
@@ -569,94 +585,99 @@ export default function Profile() {
                                     Edit
                                 </span>
                             )} */}
-                        </div>
-                        {hasWorkExperience && (
-                            <div className="mt-4 px-4 py-1 border border-solid border-my-gray-70  rounded-md">
-                                {workExperiences.map(
-                                    (workExperience, index) => {
-                                        return (
-                                            <div className="my-4" key={index}>
-                                                <p className="text-lg my-1 ">
-                                                    {workExperience.title}
-                                                </p>
-                                                <p className=" my-1">
-                                                    {workExperience.company}
-                                                </p>
-                                                <p className="my-1 text-my-gray-70 text-sm">
-                                                    {workExperience.duration}
-                                                </p>
-                                                {/* <p classname="text-sm">{workExperience.description}</p> */}
-                                                <p className="text-sm">
-                                                    {workExperience.description ||
-                                                        ""}
-                                                </p>
-                                                <div className="flex flex-row flex-nowrap justify-start items-center py-2">
-                                                    <TbEdit
-                                                        onClick={() => {
-                                                            setActiveWorkExperience(
-                                                                workExperience
-                                                            );
-                                                            setActiveWorkExperienceIndex(
-                                                                index
-                                                            );
-                                                            setShowWorkExperienceEditPopup(
-                                                                true
-                                                            );
-                                                        }}
-                                                        className="text-3xl p-1 mr-1 text-primary-70 cursor-pointer"
-                                                    />
-                                                    <HiOutlineTrash
-                                                        onClick={() => {
-                                                            setActiveWorkExperience(
-                                                                workExperience
-                                                            );
-                                                            setActiveWorkExperienceIndex(
-                                                                index
-                                                            );
-                                                            deleteWorkExperience(
-                                                                index
-                                                            );
-                                                        }}
-                                                        className="text-3xl p-1 mx-1 text-red-500 cursor-pointer"
-                                                    />
+                            </div>
+                            {hasWorkExperience && (
+                                <div className="mt-4 px-4 py-1 border border-solid border-my-gray-70  rounded-md">
+                                    {workExperiences.map(
+                                        (workExperience, index) => {
+                                            return (
+                                                <div
+                                                    className="my-4"
+                                                    key={index}
+                                                >
+                                                    <p className="text-lg my-1 ">
+                                                        {workExperience.title}
+                                                    </p>
+                                                    <p className=" my-1">
+                                                        {workExperience.company}
+                                                    </p>
+                                                    <p className="my-1 text-my-gray-70 text-sm">
+                                                        {
+                                                            workExperience.duration
+                                                        }
+                                                    </p>
+                                                    {/* <p classname="text-sm">{workExperience.description}</p> */}
+                                                    <p className="text-sm">
+                                                        {workExperience.description ||
+                                                            ""}
+                                                    </p>
+                                                    <div className="flex flex-row flex-nowrap justify-start items-center py-2">
+                                                        <TbEdit
+                                                            onClick={() => {
+                                                                setActiveWorkExperience(
+                                                                    workExperience
+                                                                );
+                                                                setActiveWorkExperienceIndex(
+                                                                    index
+                                                                );
+                                                                setShowWorkExperienceEditPopup(
+                                                                    true
+                                                                );
+                                                            }}
+                                                            className="text-3xl p-1 mr-1 text-primary-70 cursor-pointer"
+                                                        />
+                                                        <HiOutlineTrash
+                                                            onClick={() => {
+                                                                setActiveWorkExperience(
+                                                                    workExperience
+                                                                );
+                                                                setActiveWorkExperienceIndex(
+                                                                    index
+                                                                );
+                                                                deleteWorkExperience(
+                                                                    index
+                                                                );
+                                                            }}
+                                                            className="text-3xl p-1 mx-1 text-red-500 cursor-pointer"
+                                                        />
+                                                    </div>
                                                 </div>
-                                            </div>
+                                            );
+                                        }
+                                    )}
+                                </div>
+                            )}
+
+                            {!hasWorkExperience && (
+                                <div
+                                    onClick={() => {
+                                        router.push(
+                                            "/job-seeker/profile-setup/step3"
                                         );
+                                    }}
+                                    className={
+                                        "mt-4 px-4 py-1 border border-solid border-my-gray-70  rounded-md flex flex-row flex-nowrap justify-start items-center cursor-pointer"
                                     }
-                                )}
-                            </div>
-                        )}
+                                >
+                                    <Image
+                                        src={"/plus-icon.svg"}
+                                        width={9}
+                                        height={9}
+                                        className="m-2"
+                                    />
+                                    <span className="text-xs text-primary-70">
+                                        Add
+                                    </span>
+                                </div>
+                            )}
+                        </div>
 
-                        {!hasWorkExperience && (
-                            <div
-                                onClick={() => {
-                                    router.push(
-                                        "/job-seeker/profile-setup/step3"
-                                    );
-                                }}
-                                className={
-                                    "mt-4 px-4 py-1 border border-solid border-my-gray-70  rounded-md flex flex-row flex-nowrap justify-start items-center cursor-pointer"
-                                }
-                            >
-                                <Image
-                                    src={"/plus-icon.svg"}
-                                    width={9}
-                                    height={9}
-                                    className="m-2"
-                                />
-                                <span className="text-xs text-primary-70">
-                                    Add
-                                </span>
-                            </div>
-                        )}
-                    </div>
-
-                    <div className="form-input-container ">
-                        <div className="flex flex-row justify-between p-2">
-                            <label className="form-label-light">
-                                Education
-                            </label>
-                            {/* {hasEducation && (
+                        <div className="form-input-container ">
+                            <div className="flex flex-row justify-between p-2">
+                                <label className="form-label-light">
+                                    Education
+                                </label>
+                                {/* {hasEducation && (
                                 <span
                                     onClick={() => {
                                         setShowEducationEditPopup(true);
@@ -666,91 +687,95 @@ export default function Profile() {
                                     Edit
                                 </span>
                             )} */}
+                            </div>
+
+                            {hasEducation && (
+                                <div
+                                    className={
+                                        "mt-4 px-4 py-1 border border-solid border-my-gray-70  rounded-md cursor-pointer "
+                                    }
+                                >
+                                    {hasEducation &&
+                                        educations.map((education, index) => {
+                                            return (
+                                                <div key={index}>
+                                                    <p className="my-1 ">
+                                                        {
+                                                            education.certification
+                                                        }
+                                                    </p>
+                                                    <p className="text-sm">
+                                                        {education.institution}
+                                                    </p>
+                                                    <p className="my-1 text-my-gray-70 text-xs">
+                                                        {education.duration}
+                                                    </p>
+                                                    <div className="flex flex-row flex-nowrap justify-start items-center py-2">
+                                                        <TbEdit
+                                                            onClick={() => {
+                                                                setActiveEducation(
+                                                                    education
+                                                                );
+                                                                setActiveEducationIndex(
+                                                                    index
+                                                                );
+                                                                setShowEducationEditPopup(
+                                                                    true
+                                                                );
+                                                            }}
+                                                            className="text-3xl p-1 mr-1 text-primary-70 cursor-pointer"
+                                                        />
+                                                        <HiOutlineTrash
+                                                            onClick={() => {
+                                                                setActiveEducation(
+                                                                    education
+                                                                );
+                                                                setActiveEducationIndex(
+                                                                    index
+                                                                );
+                                                                deleteEducation(
+                                                                    index
+                                                                );
+                                                            }}
+                                                            className="text-3xl p-1 mx-1 text-red-500 cursor-pointer"
+                                                        />
+                                                    </div>
+                                                </div>
+                                            );
+                                        })}
+                                </div>
+                            )}
+
+                            {!hasEducation && (
+                                <div
+                                    onClick={() => {
+                                        router.push(
+                                            "/job-seeker/profile-setup/step3"
+                                        );
+                                    }}
+                                    className={
+                                        "mt-4 px-4 py-1 border border-solid border-my-gray-70  rounded-md flex flex-row flex-nowrap justify-start items-center cursor-pointer"
+                                    }
+                                >
+                                    <Image
+                                        src={"/plus-icon.svg"}
+                                        width={9}
+                                        height={9}
+                                        className="m-2"
+                                    />
+                                    <span className="text-xs text-primary-70">
+                                        Add
+                                    </span>
+                                </div>
+                            )}
                         </div>
 
-                        {hasEducation && (
-                            <div
-                                className={
-                                    "mt-4 px-4 py-1 border border-solid border-my-gray-70  rounded-md cursor-pointer "
-                                }
-                            >
-                                {hasEducation &&
-                                    educations.map((education, index) => {
-                                        return (
-                                            <div key={index}>
-                                                <p className="my-1 ">
-                                                    {education.certification}
-                                                </p>
-                                                <p className="text-sm">
-                                                    {education.institution}
-                                                </p>
-                                                <p className="my-1 text-my-gray-70 text-xs">
-                                                    {education.duration}
-                                                </p>
-                                                <div className="flex flex-row flex-nowrap justify-start items-center py-2">
-                                                    <TbEdit
-                                                        onClick={() => {
-                                                            setActiveEducation(
-                                                                education
-                                                            );
-                                                            setActiveEducationIndex(
-                                                                index
-                                                            );
-                                                            setShowEducationEditPopup(
-                                                                true
-                                                            );
-                                                        }}
-                                                        className="text-3xl p-1 mr-1 text-primary-70 cursor-pointer"
-                                                    />
-                                                    <HiOutlineTrash
-                                                        onClick={() => {
-                                                            setActiveEducation(
-                                                                education
-                                                            );
-                                                            setActiveEducationIndex(
-                                                                index
-                                                            );
-                                                            deleteEducation(
-                                                                index
-                                                            );
-                                                        }}
-                                                        className="text-3xl p-1 mx-1 text-red-500 cursor-pointer"
-                                                    />
-                                                </div>
-                                            </div>
-                                        );
-                                    })}
-                            </div>
-                        )}
-
-                        {!hasEducation && (
-                            <div
-                                onClick={() => {
-                                    router.push(
-                                        "/job-seeker/profile-setup/step3"
-                                    );
-                                }}
-                                className={
-                                    "mt-4 px-4 py-1 border border-solid border-my-gray-70  rounded-md flex flex-row flex-nowrap justify-start items-center cursor-pointer"
-                                }
-                            >
-                                <Image
-                                    src={"/plus-icon.svg"}
-                                    width={9}
-                                    height={9}
-                                    className="m-2"
-                                />
-                                <span className="text-xs text-primary-70">
-                                    Add
-                                </span>
-                            </div>
-                        )}
-                    </div>
-
-                    <div className="form-input-container ">
-                        <div className="flex flex-row justify-between p-2">
-                            <label className="form-label-light">Skills</label>
-                            {/* {hasSkills && (
+                        <div className="form-input-container ">
+                            <div className="flex flex-row justify-between p-2">
+                                <label className="form-label-light">
+                                    Skills
+                                </label>
+                                {/* {hasSkills && (
                                 <span
                                     onClick={() => {
                                         setShowSkillsEditPopup(true);
@@ -760,72 +785,76 @@ export default function Profile() {
                                     Edit
                                 </span>
                             )} */}
+                            </div>
+                            {hasSkills && (
+                                <div
+                                    className={
+                                        "mt-4 border border-solid border-my-gray-70  rounded-md p-4 flex flex-row justify-start items-center "
+                                    }
+                                >
+                                    {skills.map((skill, index) => {
+                                        return (
+                                            <div
+                                                key={index}
+                                                className="flex flex-row flex-nowrap justify-start items-center  px-4 bg-my-gray-50 rounded-lg m-2 py-2 w-max"
+                                            >
+                                                <span className="">
+                                                    {skill.name}
+                                                </span>
+                                                <TbEdit
+                                                    onClick={() => {
+                                                        setActiveSkill(skill);
+                                                        setActiveSkillIndex(
+                                                            index
+                                                        );
+
+                                                        setShowSkillsEditPopup(
+                                                            true
+                                                        );
+                                                    }}
+                                                    className="text-3xl p-1 ml-2 text-primary-70 cursor-pointer"
+                                                />
+                                                <HiOutlineTrash
+                                                    onClick={() => {
+                                                        setActiveSkill(skill);
+                                                        setActiveSkillIndex(
+                                                            index
+                                                        );
+                                                        deleteSkill(index);
+                                                    }}
+                                                    className="text-3xl p-1  text-red-500 cursor-pointer"
+                                                />
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            )}
+
+                            {!hasSkills && (
+                                <div
+                                    onClick={() => {
+                                        router.push(
+                                            "/job-seeker/profile-setup/step3"
+                                        );
+                                    }}
+                                    className={
+                                        "mt-4 px-4 py-1 border border-solid border-my-gray-70  rounded-md flex flex-row flex-nowrap justify-start items-center cursor-pointer"
+                                    }
+                                >
+                                    <Image
+                                        src={"/plus-icon.svg"}
+                                        width={9}
+                                        height={9}
+                                        className="m-2"
+                                    />
+                                    <span className="text-xs text-primary-70">
+                                        Add
+                                    </span>
+                                </div>
+                            )}
                         </div>
-                        {hasSkills && (
-                            <div
-                                className={
-                                    "mt-4 border border-solid border-my-gray-70  rounded-md p-4 flex flex-row justify-start items-center "
-                                }
-                            >
-                                {skills.map((skill, index) => {
-                                    return (
-                                        <div
-                                            key={index}
-                                            className="flex flex-row flex-nowrap justify-start items-center  px-4 bg-my-gray-50 rounded-lg m-2 py-2 w-max"
-                                        >
-                                            <span className="">
-                                                {skill.name}
-                                            </span>
-                                            <TbEdit
-                                                onClick={() => {
-                                                    setActiveSkill(skill);
-                                                    setActiveSkillIndex(index);
 
-                                                    setShowSkillsEditPopup(
-                                                        true
-                                                    );
-                                                }}
-                                                className="text-3xl p-1 ml-2 text-primary-70 cursor-pointer"
-                                            />
-                                            <HiOutlineTrash
-                                                onClick={() => {
-                                                    setActiveSkill(skill);
-                                                    setActiveSkillIndex(index);
-                                                    deleteSkill(index);
-                                                }}
-                                                className="text-3xl p-1  text-red-500 cursor-pointer"
-                                            />
-                                        </div>
-                                    );
-                                })}
-                            </div>
-                        )}
-
-                        {!hasSkills && (
-                            <div
-                                onClick={() => {
-                                    router.push(
-                                        "/job-seeker/profile-setup/step3"
-                                    );
-                                }}
-                                className={
-                                    "mt-4 px-4 py-1 border border-solid border-my-gray-70  rounded-md flex flex-row flex-nowrap justify-start items-center cursor-pointer"
-                                }
-                            >
-                                <Image
-                                    src={"/plus-icon.svg"}
-                                    width={9}
-                                    height={9}
-                                    className="m-2"
-                                />
-                                <span className="text-xs text-primary-70">
-                                    Add
-                                </span>
-                            </div>
-                        )}
-                    </div>
-
-                    {/* <div className="form-input-container ">
+                        {/* <div className="form-input-container ">
                         <label className="form-label-light">
                             Assessment Text
                         </label>
@@ -844,167 +873,170 @@ export default function Profile() {
                         </div>
                     </div> */}
 
-                    <div className="form-input-container ">
-                        <div className="flex flex-row justify-between p-2">
-                            <label className="form-label-light">Resume</label>
-                            {hasResume && (
-                                <span
-                                    onClick={() => {
-                                        resumeInput.current.click();
-                                    }}
-                                    className="text-primary-70 cursor-pointer"
-                                >
-                                    Edit
-                                </span>
-                            )}
-                        </div>
-
-                        {hasResume && (
-                            <div
-                                className={
-                                    "mt-4 px-4 py-1 border border-solid border-my-gray-70  rounded-md flex flex-row flex-nowrap justify-start items-center"
-                                }
-                            >
-                                <Link
-                                    href={resume}
-                                    target="_blank"
-                                    className="flex flex-row flex-nowrap justify-start items-center"
-                                >
-                                    <AiOutlineFileText />
-                                    <span className="text-xs text-primary-70 p-2">
-                                        Resume_{basicInfo.fname}
+                        <div className="form-input-container ">
+                            <div className="flex flex-row justify-between p-2">
+                                <label className="form-label-light">
+                                    Resume
+                                </label>
+                                {hasResume && (
+                                    <span
+                                        onClick={() => {
+                                            resumeInput.current.click();
+                                        }}
+                                        className="text-primary-70 cursor-pointer"
+                                    >
+                                        Edit
                                     </span>
-                                    <MdOutlineOpenInNew className="ml-2 text-primary-70" />
-                                </Link>
-                                <input
-                                    ref={resumeInput}
-                                    className="hidden"
-                                    name="resume"
-                                    accept=".pdf,.doc,.docx"
-                                    type={"file"}
-                                    onChange={(e) => {
-                                        const value = e.target.files[0];
-                                        setUploadJobs((prevValues) => {
-                                            return {
-                                                ...prevValues,
-                                                resume: value,
-                                            };
-                                        });
-
-                                        updateResume();
-                                    }}
-                                />
+                                )}
                             </div>
-                        )}
 
-                        {!hasResume && (
-                            <div
-                                onClick={() => {
-                                    router.push(
-                                        "/job-seeker/profile-setup/step4"
-                                    );
-                                }}
-                                className={
-                                    "mt-4 px-4 py-1 border border-solid border-my-gray-70  rounded-md flex flex-row flex-nowrap justify-start items-center cursor-pointer"
-                                }
-                            >
-                                <Image
-                                    src={"/plus-icon.svg"}
-                                    width={9}
-                                    height={9}
-                                    className="m-2"
-                                />
-                                <span className="text-xs text-primary-70">
-                                    Add
-                                </span>
-                            </div>
-                        )}
-                    </div>
-                    <div className="form-input-container ">
-                        <div className="flex flex-row justify-between p-2">
-                            <label className="form-label-light">
-                                Cerficates / Other Documents
-                            </label>
-                            {hasOtherDocs && (
-                                <span
-                                    onClick={() => {
-                                        otherDocsInput.current.click();
-                                    }}
-                                    className="text-primary-70 cursor-pointer"
+                            {hasResume && (
+                                <div
+                                    className={
+                                        "mt-4 px-4 py-1 border border-solid border-my-gray-70  rounded-md flex flex-row flex-nowrap justify-start items-center"
+                                    }
                                 >
-                                    Edit
-                                </span>
+                                    <Link
+                                        href={resume}
+                                        target="_blank"
+                                        className="flex flex-row flex-nowrap justify-start items-center"
+                                    >
+                                        <AiOutlineFileText />
+                                        <span className="text-xs text-primary-70 p-2">
+                                            Resume_{basicInfo.fname}
+                                        </span>
+                                        <MdOutlineOpenInNew className="ml-2 text-primary-70" />
+                                    </Link>
+                                    <input
+                                        ref={resumeInput}
+                                        className="hidden"
+                                        name="resume"
+                                        accept=".pdf,.doc,.docx"
+                                        type={"file"}
+                                        onChange={(e) => {
+                                            const value = e.target.files[0];
+                                            setUploadJobs((prevValues) => {
+                                                return {
+                                                    ...prevValues,
+                                                    resume: value,
+                                                };
+                                            });
+
+                                            updateResume();
+                                        }}
+                                    />
+                                </div>
+                            )}
+
+                            {!hasResume && (
+                                <div
+                                    onClick={() => {
+                                        router.push(
+                                            "/job-seeker/profile-setup/step4"
+                                        );
+                                    }}
+                                    className={
+                                        "mt-4 px-4 py-1 border border-solid border-my-gray-70  rounded-md flex flex-row flex-nowrap justify-start items-center cursor-pointer"
+                                    }
+                                >
+                                    <Image
+                                        src={"/plus-icon.svg"}
+                                        width={9}
+                                        height={9}
+                                        className="m-2"
+                                    />
+                                    <span className="text-xs text-primary-70">
+                                        Add
+                                    </span>
+                                </div>
                             )}
                         </div>
+                        <div className="form-input-container ">
+                            <div className="flex flex-row justify-between p-2">
+                                <label className="form-label-light">
+                                    Cerficates / Other Documents
+                                </label>
+                                {hasOtherDocs && (
+                                    <span
+                                        onClick={() => {
+                                            otherDocsInput.current.click();
+                                        }}
+                                        className="text-primary-70 cursor-pointer"
+                                    >
+                                        Edit
+                                    </span>
+                                )}
+                            </div>
 
-                        {hasOtherDocs && (
-                            <div
-                                className={
-                                    "mt-4 px-4 py-1 border border-solid border-my-gray-70  rounded-md flex flex-col justify-start items-start"
-                                }
-                            >
-                                {otherDocs.map((otherDoc, index) => {
-                                    return (
-                                        <Link
-                                            key={index}
-                                            href={otherDoc}
-                                            target="_blank"
-                                            className="flex flex-row flex-nowrap justify-start items-center"
-                                        >
-                                            <AiOutlineFileText />
-                                            <span className="text-xs text-primary-70 p-2">
-                                                Other Doc_{index + 1}
-                                            </span>
-                                            <MdOutlineOpenInNew className="ml-2 text-primary-70" />
-                                        </Link>
-                                    );
-                                })}
-                                <input
-                                    ref={otherDocsInput}
-                                    className="hidden"
-                                    name="other_docs[]"
-                                    accept=".pdf,.doc,.docx"
-                                    type={"file"}
-                                    multiple
-                                    onChange={(e) => {
-                                        const value = e.target.files;
-                                        console.log(value);
-                                        setUploadJobs((prevValues) => {
-                                            return {
-                                                ...prevValues,
-                                                others: value,
-                                            };
-                                        });
-                                        updateOtherDocs();
+                            {hasOtherDocs && (
+                                <div
+                                    className={
+                                        "mt-4 px-4 py-1 border border-solid border-my-gray-70  rounded-md flex flex-col justify-start items-start"
+                                    }
+                                >
+                                    {otherDocs.map((otherDoc, index) => {
+                                        return (
+                                            <Link
+                                                key={index}
+                                                href={otherDoc}
+                                                target="_blank"
+                                                className="flex flex-row flex-nowrap justify-start items-center"
+                                            >
+                                                <AiOutlineFileText />
+                                                <span className="text-xs text-primary-70 p-2">
+                                                    Other Doc_{index + 1}
+                                                </span>
+                                                <MdOutlineOpenInNew className="ml-2 text-primary-70" />
+                                            </Link>
+                                        );
+                                    })}
+                                    <input
+                                        ref={otherDocsInput}
+                                        className="hidden"
+                                        name="other_docs[]"
+                                        accept=".pdf,.doc,.docx"
+                                        type={"file"}
+                                        multiple
+                                        onChange={(e) => {
+                                            const value = e.target.files;
+                                            console.log(value);
+                                            setUploadJobs((prevValues) => {
+                                                return {
+                                                    ...prevValues,
+                                                    others: value,
+                                                };
+                                            });
+                                            updateOtherDocs();
+                                        }}
+                                    />
+                                </div>
+                            )}
+
+                            {!hasResume && (
+                                <div
+                                    onClick={() => {
+                                        router.push(
+                                            "/job-seeker/profile-setup/step4"
+                                        );
                                     }}
-                                />
-                            </div>
-                        )}
-
-                        {!hasResume && (
-                            <div
-                                onClick={() => {
-                                    router.push(
-                                        "/job-seeker/profile-setup/step4"
-                                    );
-                                }}
-                                className={
-                                    "mt-4 px-4 py-1 border border-solid border-my-gray-70  rounded-md flex flex-row flex-nowrap justify-start items-center cursor-pointer"
-                                }
-                            >
-                                <Image
-                                    src={"/plus-icon.svg"}
-                                    width={9}
-                                    height={9}
-                                    className="m-2"
-                                />
-                                <span className="text-xs text-primary-70">
-                                    Add
-                                </span>
-                            </div>
-                        )}
-                    </div>
-                </section>
+                                    className={
+                                        "mt-4 px-4 py-1 border border-solid border-my-gray-70  rounded-md flex flex-row flex-nowrap justify-start items-center cursor-pointer"
+                                    }
+                                >
+                                    <Image
+                                        src={"/plus-icon.svg"}
+                                        width={9}
+                                        height={9}
+                                        className="m-2"
+                                    />
+                                    <span className="text-xs text-primary-70">
+                                        Add
+                                    </span>
+                                </div>
+                            )}
+                        </div>
+                    </section>
+                )}
 
                 <sidebar className="py-16 hidden md:block">
                     <div className="border border-my-gray-70 border-solid rounded-10 p-5">

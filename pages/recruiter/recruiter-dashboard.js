@@ -8,11 +8,13 @@ import Config from "../../Config";
 import axios from "axios";
 import Utils from "../../Utils";
 import JobsTable from "../../components/recuriters/jobsTable";
+import DashboardJobsLoaderSkeleton from "../../components/skeleton-loaders/dashboard-jobs-loader-skeleton";
 
 export default function RecruiterDashbaord() {
     const [jobs, setJobs] = useState();
     const [fname, setFname] = useState("");
     const [wallet, setWallet] = useState({});
+    const [jobsLoading, setJobsLoading] = useState(true);
 
     useEffect(() => {
         // console.log("jobs: ", jobs);
@@ -21,6 +23,7 @@ export default function RecruiterDashbaord() {
     }, []);
 
     async function getJobs() {
+        setJobsLoading(true);
         const userId = localStorage.getItem("user_id");
         const url = `${Config.API_URL}/get_user_jobs/${userId}`;
 
@@ -35,8 +38,11 @@ export default function RecruiterDashbaord() {
                 setJobs(theJobs);
             }
 
+            setJobsLoading(false);
+
             console.log("jobs: ", theJobs);
         } catch (error) {
+            setJobsLoading(false);
             console.log("get jobs error: ", error);
         }
     }
@@ -87,8 +93,12 @@ export default function RecruiterDashbaord() {
                     />
                 </div>
                 <div className="shadow-md my-3 p-3 rounded-10 min-h-40-screen flex flex-col justify-center items-center border border-solid border-my-gray-40">
-                    {jobs && <JobsTable jobs={jobs} />}
-                    {!jobs && (
+                    {jobsLoading && <DashboardJobsLoaderSkeleton />}
+                    {!jobsLoading && jobs && (
+                        <JobsTable jobs={jobs} jobsLoading={jobsLoading} />
+                    )}
+
+                    {!jobs && !jobsLoading && (
                         <>
                             <h3 className="font-semibold text-dark-50 text-center">
                                 Job listings

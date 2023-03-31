@@ -1,5 +1,7 @@
+import { useEffect, useState } from "react";
 import { FaAngleDown } from "react-icons/fa";
 import Config from "../../Config";
+
 export default function JobsTable({ jobs }) {
     return (
         <>
