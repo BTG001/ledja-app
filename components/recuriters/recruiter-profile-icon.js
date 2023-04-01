@@ -124,8 +124,8 @@ export default function RecruiterProfileIcon({ icon }) {
                     <Image
                         src="/x-icon.svg"
                         className="cursor-pointer p-2 translate-x-1/3"
-                        width={16}
-                        height={16}
+                        width={27}
+                        height={27}
                         onClick={onCloseLinks}
                     />
                 </div>
