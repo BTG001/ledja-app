@@ -3,7 +3,6 @@ import Link from "next/link";
 import JobSeekerProfileIcon from "../job-seekers/job-seeker-profile-icon";
 
 export default function JobSeekerNavbar({ active }) {
-    console.log("active: ", active);
     return (
         <div
             className="px-12 py-2 bg-my-gray-50

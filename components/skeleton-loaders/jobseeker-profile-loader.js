@@ -13,10 +13,10 @@ export default function JobSeekerProfileLoader() {
                         "w-full mt-4 p-5 border border-solid border-my-gray-70  rounded-10 md:grid md:grid-cols-3 md:gap-3 "
                     }
                 >
-                    <div className="text-dark-50 grid grid-rows-4 gap-1 justify-center w-full">
-                        <p className="row-span-3 w-44 h-full skeleton-loading"></p>
+                    <div className="text-dark-50 grid grid-rows-4 gap-1 justify-center ">
+                        <p className="row-span-3 w-40 sm:w-32 lg:w-40 h-full skeleton-loading"></p>
 
-                        <p className=" py-2 px-2 rounded-lg w-full h-full skeleton-loading"></p>
+                        <p className=" py-2 px-2 rounded-lg w-40 sm:w-32 lg:w-40 h-full skeleton-loading"></p>
                     </div>
                     <div className="flex flex-col flex-nowrap justify-center items-center md:justify-start md:items-start">
                         <h3 className=" my-5 w-full h-8  skeleton-loading"></h3>

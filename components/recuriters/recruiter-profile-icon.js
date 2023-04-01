@@ -1,8 +1,9 @@
 import Link from "next/link";
-import { useContext, useState } from "react";
+import { useContext, useState, useEffect } from "react";
 import Image from "next/image";
 import { AuthContext } from "../../pages/_app";
 import { useRouter } from "next/router";
+import Utils from "../../Utils";
 
 export default function RecruiterProfileIcon({ icon }) {
     const [showLinks, setShowLinks] = useState(false);
@@ -16,6 +17,12 @@ export default function RecruiterProfileIcon({ icon }) {
     const onCloseLinks = () => {
         setShowLinks(false);
     };
+
+    useEffect(() => {
+        if (!Utils.isLoggedIn()) {
+            router.push("/login");
+        }
+    }, []);
 
     const onLogout = () => {
         localStorage.removeItem("token");
@@ -115,10 +122,10 @@ export default function RecruiterProfileIcon({ icon }) {
                 </div>
                 <div>
                     <Image
-                        className="p-2 cursor-pointer"
                         src="/x-icon.svg"
-                        width={28}
-                        height={28}
+                        className="cursor-pointer p-2 translate-x-1/3"
+                        width={16}
+                        height={16}
                         onClick={onCloseLinks}
                     />
                 </div>

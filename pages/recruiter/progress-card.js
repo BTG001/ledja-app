@@ -89,7 +89,7 @@ export default function () {
 
         const filterApplicationsFormData = new FormData();
 
-        if (filters.name) {
+        if (filters.name && filters.name.trim() != "") {
             filterApplicationsFormData.append("fname", filters.name);
             filterApplicationsFormData.append("lname", filters.name);
         }
@@ -209,7 +209,7 @@ export default function () {
                     onMouseMove={onJobsContainerMouseMove}
                     className="flex flex-row flex-nowrap overflow-x-auto justify-start items-center py-2 cursor-grab "
                 >
-                    {!jobs && !jobsLoading && (
+                    {(!jobs || jobs.length < 1) && !jobsLoading && (
                         <p className="text-sm text-dark-50 text-center flex justify-center items-center min-h-10-screen md:m-h-20-screen min-w-60-screen md:min-w-20-screen bg-primary-40 rounded-md py-2 px-6 mr-4 border border-primary-40 border-solid">
                             You have not posted any jobs yet
                         </p>
@@ -438,235 +438,243 @@ export default function () {
                         </div>
                     </form>
                 </div>
-                {!applications && !applicationsLoading && (
-                    <p className="w-full text-center">No Applications !</p>
-                )}
+                {(!applications || applications.length < 1) &&
+                    !applicationsLoading && (
+                        <p className="w-full text-center">No Applications !</p>
+                    )}
+
                 {applicationsLoading && (
                     <ProgressCardApplicationsLoaderSkeleton />
                 )}
-                {!applicationsLoading && (
-                    <div className="md:grid md:grid-cols-3 gap-4 mt-5 mb-16">
-                        <sidebar className="flex flex-row flex-nowrap overflow-x-auto md:block cursor-grab">
-                            {applications &&
-                                applications.length > 0 &&
-                                applications.map((application) => {
-                                    return (
-                                        <div
-                                            onClick={() => {
-                                                setActiveApplication(
-                                                    application
-                                                );
-                                                if (
-                                                    application.status ==
-                                                    "awaiting"
-                                                ) {
-                                                    updateStatus(
-                                                        "reviewed",
-                                                        application.id
+                {!applicationsLoading &&
+                    applications &&
+                    applications.length > 0 && (
+                        <div className="md:grid md:grid-cols-3 gap-4 mt-5 mb-16">
+                            <sidebar className="flex flex-row flex-nowrap overflow-x-auto md:block cursor-grab md:cursor-">
+                                {applications &&
+                                    applications.length > 0 &&
+                                    applications.map((application) => {
+                                        return (
+                                            <div
+                                                onClick={() => {
+                                                    setActiveApplication(
+                                                        application
                                                     );
-                                                }
-                                            }}
-                                            className={`w-full p-3 md:mx-auto my-3 mx-1 min-w-60-screen sm:min-w-40-screen md:min-w-10-screen  border border-my-gray-50 border-solid rounded-10  
+                                                    if (
+                                                        application.status ==
+                                                        "awaiting"
+                                                    ) {
+                                                        updateStatus(
+                                                            "reviewed",
+                                                            application.id
+                                                        );
+                                                    }
+                                                }}
+                                                className={`w-full p-3 md:mx-auto my-3 mx-1 min-w-60-screen sm:min-w-40-screen md:min-w-10-screen  border border-my-gray-50 border-solid rounded-10  
                                     ${
                                         activeApplication.id == application.id
                                             ? "bg-my-gray-50 "
                                             : "bg-white"
                                     }`}
-                                        >
-                                            <div className="flex flex-row flex-nowrap justify-between items-center">
-                                                <h3 className="font-semibold text-xl my-1">
-                                                    {application.jobseeker_basic_info
-                                                        ? `${application.jobseeker_basic_info.fname} ${application.jobseeker_basic_info.lname}`
-                                                        : ""}
-                                                </h3>
-                                                <h3 className="flex flex-row flex-nowrap justify-center items-center">
-                                                    <Image
-                                                        src={
-                                                            "/star-full-icon.svg"
-                                                        }
-                                                        width={17}
-                                                        height={16}
-                                                        className="m-1"
-                                                    />
-                                                    <span className="font-semibold text-xl m-1">
-                                                        8.7
+                                            >
+                                                <div className="flex flex-row flex-nowrap justify-between items-center">
+                                                    <h3 className="font-semibold text-xl my-1">
+                                                        {application.jobseeker_basic_info
+                                                            ? `${application.jobseeker_basic_info.fname} ${application.jobseeker_basic_info.lname}`
+                                                            : ""}
+                                                    </h3>
+                                                    <h3 className="flex flex-row flex-nowrap justify-center items-center">
+                                                        <Image
+                                                            src={
+                                                                "/star-full-icon.svg"
+                                                            }
+                                                            width={17}
+                                                            height={16}
+                                                            className="m-1"
+                                                        />
+                                                        <span className="font-semibold text-xl m-1">
+                                                            8.7
+                                                        </span>
+                                                    </h3>
+                                                </div>
+                                                <p className="text-dark-50 flex flex-row flex-nowrap justify-start items-center">
+                                                    {showStatusIcon(
+                                                        application.status
+                                                    )}
+                                                    <span>
+                                                        {application.status ||
+                                                            ""}
                                                     </span>
-                                                </h3>
+                                                </p>
+                                                <p className="text-my-gray-80 mt-2 mb-1">
+                                                    Reviewed{" "}
+                                                    {Utils.calculateTimeLapse(
+                                                        application.updated_at
+                                                    )}{" "}
+                                                    ago
+                                                </p>
                                             </div>
-                                            <p className="text-dark-50 flex flex-row flex-nowrap justify-start items-center">
-                                                {showStatusIcon(
-                                                    application.status
-                                                )}
+                                        );
+                                    })}
+                            </sidebar>
+                            {activeApplication && activeApplication.id && (
+                                <section className="col-span-2 ">
+                                    <div className="bg-my-gray-50 p-5 my-5 rounded-10">
+                                        <div className="flex flex-row flex-nowrap justify-between items-center">
+                                            <h3 className="">
+                                                {activeApplication.jobseeker_basic_info
+                                                    ? `${activeApplication.jobseeker_basic_info.fname} ${activeApplication.jobseeker_basic_info.lname}`
+                                                    : ""}
+                                            </h3>
+                                            <h3 className="font-semibold flex flex-row flex-nowrap justify-center items-center">
+                                                <Image
+                                                    src={"/star-full-icon.svg"}
+                                                    width={12}
+                                                    height={12}
+                                                    className="mr-3"
+                                                />
+                                                <span className="text-2xl m-2">
+                                                    8.7
+                                                </span>
+                                                <span className="text-sm">
+                                                    {" "}
+                                                    out of 10
+                                                </span>
+                                            </h3>
+                                        </div>
+
+                                        <div className="flex flex-row flex-nowrap justify-between items-center">
+                                            <p className="flex flex-row flex-nowrap justify-start items-center my-1">
+                                                <Image
+                                                    src={"/location-icon.svg"}
+                                                    width={12}
+                                                    height={12}
+                                                    className="mr-3"
+                                                />
                                                 <span>
-                                                    {application.status || ""}
+                                                    {activeApplication.job
+                                                        ? activeApplication.job
+                                                              .location
+                                                        : ""}
                                                 </span>
                                             </p>
-                                            <p className="text-my-gray-80 mt-2 mb-1">
-                                                {Utils.calculateTimeLapse(
-                                                    application.updated_at
-                                                )}{" "}
-                                                ago
+                                            <p className="text-right">
+                                                # 09/100
                                             </p>
                                         </div>
-                                    );
-                                })}
-                        </sidebar>
-                        {activeApplication && activeApplication.id && (
-                            <section className="col-span-2 ">
-                                <div className="bg-my-gray-50 p-5 my-5 rounded-10">
-                                    <div className="flex flex-row flex-nowrap justify-between items-center">
-                                        <h3 className="">
-                                            {activeApplication.jobseeker_basic_info
-                                                ? `${activeApplication.jobseeker_basic_info.fname} ${activeApplication.jobseeker_basic_info.lname}`
-                                                : ""}
-                                        </h3>
-                                        <h3 className="font-semibold flex flex-row flex-nowrap justify-center items-center">
-                                            <Image
-                                                src={"/star-full-icon.svg"}
-                                                width={12}
-                                                height={12}
-                                                className="mr-3"
-                                            />
-                                            <span className="text-2xl m-2">
-                                                8.7
-                                            </span>
-                                            <span className="text-sm">
-                                                {" "}
-                                                out of 10
-                                            </span>
-                                        </h3>
-                                    </div>
-
-                                    <div className="flex flex-row flex-nowrap justify-between items-center">
-                                        <p className="flex flex-row flex-nowrap justify-start items-center my-1">
-                                            <Image
-                                                src={"/location-icon.svg"}
-                                                width={12}
-                                                height={12}
-                                                className="mr-3"
-                                            />
-                                            <span>
-                                                {activeApplication.job
-                                                    ? activeApplication.job
-                                                          .location
-                                                    : ""}
-                                            </span>
-                                        </p>
-                                        <p className="text-right"># 09/100</p>
-                                    </div>
-                                    <div className="flex flex-row flex-wrap justify-between items-center">
-                                        <p className="flex flex-row flex-nowrap justify-start items-center">
-                                            Applied on{" "}
-                                            {`${
-                                                Config.MONTH_NAMES[
-                                                    new Date(
-                                                        activeApplication.created_at
-                                                    ).getMonth()
-                                                ]
-                                            } ${new Date(
-                                                activeApplication.created_at
-                                            ).getDate()}`}
-                                        </p>
-                                        <p className=" flex flex-row flex-nowrap justify-end items-center my-2 ">
-                                            <AiOutlineInfoCircle />
-                                            <span className="text-xs m-1">
-                                                Rank is calculated based on
-                                                assessment scores
-                                            </span>
-                                        </p>
-                                    </div>
-                                    <div className="my-3 flex flex-row flex-wrap justify-between items-center min-h-10-screen ">
-                                        <div
-                                            flex
-                                            flex-row
-                                            flex-wrap
-                                            justify-start
-                                            items-center
-                                            my-2
-                                        >
-                                            <PrimaryBtn
-                                                text={"Interview"}
-                                                path="/interview"
-                                                className={"mr-2"}
-                                            />
-                                            <SecondaryBtn
-                                                text={"View profile"}
-                                                path="user-profile"
-                                                className={"mr-2"}
-                                            />
+                                        <div className="flex flex-row flex-wrap justify-between items-center">
+                                            <p className="flex flex-row flex-nowrap justify-start items-center">
+                                                Applied on{" "}
+                                                {`${
+                                                    Config.MONTH_NAMES[
+                                                        new Date(
+                                                            activeApplication.created_at
+                                                        ).getMonth()
+                                                    ]
+                                                } ${new Date(
+                                                    activeApplication.created_at
+                                                ).getDate()}`}
+                                            </p>
+                                            <p className=" flex flex-row flex-nowrap justify-end items-center my-2 ">
+                                                <AiOutlineInfoCircle />
+                                                <span className="text-xs m-1">
+                                                    Rank is calculated based on
+                                                    assessment scores
+                                                </span>
+                                            </p>
                                         </div>
-                                        <div
-                                            className="flex
+                                        <div className="my-3 flex flex-row flex-wrap justify-between items-center min-h-10-screen ">
+                                            <div
+                                                flex
+                                                flex-row
+                                                flex-wrap
+                                                justify-start
+                                                items-center
+                                                my-2
+                                            >
+                                                <PrimaryBtn
+                                                    text={"Interview"}
+                                                    path="/interview"
+                                                    className={"mr-2"}
+                                                />
+                                                <SecondaryBtn
+                                                    text={"View profile"}
+                                                    path="user-profile"
+                                                    className={"mr-2"}
+                                                />
+                                            </div>
+                                            <div
+                                                className="flex
                                     flex-row
                                     flex-nowrap
                                     justify-end
                                     items-center"
-                                        >
-                                            <Image
-                                                onClick={() => {
-                                                    if (
+                                            >
+                                                <Image
+                                                    onClick={() => {
+                                                        if (
+                                                            activeApplication.status ==
+                                                                "saved" ||
+                                                            activeApplication.status ==
+                                                                "contacting"
+                                                        ) {
+                                                            updateStatus(
+                                                                "reviewed",
+                                                                activeApplication.id
+                                                            );
+                                                        } else {
+                                                            updateStatus(
+                                                                "saved",
+                                                                activeApplication.id
+                                                            );
+                                                        }
+                                                    }}
+                                                    src={
                                                         activeApplication.status ==
                                                             "saved" ||
                                                         activeApplication.status ==
                                                             "contacting"
-                                                    ) {
-                                                        updateStatus(
-                                                            "reviewed",
-                                                            activeApplication.id
-                                                        );
-                                                    } else {
-                                                        updateStatus(
-                                                            "saved",
-                                                            activeApplication.id
-                                                        );
+                                                            ? "/love-fill-icon.svg"
+                                                            : "/love-icon.svg"
                                                     }
-                                                }}
-                                                src={
-                                                    activeApplication.status ==
-                                                        "saved" ||
-                                                    activeApplication.status ==
-                                                        "contacting"
-                                                        ? "/love-fill-icon.svg"
-                                                        : "/love-icon.svg"
-                                                }
-                                                width={30}
-                                                height={26}
-                                                className="mr-3"
-                                            />
-                                            <Image
-                                                onClick={() => {
-                                                    if (
+                                                    width={30}
+                                                    height={26}
+                                                    className="mr-3"
+                                                />
+                                                <Image
+                                                    onClick={() => {
+                                                        if (
+                                                            activeApplication.status ==
+                                                            "rejected"
+                                                        ) {
+                                                            updateStatus(
+                                                                "reviewed",
+                                                                activeApplication.id
+                                                            );
+                                                        } else {
+                                                            updateStatus(
+                                                                "rejected",
+                                                                activeApplication.id
+                                                            );
+                                                        }
+                                                    }}
+                                                    src={
                                                         activeApplication.status ==
                                                         "rejected"
-                                                    ) {
-                                                        updateStatus(
-                                                            "reviewed",
-                                                            activeApplication.id
-                                                        );
-                                                    } else {
-                                                        updateStatus(
-                                                            "rejected",
-                                                            activeApplication.id
-                                                        );
+                                                            ? "/not-interested-active-icon.svg"
+                                                            : "/not-interested-icon.svg"
                                                     }
-                                                }}
-                                                src={
-                                                    activeApplication.status ==
-                                                    "rejected"
-                                                        ? "/not-interested-active-icon.svg"
-                                                        : "/not-interested-icon.svg"
-                                                }
-                                                width={30}
-                                                height={30}
-                                                className="mr-3"
-                                            />
+                                                    width={30}
+                                                    height={30}
+                                                    className="mr-3"
+                                                />
+                                            </div>
                                         </div>
-                                    </div>
-                                    <div className="bg-white p-3 mx-auto my-8 rounded-10 flex  ">
-                                        <p className="w-full text-center p-6">
-                                            No Assessment!
-                                        </p>
-                                        {/* <div className="">
+                                        <div className="bg-white p-3 mx-auto my-8 rounded-10 flex  ">
+                                            <p className="w-full text-center p-6">
+                                                No Assessment!
+                                            </p>
+                                            {/* <div className="">
                                         <div className="grid grid-cols-5 p-4 border-b border-solid border-my-gray-50">
                                             <span className="col-span-2">
                                                 Skills
@@ -750,12 +758,12 @@ export default function () {
                                             <span>8.7 </span>
                                         </div>
                                     </div> */}
+                                        </div>
                                     </div>
-                                </div>
-                            </section>
-                        )}
-                    </div>
-                )}
+                                </section>
+                            )}
+                        </div>
+                    )}
             </section>
             <Footer />
         </>

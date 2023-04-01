@@ -47,10 +47,13 @@ export default function AddEducationPopup({ showPopup, onClose, onSuccess }) {
 
         const educationFormData = new FormData();
 
-        educationFormData.append("user_id", userId);
-        educationFormData.append("certification", education.certification);
-        educationFormData.append("institution", education.institution);
-        educationFormData.append("duration", duration);
+        educationFormData.append("user_id", userId || "");
+        educationFormData.append(
+            "certification",
+            education.certification || ""
+        );
+        educationFormData.append("institution", education.institution || "");
+        educationFormData.append("duration", duration || "");
 
         Utils.makeRequest(async () => {
             try {
@@ -70,7 +73,7 @@ export default function AddEducationPopup({ showPopup, onClose, onSuccess }) {
                 onSuccess(addEducationResults);
             } catch (error) {
                 console.log("Add Education Error: ", error);
-
+                extractErrors(error);
                 setLoading(false);
             }
         });
@@ -118,6 +121,28 @@ export default function AddEducationPopup({ showPopup, onClose, onSuccess }) {
         return hasErrors;
     };
 
+    const extractErrors = (error) => {
+        try {
+            let errorMessages = {};
+            const errors = error.response.data.data;
+
+            Object.keys(errors).map((errorKey) => {
+                errorMessages[errorKey] = errors[errorKey][0];
+            });
+
+            console.log("errors: ", errorMessages);
+            setErrors(errorMessages);
+
+            if (errors.length < 1 && error.response.data.error) {
+                console.log("unknown error: ", error.response.data.error);
+            }
+        } catch (error) {
+            // setErrorMessage(`Unknown Error:  ${error.message}`);
+            // setShowErrorPopup(true);
+            console.log("Error Generating Error Message: ", error);
+        }
+    };
+
     return (
         showPopup && (
             <>
@@ -128,9 +153,9 @@ export default function AddEducationPopup({ showPopup, onClose, onSuccess }) {
                         <Image
                             onClick={onClose}
                             src={"/x-icon.svg"}
-                            className="cursor-pointer mb-2"
-                            width={27}
-                            height={27}
+                            className="cursor-pointer mb-2 translate-x-1/3"
+                            width={16}
+                            height={16}
                         />
                     </p>
 

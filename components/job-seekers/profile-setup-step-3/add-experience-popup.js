@@ -4,6 +4,7 @@ import SecondaryBtn from "../../buttons/SecondaryBtn";
 import Image from "next/image";
 import Config from "../../../Config";
 import Utils from "../../../Utils";
+import ErrorPopup from "../../errorPopup";
 
 export default function AddExperiencePopup({ showPopup, onClose, onSuccess }) {
     const selectEmptyValue = "Please Select";
@@ -56,11 +57,14 @@ export default function AddExperiencePopup({ showPopup, onClose, onSuccess }) {
 
         const experienceFormData = new FormData();
 
-        experienceFormData.append("user_id", userId);
-        experienceFormData.append("title", workExperience.title);
-        experienceFormData.append("company", workExperience.companyName);
-        experienceFormData.append("duration", duration);
-        experienceFormData.append("description", workExperience.description);
+        experienceFormData.append("user_id", userId || "");
+        experienceFormData.append("title", workExperience.title || "");
+        experienceFormData.append("company", workExperience.companyName || "");
+        experienceFormData.append("duration", duration || "");
+        experienceFormData.append(
+            "description",
+            workExperience.description || ""
+        );
 
         Utils.makeRequest(async () => {
             try {
@@ -80,7 +84,7 @@ export default function AddExperiencePopup({ showPopup, onClose, onSuccess }) {
                 onSuccess(addExperienceResults);
             } catch (error) {
                 console.log("Add Experience Error: ", error);
-
+                extractErrors(error);
                 setLoading(false);
             }
         });
@@ -150,6 +154,28 @@ export default function AddExperiencePopup({ showPopup, onClose, onSuccess }) {
         return hasErrors;
     };
 
+    const extractErrors = (error) => {
+        try {
+            let errorMessages = {};
+            const errors = error.response.data.data;
+
+            Object.keys(errors).map((errorKey) => {
+                errorMessages[errorKey] = errors[errorKey][0];
+            });
+
+            console.log("errors: ", errorMessages);
+            setErrors(errorMessages);
+
+            if (errors.length < 1 && error.response.data.error) {
+                console.log("unknown error: ", error.response.data.error);
+            }
+        } catch (error) {
+            // setErrorMessage(`Unknown Error:  ${error.message}`);
+            // setShowErrorPopup(true);
+            console.log("Error Generating Error Message: ", error);
+        }
+    };
+
     return (
         showPopup && (
             <>
@@ -160,9 +186,9 @@ export default function AddExperiencePopup({ showPopup, onClose, onSuccess }) {
                         <Image
                             onClick={onClose}
                             src={"/x-icon.svg"}
-                            className="cursor-pointer mb-2"
-                            width={27}
-                            height={27}
+                            className="cursor-pointer mb-2 translate-x-1/3"
+                            width={16}
+                            height={16}
                         />
                     </p>
 
@@ -254,7 +280,7 @@ export default function AddExperiencePopup({ showPopup, onClose, onSuccess }) {
                                 }}
                             />
                             <p className="text-red-500 text-left">
-                                {errors.companyName || ""}
+                                {errors.companyName || errors.company || ""}
                             </p>
                         </div>
 

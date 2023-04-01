@@ -116,9 +116,9 @@ export default function ReloadCreditPopup({
                         <Image
                             onClick={onClose}
                             src={"/x-icon.svg"}
-                            className="cursor-pointer"
-                            width={27}
-                            height={27}
+                            className="cursor-pointer translate-x-1/3"
+                            width={16}
+                            height={16}
                         />
                     </p>
                     <h3 className="text-dark-70 text-xl font-medium text-left my-3">

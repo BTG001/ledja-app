@@ -1,4 +1,3 @@
-import LogoNavbar from "../../../components/navbars/LogoNavbar";
 import Link from "next/link";
 import Image from "next/image";
 import Footer from "../../../components/Footer";
@@ -7,6 +6,7 @@ import { useRef, useState } from "react";
 import Utils from "../../../Utils";
 import Config from "../../../Config";
 import ErrorPopup from "../../../components/errorPopup";
+import AuthenticatedNavbar from "../../../components/navbars/authenticatedNavbar";
 
 export default function RecruiterProfileSetupStep2() {
     const router = useRouter();
@@ -22,6 +22,8 @@ export default function RecruiterProfileSetupStep2() {
     const [loadingExit, setLoadingExit] = useState(false);
     const [showErrorPopup, setShowErrorPopup] = useState(false);
     const [errorMessage, setErrorMessage] = useState("An Error Occured");
+
+    const [errors, setErrors] = useState({});
 
     const onNext = async (e) => {
         e.preventDefault();
@@ -51,8 +53,9 @@ export default function RecruiterProfileSetupStep2() {
                 setLoadingNext(false);
             } catch (error) {
                 console.log("step 2 Error: ", error);
-                setErrorMessage(error.message);
-                setShowErrorPopup(true);
+                // setErrorMessage(error.message);
+                // setShowErrorPopup(true);
+                extractErrors(error);
                 setLoadingNext(false);
             }
         });
@@ -89,11 +92,35 @@ export default function RecruiterProfileSetupStep2() {
                 setLoadingExit(false);
             } catch (error) {
                 console.log("step 2 Error: ", error);
-                setErrorMessage(error.message);
-                setShowErrorPopup(true);
+                // setErrorMessage(error.message);
+                // setShowErrorPopup(true);
+                extractErrors(error);
                 setLoadingExit(false);
             }
         });
+    };
+
+    const extractErrors = (error) => {
+        try {
+            let errorMessages = {};
+            const errors = error.response.data.data;
+
+            Object.keys(errors).map((errorKey) => {
+                errorMessages[errorKey] = errors[errorKey][0];
+            });
+
+            console.log("errors: ", errorMessages);
+            setErrors(errorMessages);
+
+            if (errors.length < 1 && error.response.data.error) {
+                setErrorMessage(`Unknown Error:  ${error.response.data.error}`);
+                setShowErrorPopup(true);
+            }
+        } catch (error) {
+            setErrorMessage(`Unknown Error:  ${error.message}`);
+            setShowErrorPopup(true);
+            console.log("Error Generating Error Message: ", error);
+        }
     };
     return (
         <>
@@ -102,7 +129,7 @@ export default function RecruiterProfileSetupStep2() {
                 onClose={onClose}
                 message={errorMessage}
             />
-            <LogoNavbar />
+            <AuthenticatedNavbar />
             <p
                 className="back-btn"
                 onClick={() => {
@@ -166,6 +193,7 @@ export default function RecruiterProfileSetupStep2() {
                                 className="m-2"
                             />
                         </div>
+                        <p className="text-red-500">{errors.websites}</p>
                     </div>
 
                     <div className="form-input-container">
@@ -196,6 +224,7 @@ export default function RecruiterProfileSetupStep2() {
                                 className="m-2"
                             />
                         </div>
+                        <p className="text-red-500">{errors.linked_in}</p>
                         <div
                             className={`mt-4 border border-solid  rounded-sm flex flex-row flex-nowrap justify-center items-center ${
                                 twitterFocus
@@ -219,6 +248,7 @@ export default function RecruiterProfileSetupStep2() {
                                 className="m-2"
                             />
                         </div>
+                        <p className="text-red-500">{errors.twitter}</p>
                         <div
                             className={`mt-4 border border-solid  rounded-sm flex flex-row flex-nowrap justify-center items-center ${
                                 facebookFocus
@@ -242,6 +272,7 @@ export default function RecruiterProfileSetupStep2() {
                                 className="m-2"
                             />
                         </div>
+                        <p className="text-red-500">{errors.facebook}</p>
                     </div>
                     <div className="flex flex-row justify-left">
                         <button

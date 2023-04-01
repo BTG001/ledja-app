@@ -3,6 +3,7 @@ import Config from "../../Config";
 import Utils from "../../Utils";
 import axios from "axios";
 import ErrorPopup from "../errorPopup";
+import JobCategoriesLoaderSkeleton from "../skeleton-loaders/job-categories-loader-skeleton";
 
 export default function JobCategories({
     activeJobCategoryId,
@@ -12,13 +13,24 @@ export default function JobCategories({
     const [jobCategories, setJobCategories] = useState();
     const [showErrorPopup, setShowErrorPopup] = useState();
     const [errorMessage, setErrorMessage] = useState(" an Error Occured");
-    const [requestFinished, setRequestFinished] = useState(false);
+
+    const [categoriesLoading, setCategoriesLoading] = useState(true);
 
     useEffect(() => {
-        getJobCategories();
+        let storedJobCategories = localStorage.getItem("jobcategories");
+
+        if (storedJobCategories) {
+            setCategoriesLoading(true);
+            storedJobCategories = JSON.parse(storedJobCategories);
+            setJobCategories(storedJobCategories);
+            setCategoriesLoading(false);
+        } else {
+            getJobCategories();
+        }
     }, []);
 
     async function getJobCategories() {
+        setCategoriesLoading(true);
         const url = `${Config.API_URL}/job_categories`;
 
         try {
@@ -30,10 +42,14 @@ export default function JobCategories({
 
             console.log("job categories: ", jobCategories);
             setJobCategories(jobCategories);
-            setRequestFinished(true);
+            localStorage.setItem(
+                "jobcategories",
+                JSON.stringify(jobCategories)
+            );
+            setCategoriesLoading(false);
         } catch (error) {
             setErrorMessage("Could not resolve job categories");
-            setShowErrorPopup(true);
+            setShowErrorPopup(false);
             console.log("getting job categories error: ", error);
         }
     }
@@ -65,12 +81,14 @@ export default function JobCategories({
                 </h3>
             )}
             <div className="md:grid md:grid-cols-3 mb-10">
-                {!jobCategories && requestFinished && (
+                {!jobCategories && !categoriesLoading && (
                     <p className="text-center w-full text-red-500 border border-solid border-red-500 rounded-lg">
                         No Job Categories!
                     </p>
                 )}
+                {categoriesLoading && <JobCategoriesLoaderSkeleton />}
                 {jobCategories &&
+                    !categoriesLoading &&
                     jobCategories.map((jobCategory, index) => {
                         if (!activeJobCategoryId) {
                             onChangeTheJobCategory(2);

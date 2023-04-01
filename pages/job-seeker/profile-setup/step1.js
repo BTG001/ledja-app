@@ -1,4 +1,3 @@
-import LogoNavbar from "../../../components/navbars/LogoNavbar";
 import Link from "next/link";
 import Image from "next/image";
 import Footer from "../../../components/Footer";
@@ -10,6 +9,7 @@ import ErrorPopup from "../../../components/errorPopup";
 import { BiCloudUpload } from "react-icons/bi";
 import { AuthContext } from "../../_app";
 import { useContext } from "react";
+import AuthenticatedNavbar from "../../../components/navbars/authenticatedNavbar";
 
 export default function JobSeekerProfileSetupStep1() {
     const router = useRouter();
@@ -82,8 +82,9 @@ export default function JobSeekerProfileSetupStep1() {
                 setLoadingNext(false);
             } catch (error) {
                 console.log("step 1 Error: ", error);
-                setErrorMessage(error.message);
-                setShowErrorPopup(true);
+                // setErrorMessage(error.message);
+                // setShowErrorPopup(true);
+                extractErrors(error);
                 setLoadingNext(false);
             }
         });
@@ -123,8 +124,9 @@ export default function JobSeekerProfileSetupStep1() {
                 setLoadingExit(false);
             } catch (error) {
                 console.log("step 1 Error: ", error);
-                setErrorMessage(error.message);
-                setShowErrorPopup(true);
+                // setErrorMessage(error.message);
+                // setShowErrorPopup(true);
+                extractErrors(error);
                 setLoadingExit(false);
             }
         });
@@ -135,15 +137,15 @@ export default function JobSeekerProfileSetupStep1() {
 
         const userId = localStorage.getItem("user_id");
 
-        basicInfosFormData.append("user_id", userId);
-        basicInfosFormData.append("fname", basicInfos.firstName);
-        basicInfosFormData.append("lname", basicInfos.lastName);
-        basicInfosFormData.append("email", basicInfos.email);
-        basicInfosFormData.append("phone_no", basicInfos.phoneNumber);
-        basicInfosFormData.append("position", basicInfos.position);
-        basicInfosFormData.append("location", basicInfos.location);
+        basicInfosFormData.append("user_id", userId || "");
+        basicInfosFormData.append("fname", basicInfos.firstName || "") || "";
+        basicInfosFormData.append("lname", basicInfos.lastName || "");
+        // basicInfosFormData.append("email", basicInfos.email || "");
+        basicInfosFormData.append("phone_no", basicInfos.phoneNumber || "");
+        basicInfosFormData.append("position", basicInfos.position || "");
+        basicInfosFormData.append("location", basicInfos.location || "");
         if (basicInfos.avatar) {
-            basicInfosFormData.append("avatar", basicInfos.avatar);
+            basicInfosFormData.append("avatar", basicInfos.avatar || "");
         }
 
         return basicInfosFormData;
@@ -167,10 +169,10 @@ export default function JobSeekerProfileSetupStep1() {
             theErrors.phoneNumber = "Phone Number is Required";
         }
 
-        if (!basicInfos.email) {
-            hasErrors = true;
-            theErrors.email = "Email is Required";
-        }
+        // if (!basicInfos.email) {
+        //     hasErrors = true;
+        //     theErrors.email = "Email is Required";
+        // }
 
         if (!basicInfos.position) {
             hasErrors = true;
@@ -187,6 +189,29 @@ export default function JobSeekerProfileSetupStep1() {
         return hasErrors;
     };
 
+    const extractErrors = (error) => {
+        try {
+            let errorMessages = {};
+            const errors = error.response.data.data;
+
+            Object.keys(errors).map((errorKey) => {
+                errorMessages[errorKey] = errors[errorKey][0];
+            });
+
+            console.log("errors: ", errorMessages);
+            setErrors(errorMessages);
+
+            if (errors.length < 1 && error.response.data.error) {
+                setErrorMessage(`Unknown Error:  ${error.response.data.error}`);
+                setShowErrorPopup(true);
+            }
+        } catch (error) {
+            setErrorMessage(`Unknown Error:  ${error.message}`);
+            setShowErrorPopup(true);
+            console.log("Error Generating Error Message: ", error);
+        }
+    };
+
     const onClose = () => {
         setShowErrorPopup(false);
     };
@@ -198,7 +223,7 @@ export default function JobSeekerProfileSetupStep1() {
                 onClose={onClose}
                 message={errorMessage}
             />
-            <LogoNavbar />
+            <AuthenticatedNavbar />
             <p
                 className="back-btn"
                 onClick={() => {
@@ -255,7 +280,7 @@ export default function JobSeekerProfileSetupStep1() {
                                 }}
                             />
                             <p className="text-red-500 text-left py-2 ">
-                                {errors.firstName || ""}
+                                {errors.firstName || errors.fname || ""}
                             </p>
                         </div>
 
@@ -281,39 +306,39 @@ export default function JobSeekerProfileSetupStep1() {
                                 }}
                             />
                             <p className="text-red-500 text-left py-2 ">
-                                {errors.lastName || ""}
+                                {errors.lastName || errors.lname || ""}
                             </p>
                         </div>
                     </div>
 
-                    <div className=" md:grid md:grid-cols-2 md:gap-6">
-                        <div className="form-input-container">
-                            <label className="form-label-light form-label-required">
-                                Phone Number
-                            </label>
-                            <input
-                                className="form-input"
-                                type={"text"}
-                                placeholder="000-000-0000"
-                                required
-                                value={basicInfos.phoneNumber}
-                                onChange={(e) => {
-                                    const value = e.target.value;
+                    {/* <div className=" md:grid md:grid-cols-2 md:gap-6"> */}
+                    <div className="form-input-container">
+                        <label className="form-label-light form-label-required">
+                            Phone Number
+                        </label>
+                        <input
+                            className="form-input"
+                            type={"text"}
+                            placeholder="000-000-0000"
+                            required
+                            value={basicInfos.phoneNumber}
+                            onChange={(e) => {
+                                const value = e.target.value;
 
-                                    setBasicInfos((prevValues) => {
-                                        return {
-                                            ...prevValues,
-                                            phoneNumber: value,
-                                        };
-                                    });
-                                }}
-                            />
-                            <p className="text-red-500 text-left py-2 ">
-                                {errors.phoneNumber || ""}
-                            </p>
-                        </div>
+                                setBasicInfos((prevValues) => {
+                                    return {
+                                        ...prevValues,
+                                        phoneNumber: value,
+                                    };
+                                });
+                            }}
+                        />
+                        <p className="text-red-500 text-left py-2 ">
+                            {errors.phoneNumber || errors.phone_no || ""}
+                        </p>
+                    </div>
 
-                        <div className="form-input-container">
+                    {/* <div className="form-input-container">
                             <label className="form-label-light form-label-required">
                                 Email
                             </label>
@@ -334,8 +359,8 @@ export default function JobSeekerProfileSetupStep1() {
                             <p className="text-red-500 text-left py-2 ">
                                 {errors.email || ""}
                             </p>
-                        </div>
-                    </div>
+                        </div> */}
+                    {/* </div> */}
 
                     <div className="form-input-container">
                         <label className="form-label-light form-label-required">

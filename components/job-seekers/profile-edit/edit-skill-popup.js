@@ -118,9 +118,9 @@ export default function EditSkillPopup({
                         <Image
                             onClick={onClose}
                             src={"/x-icon.svg"}
-                            className="cursor-pointer mb-2"
-                            width={27}
-                            height={27}
+                            className="cursor-pointer mb-2 translate-x-1/3"
+                            width={16}
+                            height={16}
                         />
                     </p>
 

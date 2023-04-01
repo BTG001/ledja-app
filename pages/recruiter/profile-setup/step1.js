@@ -1,4 +1,3 @@
-import LogoNavbar from "../../../components/navbars/LogoNavbar";
 import Link from "next/link";
 import Image from "next/image";
 import Footer from "../../../components/Footer";
@@ -12,6 +11,7 @@ import ErrorPopup from "../../../components/errorPopup";
 import { BiCloudUpload } from "react-icons/bi";
 import { AuthContext } from "../../_app";
 import { useContext } from "react";
+import AuthenticatedNavbar from "../../../components/navbars/authenticatedNavbar";
 
 export default function RecruiterProfileSetupStep1() {
     const router = useRouter();
@@ -26,6 +26,8 @@ export default function RecruiterProfileSetupStep1() {
     const recruiterAvatarInput = useRef();
     const companyAvatarInput = useRef();
     const auth = useContext(AuthContext);
+
+    const [errors, setErrors] = useState({});
 
     const onNext = async (e) => {
         e.preventDefault();
@@ -59,8 +61,9 @@ export default function RecruiterProfileSetupStep1() {
                 setLoadingNext(false);
             } catch (error) {
                 console.log("step 1 Error: ", error);
-                setErrorMessage(error.message);
-                setShowErrorPopup(true);
+                // setErrorMessage(error.message);
+                // setShowErrorPopup(true);
+                extractErrors(error);
                 setLoadingNext(false);
             }
         });
@@ -97,11 +100,35 @@ export default function RecruiterProfileSetupStep1() {
                 setLoadingExit(false);
             } catch (error) {
                 console.log("step 1 Error: ", error);
-                setErrorMessage(error.message);
-                setShowErrorPopup(true);
+                // setErrorMessage(error.message);
+                // setShowErrorPopup(true);
+                extractErrors(error);
                 setLoadingExit(false);
             }
         });
+    };
+
+    const extractErrors = (error) => {
+        try {
+            let errorMessages = {};
+            const errors = error.response.data.data;
+
+            Object.keys(errors).map((errorKey) => {
+                errorMessages[errorKey] = errors[errorKey][0];
+            });
+
+            console.log("errors: ", errorMessages);
+            setErrors(errorMessages);
+
+            if (errors.length < 1 && error.response.data.error) {
+                setErrorMessage(`Unknown Error:  ${error.response.data.error}`);
+                setShowErrorPopup(true);
+            }
+        } catch (error) {
+            setErrorMessage(`Unknown Error:  ${error.message}`);
+            setShowErrorPopup(true);
+            console.log("Error Generating Error Message: ", error);
+        }
     };
 
     const onClose = () => {
@@ -142,7 +169,7 @@ export default function RecruiterProfileSetupStep1() {
                 onClose={onClose}
                 message={errorMessage}
             />
-            <LogoNavbar />
+            <AuthenticatedNavbar />
             <p
                 className="back-btn"
                 onClick={() => {
@@ -191,6 +218,7 @@ export default function RecruiterProfileSetupStep1() {
                             // value={"ABC Company Inc"}
                             required
                         />
+                        <p className="text-red-500">{errors.company_name}</p>
                     </div>
                     <div className="grid grid-cols-2 gap-6">
                         <div className="form-input-container">
@@ -208,6 +236,7 @@ export default function RecruiterProfileSetupStep1() {
                                 <option value={"Banking"}>Banking</option>
                                 <option value={"Industry2"}>Industry2</option>
                             </select>
+                            <p className="text-red-500">{errors.industry}</p>
                         </div>
 
                         <div className="form-input-container">
@@ -225,6 +254,9 @@ export default function RecruiterProfileSetupStep1() {
                                 // value={"CBD"}
                                 required
                             />
+                            <p className="text-red-500">
+                                {errors.headquarters}
+                            </p>
                         </div>
                     </div>
 
@@ -243,6 +275,9 @@ export default function RecruiterProfileSetupStep1() {
                                 name="company_size"
                                 // value={"2000"}
                             />
+                            <p className="text-red-500">
+                                {errors.company_size}
+                            </p>
                         </div>
 
                         <div className="form-input-container">
@@ -256,6 +291,7 @@ export default function RecruiterProfileSetupStep1() {
                                 name="revenue"
                                 // value={"20000000"}
                             />
+                            <p className="text-red-500">{errors.revenue}</p>
                         </div>
                     </div>
 
@@ -273,6 +309,7 @@ export default function RecruiterProfileSetupStep1() {
                                 name="founded_on"
                                 // value={"2001"}
                             />
+                            <p className="text-red-500">{errors.founded_on}</p>
                         </div>
 
                         <div className="form-input-container">
@@ -281,11 +318,12 @@ export default function RecruiterProfileSetupStep1() {
                             </label>
                             <input
                                 className="form-input"
-                                type={"email"}
+                                type={"text"}
                                 placeholder="Frank Jessy"
                                 name="ceo"
                                 // value={"Frank Jessy"}
                             />
+                            <p className="text-red-500">{errors.ceo}</p>
                         </div>
                     </div>
 
@@ -320,6 +358,7 @@ export default function RecruiterProfileSetupStep1() {
                                     });
                                 }}
                             />
+                            <p className="text-red-500">{errors.avatar}</p>
                             <div
                                 onClick={() => {
                                     recruiterAvatarInput.current.click();
@@ -365,6 +404,9 @@ export default function RecruiterProfileSetupStep1() {
                                     });
                                 }}
                             />
+                            <p className="text-red-500">
+                                {errors.company_avatar}
+                            </p>
                             <div
                                 onClick={() => {
                                     companyAvatarInput.current.click();

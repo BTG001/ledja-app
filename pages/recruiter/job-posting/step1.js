@@ -59,13 +59,13 @@ export default function ({ jobCategories }) {
 
         setErrors({});
 
-        const hasErrors = handleErrors();
+        // const hasErrors = handleErrors();
 
-        if (hasErrors) {
-            setErrorMessage("Please resolve the errors");
-            setShowErrorPopup(true);
-            return;
-        }
+        // if (hasErrors) {
+        //     setErrorMessage("Please resolve the errors");
+        //     setShowErrorPopup(true);
+        //     return;
+        // }
 
         localJobPost.job_category_id = activeJobCategoryId;
         localJobPost.company_industry = companyIndustry;

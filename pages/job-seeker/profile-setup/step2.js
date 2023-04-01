@@ -7,6 +7,7 @@ import { useState } from "react";
 import ErrorPopup from "../../../components/errorPopup";
 import Config from "../../../Config";
 import Utils from "../../../Utils";
+import AuthenticatedNavbar from "../../../components/navbars/authenticatedNavbar";
 
 export default function JobSeekerProfileSetupStep2() {
     const router = useRouter();
@@ -37,14 +38,14 @@ export default function JobSeekerProfileSetupStep2() {
             setLoadingNext(true);
         }
 
-        const hasErrors = validateData();
+        // const hasErrors = validateData();
 
-        if (hasErrors) {
-            setErrorMessage("Please resolve the errors shown");
-            setShowErrorPopup(true);
-            setLoadingNext(false);
-            return;
-        }
+        // if (hasErrors) {
+        //     setErrorMessage("Please resolve the errors shown");
+        //     setShowErrorPopup(true);
+        //     setLoadingNext(false);
+        //     return;
+        // }
 
         const jobSeekerLinksFormData = createFormData();
 
@@ -63,8 +64,9 @@ export default function JobSeekerProfileSetupStep2() {
                 setLoadingNext(false);
             } catch (error) {
                 console.log("step 2 Error: ", error);
-                setErrorMessage(error.message);
-                setShowErrorPopup(true);
+                // setErrorMessage(error.message);
+                // setShowErrorPopup(true);
+                extractErrors(error);
                 setLoadingNext(false);
             }
         });
@@ -78,14 +80,14 @@ export default function JobSeekerProfileSetupStep2() {
             setLoadingExit(true);
         }
 
-        const hasErrors = validateData();
+        // const hasErrors = validateData();
 
-        if (hasErrors) {
-            setErrorMessage("Please resolve the errors shown");
-            setShowErrorPopup(true);
-            setLoadingNext(false);
-            return;
-        }
+        // if (hasErrors) {
+        //     setErrorMessage("Please resolve the errors shown");
+        //     setShowErrorPopup(true);
+        //     setLoadingNext(false);
+        //     return;
+        // }
 
         const jobSeekerLinksFormData = createFormData();
 
@@ -105,8 +107,9 @@ export default function JobSeekerProfileSetupStep2() {
                 setLoadingExit(false);
             } catch (error) {
                 console.log("step 2 Error: ", error);
-                setErrorMessage(error.message);
-                setShowErrorPopup(true);
+                // setErrorMessage(error.message);
+                // setShowErrorPopup(true);
+                extractErrors(error);
                 setLoadingExit(false);
             }
         });
@@ -117,11 +120,11 @@ export default function JobSeekerProfileSetupStep2() {
 
         const userId = localStorage.getItem("user_id");
 
-        formData.append("user_id", userId);
-        formData.append("websites", jobSeekerLinks.website);
-        formData.append("linked_in", jobSeekerLinks.linkedin);
-        formData.append("twitter", jobSeekerLinks.twitter);
-        formData.append("facebook", jobSeekerLinks.facebook);
+        formData.append("user_id", userId || "");
+        formData.append("websites", jobSeekerLinks.website || "");
+        formData.append("linked_in", jobSeekerLinks.linkedin || "");
+        formData.append("twitter", jobSeekerLinks.twitter || "");
+        formData.append("facebook", jobSeekerLinks.facebook || "");
 
         return formData;
     };
@@ -155,6 +158,29 @@ export default function JobSeekerProfileSetupStep2() {
         return hasErrors;
     };
 
+    const extractErrors = (error) => {
+        try {
+            let errorMessages = {};
+            const errors = error.response.data.data;
+
+            Object.keys(errors).map((errorKey) => {
+                errorMessages[errorKey] = errors[errorKey][0];
+            });
+
+            console.log("errors: ", errorMessages);
+            setErrors(errorMessages);
+
+            if (errors.length < 1 && error.response.data.error) {
+                setErrorMessage(`Unknown Error:  ${error.response.data.error}`);
+                setShowErrorPopup(true);
+            }
+        } catch (error) {
+            setErrorMessage(`Unknown Error:  ${error.message}`);
+            setShowErrorPopup(true);
+            console.log("Error Generating Error Message: ", error);
+        }
+    };
+
     const onClose = () => {
         setShowErrorPopup(false);
     };
@@ -165,7 +191,8 @@ export default function JobSeekerProfileSetupStep2() {
                 onClose={onClose}
                 message={errorMessage}
             />
-            <LogoNavbar />
+
+            <AuthenticatedNavbar />
             <p
                 className="back-btn"
                 onClick={() => {
@@ -238,7 +265,7 @@ export default function JobSeekerProfileSetupStep2() {
                             />
                         </div>
                         <p className="text-red-500 text-left py-2 ">
-                            {errors.website || ""}
+                            {errors.website || errors.websites || ""}
                         </p>
                     </div>
 
@@ -280,7 +307,7 @@ export default function JobSeekerProfileSetupStep2() {
                                 />
                             </div>
                             <p className="text-red-500 text-left py-2 ">
-                                {errors.linkedin || ""}
+                                {errors.linkedin || errors.linked_in || ""}
                             </p>
                         </div>
                         <div>

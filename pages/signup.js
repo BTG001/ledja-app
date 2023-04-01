@@ -19,6 +19,7 @@ export default function login() {
     const [loading, setLoading] = useState(false);
     const [showErrorPopup, setShowErrorPopup] = useState(false);
     const [errorMessage, setErrorMessage] = useState("An Error Occured");
+    const [errors, setErrors] = useState({});
 
     const { role } = router.query;
     const auth = useContext(AuthContext);
@@ -46,6 +47,19 @@ export default function login() {
 
         const signupFormData = new FormData(signupForm.current);
         signupFormData.append("user_type_id", userTypeID);
+
+        // const termsOfServiceAgreement = signupFormData.get("terms");
+
+        // console.log("terms of service: ", termsOfServiceAgreement);
+
+        // if (!termsOfServiceAgreement) {
+        //     setLoading(false);
+        //     setErrorMessage(
+        //         "You must agree to our terms of service and privacy policy to proceed"
+        //     );
+        //     setShowErrorPopup(true);
+        //     return;
+        // }
 
         // for (const [key, value] of signupFormData) {
         //     console.log(key, ": ", value);
@@ -85,8 +99,31 @@ export default function login() {
                 }
             } catch (error) {
                 console.log("Sign up Error: ", error);
-                setErrorMessage(error.message);
-                setShowErrorPopup(true);
+                // setErrorMessage("Please resolve the errors");
+                // setShowErrorPopup(true);
+
+                try {
+                    let errorMessages = {};
+                    const errors = error.response.data.data;
+
+                    Object.keys(errors).map((errorKey) => {
+                        errorMessages[errorKey] = errors[errorKey][0];
+                    });
+
+                    console.log("errors: ", errorMessages);
+                    setErrors(errorMessages);
+
+                    if (errors.length < 1 && error.response.data.error) {
+                        setErrorMessage(
+                            `Unknown Error:  ${error.response.data.error}`
+                        );
+                        setShowErrorPopup(true);
+                    }
+                } catch (error) {
+                    setErrorMessage(`Unknown Error:  ${error.message}`);
+                    setShowErrorPopup(true);
+                    console.log("Error Generating Error Message: ", error);
+                }
                 setLoading(false);
             }
         });
@@ -123,8 +160,11 @@ export default function login() {
                             type={"email"}
                             placeholder="email@example.com"
                             name="email"
-                            required
+                            // required
                         />
+                        <p className="text-red-500 my-1 py-1">
+                            {errors.email || ""}
+                        </p>
                     </div>
 
                     <div className="form-input-container">
@@ -134,8 +174,11 @@ export default function login() {
                             type={"password"}
                             placeholder="6 characters minimum"
                             name="password"
-                            required
+                            // required
                         />
+                        <p className="text-red-500 my-1 py-1">
+                            {errors.password || ""}
+                        </p>
                     </div>
                     <div className="form-input-container">
                         <label className="form-label">Confirm Password</label>
@@ -144,12 +187,15 @@ export default function login() {
                             type={"password"}
                             placeholder="Password should match"
                             name="c_password"
-                            required
+                            // required
                         />
+                        <p className="text-red-500 my-1 py-1">
+                            {errors.c_password || ""}
+                        </p>
                     </div>
 
                     <div className="form-input-container mb-8">
-                        <input type={"checkbox"} required />{" "}
+                        {/* <input type={"checkbox"} checked name="terms" />{" "} */}
                         <p className="text-xs inline">
                             <span>By signing up, I agree to the</span>{" "}
                             <Link href={"/terms"} className="underline">

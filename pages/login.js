@@ -154,7 +154,10 @@ export default function login() {
                     <span className="text-sm text-dark-50 mr-4">
                         Dont have an account?
                     </span>
-                    <Link href="/signup" className="text-sm text-primary-70">
+                    <Link
+                        href="/role-selection"
+                        className="text-sm text-primary-70"
+                    >
                         Sign up
                     </Link>
                 </p>

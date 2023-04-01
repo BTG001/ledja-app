@@ -38,9 +38,7 @@ export default function ErrorPopup({
                             })}
 
                         {message && !messageArray && (
-                            <p className="text-red-500 border border-solid border-red-5-500 my-1">
-                                {message}
-                            </p>
+                            <p className="text-red-500 my-1">{message}</p>
                         )}
                     </div>
                     <div

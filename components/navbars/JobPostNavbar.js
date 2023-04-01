@@ -3,8 +3,18 @@ import Link from "next/link";
 import RecruiterProfileIcon from "../recuriters/recruiter-profile-icon";
 
 import SecondaryBtn from "../../components/buttons/SecondaryBtn";
+import { useRouter } from "next/router";
+import { useEffect } from "react";
+import Utils from "../../Utils";
 
 export default function RecruiterNavbar({ currentStepText }) {
+    const router = useRouter();
+
+    useEffect(() => {
+        if (!Utils.isLoggedIn()) {
+            router.push("/login");
+        }
+    }, []);
     return (
         <>
             <div

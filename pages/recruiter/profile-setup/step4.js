@@ -1,4 +1,3 @@
-import LogoNavbar from "../../../components/navbars/LogoNavbar";
 import Link from "next/link";
 import Image from "next/image";
 import Footer from "../../../components/Footer";
@@ -8,6 +7,7 @@ import RecruiterProfileSuccessPopup from "../../../components/recuriters/recuite
 import Utils from "../../../Utils";
 import Config from "../../../Config";
 import ErrorPopup from "../../../components/errorPopup";
+import AuthenticatedNavbar from "../../../components/navbars/authenticatedNavbar";
 
 export default function RecruiterProfileSetupStep4() {
     const router = useRouter();
@@ -19,6 +19,7 @@ export default function RecruiterProfileSetupStep4() {
     const [loadingExit, setLoadingExit] = useState(false);
     const [showErrorPopup, setShowErrorPopup] = useState(false);
     const [errorMessage, setErrorMessage] = useState("An Error Occured");
+    const [errors, setErrors] = useState({});
 
     const onNext = async (e) => {
         e.preventDefault();
@@ -51,8 +52,9 @@ export default function RecruiterProfileSetupStep4() {
                 setLoadingNext(false);
             } catch (error) {
                 console.log("step 4 Error: ", error);
-                setErrorMessage(error.message);
-                setShowErrorPopup(true);
+                // setErrorMessage(error.message);
+                // setShowErrorPopup(true);
+                extractErrors(error);
                 setLoadingNext(false);
             }
         });
@@ -88,16 +90,41 @@ export default function RecruiterProfileSetupStep4() {
                 setLoadingExit(false);
             } catch (error) {
                 console.log("step 4 Error: ", error);
-                setErrorMessage(error.message);
-                setShowErrorPopup(true);
+                // setErrorMessage(error.message);
+                // setShowErrorPopup(true);
+                extractErrors(error);
                 setLoadingExit(false);
             }
         });
     };
 
+    const extractErrors = (error) => {
+        try {
+            let errorMessages = {};
+            const errors = error.response.data.data;
+
+            Object.keys(errors).map((errorKey) => {
+                errorMessages[errorKey] = errors[errorKey][0];
+            });
+
+            console.log("errors: ", errorMessages);
+            setErrors(errorMessages);
+
+            if (errors.length < 1 && error.response.data.error) {
+                setErrorMessage(`Unknown Error:  ${error.response.data.error}`);
+                setShowErrorPopup(true);
+            }
+        } catch (error) {
+            setErrorMessage(`Unknown Error:  ${error.message}`);
+            setShowErrorPopup(true);
+            console.log("Error Generating Error Message: ", error);
+        }
+    };
+
     const onClose = () => {
         setShowErrorPopup(false);
     };
+
     return (
         <>
             <ErrorPopup
@@ -105,7 +132,7 @@ export default function RecruiterProfileSetupStep4() {
                 onClose={onClose}
                 message={errorMessage}
             />
-            <LogoNavbar />
+            <AuthenticatedNavbar />
             <p
                 className="back-btn"
                 onClick={() => {
@@ -155,6 +182,7 @@ export default function RecruiterProfileSetupStep4() {
                                 // value={"Jennifer"}
                                 required
                             />
+                            <p className="text-red-500">{errors.fname}</p>
                         </div>
 
                         <div className="form-input-container">
@@ -172,27 +200,29 @@ export default function RecruiterProfileSetupStep4() {
                                 // value={"Smith"}
                                 required
                             />
+                            <p className="text-red-500">{errors.lname}</p>
                         </div>
                     </div>
+                    {/* 
+                    <div className=" md:grid md:grid-cols-2 md:gap-6"> */}
+                    <div className="form-input-container">
+                        <label
+                            className="form-label-light form-label-required"
+                            for="text"
+                        >
+                            Phone Number
+                        </label>
+                        <input
+                            className="form-input"
+                            type={"text"}
+                            placeholder="000-000-0000"
+                            name="phone_no"
+                            required
+                        />
+                        <p className="text-red-500">{errors.phone_no}</p>
+                    </div>
 
-                    <div className=" md:grid md:grid-cols-2 md:gap-6">
-                        <div className="form-input-container">
-                            <label
-                                className="form-label-light form-label-required"
-                                for="text"
-                            >
-                                Phone Number
-                            </label>
-                            <input
-                                className="form-input"
-                                type={"text"}
-                                placeholder="000-000-0000"
-                                name="phone_no"
-                                required
-                            />
-                        </div>
-
-                        <div className="form-input-container">
+                    {/* <div className="form-input-container">
                             <label
                                 className="form-label-light form-label-required"
                                 for="email"
@@ -206,8 +236,8 @@ export default function RecruiterProfileSetupStep4() {
                                 name="email"
                                 required
                             />
-                        </div>
-                    </div>
+                        </div> */}
+                    {/* </div> */}
 
                     <div className="form-input-container">
                         <label
@@ -224,6 +254,7 @@ export default function RecruiterProfileSetupStep4() {
                             // value={"COO"}
                             required
                         />
+                        <p className="text-red-500">{errors.lname}</p>
                     </div>
 
                     <div className="form-input-container">
@@ -241,6 +272,7 @@ export default function RecruiterProfileSetupStep4() {
                             // value={"Nairobi, Kenya"}
                             required
                         />
+                        <p className="text-red-500">{errors.location}</p>
                     </div>
                     <div className="flex flex-row justify-left">
                         <button

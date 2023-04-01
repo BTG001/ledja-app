@@ -1,4 +1,3 @@
-import LogoNavbar from "../../../components/navbars/LogoNavbar";
 import Link from "next/link";
 import Image from "next/image";
 import Footer from "../../../components/Footer";
@@ -7,6 +6,7 @@ import { useState } from "react";
 import AddExperiencePopup from "../../../components/job-seekers/profile-setup-step-3/add-experience-popup";
 import AddEducationPopup from "../../../components/job-seekers/profile-setup-step-3/add-education-popup";
 import AddSkillPopup from "../../../components/job-seekers/profile-setup-step-3/add-skill-popup";
+import AuthenticatedNavbar from "../../../components/navbars/authenticatedNavbar";
 
 export default function JobSeekerProfileSetupStep3() {
     const router = useRouter();
@@ -89,7 +89,7 @@ export default function JobSeekerProfileSetupStep3() {
                 onSuccess={onSuccessSkill}
             />
 
-            <LogoNavbar />
+            <AuthenticatedNavbar />
             <p
                 className="back-btn"
                 onClick={() => {
@@ -144,10 +144,10 @@ export default function JobSeekerProfileSetupStep3() {
                                         key={index}
                                         className="text-primary-70 border-b border-primary-40 p-1"
                                     >
-                                        <span className="p-2">
+                                        <span className="p-2 pl-0">
                                             {workExperience.duration}
                                         </span>
-                                        <span className="p-2">
+                                        <span className="p-2 pl-0">
                                             {workExperience.title}
                                         </span>
                                     </p>
@@ -184,15 +184,15 @@ export default function JobSeekerProfileSetupStep3() {
                                 return (
                                     <p
                                         key={index}
-                                        className="text-primary-70 border-b border-primary-40"
+                                        className="text-primary-70 border-b border-primary-40 p-1"
                                     >
-                                        <span className="p-2">
+                                        <span className="p-2 pl-0">
                                             {education.duration}
                                         </span>
-                                        <span className="p-2">
+                                        <span className="p-2 pl-0">
                                             {education.certification}
                                         </span>
-                                        <span className="p-2">
+                                        <span className="p-2 pl-0">
                                             at {education.institution}
                                         </span>
                                     </p>
@@ -230,10 +230,10 @@ export default function JobSeekerProfileSetupStep3() {
                                         key={index}
                                         className="text-primary-70 border-b border-primary-40 p-1"
                                     >
-                                        <span className="p-2">
+                                        <span className="p-2 pl-0">
                                             {skill.proficiency}
                                         </span>
-                                        <span className="p-2">
+                                        <span className="p-2 pl-0">
                                             in {skill.name}
                                         </span>
                                     </p>

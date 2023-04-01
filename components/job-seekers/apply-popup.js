@@ -168,9 +168,9 @@ export default function ApplyPopup({
                         <Image
                             onClick={onClose}
                             src={"/x-icon.svg"}
-                            className="cursor-pointer"
-                            width={27}
-                            height={27}
+                            className="cursor-pointer mb-2 translate-x-1/3"
+                            width={16}
+                            height={16}
                         />
                     </p>
                     <section className="col-span-2 h-max max-h-60-screen overflow-y-auto pl-6 pr-6 my-3">

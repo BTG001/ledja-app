@@ -13,7 +13,7 @@ export default function ProgressCardApplicationsLoaderSkeleton() {
                         </h3>
                     </div>
                     <p className="text-dark-50 flex flex-row flex-nowrap justify-start items-center w-1/3 h-4 skeleton-loading"></p>
-                    <p className="text-my-gray-80 mt-2 mb-1 w-1/3 h-4 skeleton-loading"></p>
+                    <p className="text-my-gray-80 mt-2 mb-1 w-3/5 h-4 skeleton-loading"></p>
                 </div>
                 <div
                     className={`w-full p-3 md:mx-auto my-3 mx-1 min-w-60-screen sm:min-w-40-screen md:min-w-10-screen  border border-my-gray-50 border-solid rounded-10  `}
@@ -26,7 +26,20 @@ export default function ProgressCardApplicationsLoaderSkeleton() {
                         </h3>
                     </div>
                     <p className="text-dark-50 flex flex-row flex-nowrap justify-start items-center w-1/3 h-4 skeleton-loading"></p>
-                    <p className="text-my-gray-80 mt-2 mb-1 w-1/3 h-4 skeleton-loading"></p>
+                    <p className="text-my-gray-80 mt-2 mb-1 w-3/5h-4 skeleton-loading"></p>
+                </div>
+                <div
+                    className={`w-full p-3 md:mx-auto my-3 mx-1 min-w-60-screen sm:min-w-40-screen md:min-w-10-screen  border border-my-gray-50 border-solid rounded-10  `}
+                >
+                    <div className="flex flex-row flex-nowrap justify-between items-center">
+                        <h3 className="font-semibold text-xl my-1 h-6 w-full skeleton-loading"></h3>
+                        <h3 className="flex flex-row flex-nowrap justify-center items-center w-full">
+                            <span className="font-semibold text-xl m-1 w-6 h-6 skeleton-loading"></span>
+                            <span className="font-semibold text-xl m-1 w-6 h-6 skeleton-loading"></span>
+                        </h3>
+                    </div>
+                    <p className="text-dark-50 flex flex-row flex-nowrap justify-start items-center w-1/3 h-4 skeleton-loading"></p>
+                    <p className="text-my-gray-80 mt-2 mb-1 w-3/5 h-4 skeleton-loading"></p>
                 </div>
             </sidebar>
             <section className="col-span-2 ">
