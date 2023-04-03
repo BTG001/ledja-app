@@ -21,6 +21,9 @@ import EditEducationPopup from "../../components/job-seekers/profile-edit/edit-e
 import { MdOutlineOpenInNew } from "react-icons/md";
 import EditSkillPopup from "../../components/job-seekers/profile-edit/edit-skill-popup";
 import JobSeekerProfileLoader from "../../components/skeleton-loaders/jobseeker-profile-loader";
+import AddExperiencePopup from "../../components/job-seekers/profile-setup-step-3/add-experience-popup";
+import AddEducationPopup from "../../components/job-seekers/profile-setup-step-3/add-education-popup";
+import AddSkillPopup from "../../components/job-seekers/profile-setup-step-3/add-skill-popup";
 
 export default function Profile() {
     const router = useRouter();
@@ -85,6 +88,10 @@ export default function Profile() {
     const resumeInput = useRef();
     const [uploadJobs, setUploadJobs] = useState();
     const [uploadJobsId, setUploadJobsId] = useState();
+
+    const [showAddExperiencePopup, setShowAddExperiencePopup] = useState(false);
+    const [showAddEducationPopup, setShowAddEducationPopup] = useState(false);
+    const [showAddSkillPopup, setShowAddSkillPopup] = useState(false);
 
     const otherDocsInput = useRef();
 
@@ -263,6 +270,9 @@ export default function Profile() {
         setShowWorkExperienceEditPopup(false);
         setShowEducationEditPopup(false);
         setShowSkillsEditPopup(false);
+        setShowAddEducationPopup(false);
+        setShowAddExperiencePopup(false);
+        setShowAddSkillPopup(false);
     };
 
     const onExperienceUpdated = (updatedWorkExperience) => {
@@ -293,6 +303,29 @@ export default function Profile() {
 
     const deleteSkill = (itemIndex) => {
         console.log("delete Skill", skills[itemIndex]);
+    };
+
+    const onSuccess = (workExperience) => {
+        // e.preventDefault();
+        setShowAddExperiencePopup(false);
+
+        setWorkExperiences((prevValues) => {
+            return [workExperience, ...prevValues];
+        });
+    };
+
+    const onSuccessEducation = (education) => {
+        setShowAddEducationPopup(false);
+        setEducations((prevValues) => {
+            return [education, ...prevValues];
+        });
+    };
+
+    const onSuccessSkill = (skill) => {
+        setShowAddSkillPopup(false);
+        setSkills((prevValues) => {
+            return [skill, ...prevValues];
+        });
     };
 
     const updateResume = () => {
@@ -385,6 +418,23 @@ export default function Profile() {
                 basicInfos={basicInfo}
                 links={links}
             />
+            <AddExperiencePopup
+                showPopup={showAddExperiencePopup}
+                onClose={onClose}
+                onSuccess={onSuccess}
+            />
+
+            <AddEducationPopup
+                showPopup={showAddEducationPopup}
+                onClose={onClose}
+                onSuccess={onSuccessEducation}
+            />
+            <AddSkillPopup
+                showPopup={showAddSkillPopup}
+                onClose={onClose}
+                onSuccess={onSuccessSkill}
+            />
+
             <EditWorkExperiencePopup
                 showPopup={showWorkExperienceEditPopup}
                 onClose={onClose}
@@ -575,16 +625,21 @@ export default function Profile() {
                                 <label className="form-label-light">
                                     Work Experience
                                 </label>
-                                {/* {hasWorkExperience && (
+
                                 <span
                                     onClick={() => {
-                                        setShowWorkExperienceEditPopup(true);
+                                        setShowAddExperiencePopup(true);
                                     }}
-                                    className="text-primary-70 cursor-pointer"
+                                    className="text-primary-70 test-sm cursor-pointer flex flex-row flex-nowrap justify-center items-center"
                                 >
-                                    Edit
+                                    <Image
+                                        src={"/plus-icon.svg"}
+                                        width={12}
+                                        height={12}
+                                        className="m-2"
+                                    />
+                                    Add
                                 </span>
-                            )} */}
                             </div>
                             {hasWorkExperience && (
                                 <div className="mt-4 px-4 py-1 border border-solid border-my-gray-70  rounded-md">
@@ -677,16 +732,20 @@ export default function Profile() {
                                 <label className="form-label-light">
                                     Education
                                 </label>
-                                {/* {hasEducation && (
                                 <span
                                     onClick={() => {
-                                        setShowEducationEditPopup(true);
+                                        setShowAddEducationPopup(true);
                                     }}
-                                    className="text-primary-70 cursor-pointer"
+                                    className="text-primary-70 test-sm cursor-pointer flex flex-row flex-nowrap justify-center items-center"
                                 >
-                                    Edit
+                                    <Image
+                                        src={"/plus-icon.svg"}
+                                        width={12}
+                                        height={12}
+                                        className="m-2"
+                                    />
+                                    Add
                                 </span>
-                            )} */}
                             </div>
 
                             {hasEducation && (
@@ -775,16 +834,20 @@ export default function Profile() {
                                 <label className="form-label-light">
                                     Skills
                                 </label>
-                                {/* {hasSkills && (
                                 <span
                                     onClick={() => {
-                                        setShowSkillsEditPopup(true);
+                                        setShowAddSkillPopup(true);
                                     }}
-                                    className="text-primary-70 cursor-pointer"
+                                    className="text-primary-70 test-sm cursor-pointer flex flex-row flex-nowrap justify-center items-center"
                                 >
-                                    Edit
+                                    <Image
+                                        src={"/plus-icon.svg"}
+                                        width={12}
+                                        height={12}
+                                        className="m-2"
+                                    />
+                                    Add
                                 </span>
-                            )} */}
                             </div>
                             {hasSkills && (
                                 <div
@@ -1012,7 +1075,7 @@ export default function Profile() {
                                 </div>
                             )}
 
-                            {!hasResume && (
+                            {!hasOtherDocs && (
                                 <div
                                     onClick={() => {
                                         router.push(

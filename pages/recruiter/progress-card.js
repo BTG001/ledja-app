@@ -12,6 +12,8 @@ import axios from "axios";
 import { AiOutlineSave } from "react-icons/ai";
 import DashboardJobsLoaderSkeleton from "../../components/skeleton-loaders/progress-card-jobs-loader-skeleton";
 import ProgressCardApplicationsLoaderSkeleton from "../../components/skeleton-loaders/progress-card-applications-loader-skeleton";
+import JobSeekerProfilePopup from "../../components/recuriters/applicant-profile-popup";
+import InterviewStartedPopup from "../../components/recuriters/interviewing-started-popup";
 
 export default function () {
     const [jobsSearchFocus, setJobsSearchFocus] = useState(false);
@@ -29,11 +31,26 @@ export default function () {
     const [activeApplication, setActiveApplication] = useState({});
     const [applicationsLoading, setApplicationsLoading] = useState(true);
 
+    const [showCurrentApplicantProfile, setShowCurrentApplicantProfile] =
+        useState();
+    const [showInterviewingStartedPopup, setShowInterviewingStartedPopup] =
+        useState();
+
+    const [activeApplicantId, setActiveApplicantId] = useState();
+
+    const [loadingInterviewing, setLoadingInterviewing] = useState(false);
+
     const [filters, setFilters] = useState({});
 
     useEffect(() => {
         getJobs();
     }, []);
+
+    useEffect(() => {
+        if (activeApplication.user) {
+            setActiveApplicantId(activeApplication.user.id);
+        }
+    }, [activeApplication]);
 
     useEffect(() => {
         if (activeJob.id) {
@@ -143,6 +160,14 @@ export default function () {
         const statusFormData = new FormData();
         statusFormData.append("status", status);
 
+        if (status == "contacting") {
+            if (loadingInterviewing) {
+                return;
+            } else {
+                setLoadingInterviewing(true);
+            }
+        }
+
         Utils.makeRequest(async () => {
             try {
                 const statusURL = `${Config.API_URL}/applications/${applicationId}`;
@@ -157,14 +182,40 @@ export default function () {
                 setActiveApplication(updateStatusResults);
 
                 console.log("update status results: ", updateStatusResults);
+
+                if (status == "contacting") {
+                    setShowInterviewingStartedPopup(true);
+                    setLoadingInterviewing(false);
+                }
             } catch (error) {
+                if (status == "contacting") {
+                    setLoadingInterviewing(false);
+                }
                 console.log("updateStatus: ", error);
             }
         });
     };
 
+    const onStartInterview = () => {
+        updateStatus("contacting", activeApplication.id);
+    };
+
+    const onClose = () => {
+        setShowCurrentApplicantProfile(false);
+        setShowInterviewingStartedPopup(false);
+    };
+
     return (
         <>
+            <JobSeekerProfilePopup
+                showPopup={showCurrentApplicantProfile}
+                onClose={onClose}
+                jobSeekerId={activeApplicantId}
+            />
+            <InterviewStartedPopup
+                showPopup={showInterviewingStartedPopup}
+                onClose={onClose}
+            />
             <RecruiterNavbar active="progress-card" />
             <section className="w-4/5 mx-auto my-5">
                 <div className="w-1/4">
@@ -207,7 +258,7 @@ export default function () {
                         setJobsContainerMouseDown(false);
                     }}
                     onMouseMove={onJobsContainerMouseMove}
-                    className="flex flex-row flex-nowrap overflow-x-auto justify-start items-center py-2 cursor-grab "
+                    className="flex flex-row flex-nowrap overflow-x-auto justify-start items-center py-2 cursor-grab  "
                 >
                     {(!jobs || jobs.length < 1) && !jobsLoading && (
                         <p className="text-sm text-dark-50 text-center flex justify-center items-center min-h-10-screen md:m-h-20-screen min-w-60-screen md:min-w-20-screen bg-primary-40 rounded-md py-2 px-6 mr-4 border border-primary-40 border-solid">
@@ -226,7 +277,7 @@ export default function () {
                                     onClick={() => {
                                         onChangeActiveJob(job);
                                     }}
-                                    className={`min-w-60-screen sm:min-w-20-screen  rounded-md py-2 px-6 mr-4 border border-primary-40 border-solid
+                                    className={`cursor-pointer min-w-60-screen sm:min-w-20-screen  rounded-md py-2 px-6 mr-4 border border-primary-40 border-solid
                                     ${
                                         activeJob.id == job.id
                                             ? "bg-primary-40"
@@ -446,11 +497,12 @@ export default function () {
                 {applicationsLoading && (
                     <ProgressCardApplicationsLoaderSkeleton />
                 )}
+
                 {!applicationsLoading &&
                     applications &&
                     applications.length > 0 && (
                         <div className="md:grid md:grid-cols-3 gap-4 mt-5 mb-16">
-                            <sidebar className="flex flex-row flex-nowrap overflow-x-auto md:block cursor-grab md:cursor-">
+                            <sidebar className="flex flex-row flex-nowrap overflow-x-auto md:block cursor-grab md:cursor-context-menu">
                                 {applications &&
                                     applications.length > 0 &&
                                     applications.map((application) => {
@@ -470,7 +522,7 @@ export default function () {
                                                         );
                                                     }
                                                 }}
-                                                className={`w-full p-3 md:mx-auto my-3 mx-1 min-w-60-screen sm:min-w-40-screen md:min-w-10-screen  border border-my-gray-50 border-solid rounded-10  
+                                                className={`cursor-pointer w-full p-3 md:mx-auto my-3 mx-1 min-w-60-screen sm:min-w-40-screen md:min-w-10-screen  border border-my-gray-50 border-solid rounded-10  
                                     ${
                                         activeApplication.id == application.id
                                             ? "bg-my-gray-50 "
@@ -585,23 +637,36 @@ export default function () {
                                         </div>
                                         <div className="my-3 flex flex-row flex-wrap justify-between items-center min-h-10-screen ">
                                             <div
-                                                flex
+                                                className="flex
                                                 flex-row
-                                                flex-wrap
+                                                flex-nowrap
                                                 justify-start
                                                 items-center
-                                                my-2
+                                                my-2"
                                             >
-                                                <PrimaryBtn
-                                                    text={"Interview"}
-                                                    path="/interview"
-                                                    className={"mr-2"}
-                                                />
-                                                <SecondaryBtn
-                                                    text={"View profile"}
-                                                    path="user-profile"
-                                                    className={"mr-2"}
-                                                />
+                                                <span
+                                                    onClick={onStartInterview}
+                                                    className="m-1 mr-2 bg-primary-70 px-4 py-3 rounded-10 text-white cursor-pointer w-32 text-center flex justify-center items-center  "
+                                                >
+                                                    {loadingInterviewing && (
+                                                        <span className="loader"></span>
+                                                    )}
+                                                    {!loadingInterviewing && (
+                                                        <span className="">
+                                                            Interview
+                                                        </span>
+                                                    )}
+                                                </span>
+                                                <span
+                                                    onClick={() => {
+                                                        setShowCurrentApplicantProfile(
+                                                            true
+                                                        );
+                                                    }}
+                                                    className="mr-2 bg-white px-4 py-3 rounded-10 cursor-pointer w-max m-1 flex"
+                                                >
+                                                    View Profile
+                                                </span>
                                             </div>
                                             <div
                                                 className="flex
@@ -674,90 +739,6 @@ export default function () {
                                             <p className="w-full text-center p-6">
                                                 No Assessment!
                                             </p>
-                                            {/* <div className="">
-                                        <div className="grid grid-cols-5 p-4 border-b border-solid border-my-gray-50">
-                                            <span className="col-span-2">
-                                                Skills
-                                            </span>
-                                            <span>Rank</span>
-                                            <span>Score</span>
-                                        </div>
-                                        <div className="grid grid-cols-5 p-4 border-b border-solid border-my-gray-50">
-                                            <span className="col-span-2">
-                                                Java coding skill{" "}
-                                            </span>
-                                            <span>04/100</span>
-                                            <span>8.6 </span>
-                                            <Image
-                                                src={"/caret-min-icon.svg"}
-                                                width={7}
-                                                height={4}
-                                            />
-                                        </div>
-
-                                        <div className="grid grid-cols-5 p-4 ">
-                                            <span className="col-span-2">
-                                                C++ coding skill
-                                            </span>
-                                            <span>16/100</span>
-                                            <span>7.9 </span>
-                                            <Image
-                                                src={"/caret-max-icon.svg"}
-                                                width={7}
-                                                height={4}
-                                            />
-                                        </div>
-                                        <div className="grid grid-cols-5 px-5 py-3 ">
-                                            <span className="text-sm col-span-2">
-                                                Section A
-                                            </span>
-                                            <span className="text-sm">
-                                                08/100
-                                            </span>
-                                            <span className="text-sm">
-                                                8.2{" "}
-                                            </span>
-                                        </div>
-                                        <div className="grid grid-cols-5 px-5 py-3 ">
-                                            <span className="text-sm col-span-2">
-                                                Section B
-                                            </span>
-                                            <span className="text-sm">
-                                                16/100
-                                            </span>
-                                            <span className="text-sm">7.2</span>
-                                        </div>
-                                        <div className="grid grid-cols-5 px-5 py-3 ">
-                                            <span className="text-sm col-span-2">
-                                                Section C
-                                            </span>
-                                            <span className="text-sm">
-                                                25/100
-                                            </span>
-                                            <span className="text-sm">
-                                                7.5{" "}
-                                            </span>
-                                        </div>
-                                        <div className="grid grid-cols-5 p-4 ">
-                                            <span className="col-span-2">
-                                                HTML coding skill{" "}
-                                            </span>
-                                            <span>02/100</span>
-                                            <span>8.8 </span>
-                                            <Image
-                                                src={"/caret-min-icon.svg"}
-                                                width={7}
-                                                height={4}
-                                            />
-                                        </div>
-                                        <div className="grid grid-cols-5 p-4 font-semibold text-lg">
-                                            <span className="col-span-2">
-                                                Total
-                                            </span>
-                                            <span>09/100</span>
-                                            <span>8.7 </span>
-                                        </div>
-                                    </div> */}
                                         </div>
                                     </div>
                                 </section>

@@ -102,7 +102,7 @@ export default class Utils {
     static calculateTimeLapse(fromTime) {
         const now = new Date().getTime();
         fromTime = new Date(fromTime).getTime();
-        console.log("Difference: ", now, fromTime, (now - fromTime) / 60000);
+        // console.log("Difference: ", now, fromTime, (now - fromTime) / 60000);
         const difference = Math.floor((now - fromTime) / 60000);
 
         const toReturn = {

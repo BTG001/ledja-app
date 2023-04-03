@@ -289,8 +289,8 @@ export default function JobSearch() {
                         <p className="text-dark-50 py-3">
                             Recently posted jobs
                         </p>
-                        <div className="md:grid md:grid-cols-5 border-b border-x border-t  border-solid border-my-gray-70 min-h-40-screen rounded-sm mb-16">
-                            <sidebar className="col-span-2 h-full flex flex-row flex-nowrap overflow-x-auto md:block p-2 md:p-0">
+                        <div className="md:grid md:grid-cols-5  md:border-x md:border-t  md:border-solid border-my-gray-70 min-h-40-screen rounded-sm mb-16">
+                            <sidebar className="col-span-2 h-full flex flex-row flex-nowrap overflow-x-auto md:block p-2 pl-0 md:p-0">
                                 {jobs.map((job, index) => {
                                     return (
                                         <div
@@ -299,7 +299,7 @@ export default function JobSearch() {
                                                 setActiveJobIndex(index);
                                             }}
                                             key={index}
-                                            className={`min-w-60-screen sm:min-w-40-screen md:min-w-10-screen hover:bg-primary-40 cursor-pointer flex flex-row flex-nowrap justify-start items-center p-2  md:border-b border-solid border-my-gray-70
+                                            className={`min-w-60-screen sm:min-w-40-screen md:min-w-10-screen hover:bg-primary-40 cursor-pointer flex flex-row flex-nowrap justify-start items-center p-2 border md:border-0  md:border-b border-solid border-my-gray-70 mr-2 md:mr-auto
                                         ${
                                             activeJobIndex == index
                                                 ? "bg-my-gray-50"
@@ -353,7 +353,7 @@ export default function JobSearch() {
                                     );
                                 })}
                             </sidebar>
-                            <section className="col-span-3 p-4 md:border-l border-t md:border-t-0 border-my-gray-70 border-solid">
+                            <section className="col-span-3 p-4 border-l border-t border-b border-r md:border-r-0 md:border-t-0 border-my-gray-70 border-solid">
                                 <h3 className="font-medium text-xl">
                                     {activeJob.title || ""}
                                 </h3>

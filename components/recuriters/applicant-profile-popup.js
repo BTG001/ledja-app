@@ -9,12 +9,10 @@ import Config from "../../Config";
 import Utils from "../../Utils";
 import { MdOutlineOpenInNew } from "react-icons/md";
 
-export default function ApplyPopup({
+export default function JobSeekerProfilePopup({
     showPopup,
     onClose,
-    onSuccess,
-    jobId,
-    onFailure,
+    jobSeekerId,
 }) {
     const router = useRouter();
     const [hasWorkExperience, setHasWorkExperience] = useState();
@@ -38,8 +36,6 @@ export default function ApplyPopup({
     const [resume, setResume] = useState();
     const [otherDocs, setOtherDocs] = useState();
     const [profilePic, setProfilePic] = useState();
-    const [coverLetter, setCoverLetter] = useState("");
-    const [errors, setErrors] = useState({});
 
     const [loading, setLoading] = useState(false);
 
@@ -51,53 +47,19 @@ export default function ApplyPopup({
         }
     }, [showPopup]);
 
-    const onSubmit = () => {
-        if (loading) {
-            return;
-        } else {
-            setLoading(true);
-        }
-
-        const applicationURL = `${Config.API_URL}/applications`;
-
-        const userId = localStorage.getItem("user_id");
-        const applicationFormData = new FormData();
-
-        applicationFormData.append("user_id", userId);
-        applicationFormData.append("job_id", jobId);
-        applicationFormData.append("status", "awaiting");
-
-        applicationFormData.append("cover_letter", coverLetter);
-
-        Utils.makeRequest(async () => {
-            try {
-                const applicationResults = await Utils.postForm(
-                    applicationURL,
-                    applicationFormData
-                );
-                setLoading(false);
-                console.log("application results: ", applicationResults);
-                setCoverLetter("");
-                onSuccess();
-            } catch (error) {
-                extractErrors(error);
-                console.log("application error: ", error);
-                setLoading(false);
-            }
-        });
-    };
-
     const whenClosed = () => {
         onClose();
     };
 
     useEffect(() => {
-        fetchJobSeeker();
-    }, []);
+        if (jobSeekerId) {
+            fetchJobSeeker();
+        }
+    }, [jobSeekerId]);
 
     async function fetchJobSeeker() {
         try {
-            const userId = localStorage.getItem("user_id");
+            const userId = jobSeekerId;
             const url = `${Config.API_URL}/users/${userId}`;
             let jobSeeker = await axios.get(url, {
                 headers: Utils.getHeaders(),
@@ -165,30 +127,6 @@ export default function ApplyPopup({
         }
     }
 
-    const extractErrors = (error) => {
-        try {
-            let errorMessages = {};
-            const errors = error.response.data.data;
-
-            Object.keys(errors).map((errorKey) => {
-                errorMessages[errorKey] = errors[errorKey][0];
-            });
-
-            console.log("errors: ", errorMessages);
-            setErrors(errorMessages);
-
-            if (errors.length < 1 && error.response.data.error) {
-                // setErrorMessage(`Unknown Error:  ${error.response.data.error}`);
-                // setShowErrorPopup(true);
-                onFailure();
-            }
-        } catch (error) {
-            // setErrorMessage(`Unknown Error:  ${error.message}`);
-            // setShowErrorPopup(true);
-            console.log("Error Generating Error Message: ", error);
-        }
-    };
-
     return (
         showPopup && (
             <>
@@ -198,7 +136,7 @@ export default function ApplyPopup({
                 ></div>
                 <div className="z-50 fixed w-4/5 md:w-3/4 lg:w-2/3 left-1/2 -translate-x-1/2 top-0  p-10 bg-white opacity-100 rounded-10 shadow-md  my-10">
                     <p className="w-full flex flex-row justify-between flex-wrap-reverse items-center text-lg font-medium">
-                        <span>Review your application</span>
+                        <span>Applicant Profile</span>
                         <Image
                             onClick={onClose}
                             src={"/x-icon.svg"}
@@ -207,35 +145,7 @@ export default function ApplyPopup({
                             height={16}
                         />
                     </p>
-
                     <section className="col-span-2 h-max max-h-60-screen overflow-y-auto pl-6 pr-6 my-3">
-                        <h3 className="text-xl font-medium p-2 pl-0">
-                            Cover Letter
-                        </h3>
-
-                        <div className="form-input-container p-2">
-                            <textarea
-                                className="form-input"
-                                rows={10}
-                                placeholder="This is why you should hire me...."
-                                name="end_year"
-                                value={coverLetter}
-                                onChange={(e) => {
-                                    const value = e.target.value;
-
-                                    setCoverLetter(value);
-                                }}
-                            ></textarea>
-                            <p className="text-right w-full text-sm">0/2,000</p>
-                            <p className="text-red-500 text-left  ">
-                                {errors.cover_letter || ""}
-                            </p>
-                        </div>
-
-                        <h3 className="text-xl font-medium p-2 pl-0">
-                            Your Profile
-                        </h3>
-
                         <div className="form-input-container ">
                             <p className="flex flex-row flex-nowrap justify-between items-center w-full p-2">
                                 <label className="form-label-light">
@@ -327,7 +237,7 @@ export default function ApplyPopup({
                                                 <Image
                                                     src={"/linkedin.svg"}
                                                     width={14}
-                                                    height={9}
+                                                    height={12}
                                                 />
                                             </Link>
                                         </div>
@@ -372,13 +282,13 @@ export default function ApplyPopup({
                                     }
                                 >
                                     <Image
-                                        src={"/plus-icon.svg"}
-                                        width={9}
-                                        height={9}
+                                        src={"/not-interested-active-icon.svg"}
+                                        width={12}
+                                        height={12}
                                         className="m-2"
                                     />
                                     <span className="text-xs text-primary-70">
-                                        Add your basic info and social links
+                                        No Basic Information or Social Links
                                     </span>
                                 </div>
                             )}
@@ -432,13 +342,13 @@ export default function ApplyPopup({
                                     }
                                 >
                                     <Image
-                                        src={"/plus-icon.svg"}
-                                        width={9}
-                                        height={9}
+                                        src={"/not-interested-active-icon.svg"}
+                                        width={12}
+                                        height={12}
                                         className="m-2"
                                     />
                                     <span className="text-xs text-primary-70">
-                                        Add
+                                        No Work Experience
                                     </span>
                                 </div>
                             )}
@@ -495,13 +405,13 @@ export default function ApplyPopup({
                                     }
                                 >
                                     <Image
-                                        src={"/plus-icon.svg"}
-                                        width={9}
-                                        height={9}
+                                        src={"/not-interested-active-icon.svg"}
+                                        width={12}
+                                        height={12}
                                         className="m-2"
                                     />
                                     <span className="text-xs text-primary-70">
-                                        Add
+                                        No Education Added
                                     </span>
                                 </div>
                             )}
@@ -546,13 +456,13 @@ export default function ApplyPopup({
                                     }
                                 >
                                     <Image
-                                        src={"/plus-icon.svg"}
-                                        width={9}
-                                        height={9}
+                                        src={"/not-interested-active-icon.svg"}
+                                        width={12}
+                                        height={12}
                                         className="m-2"
                                     />
                                     <span className="text-xs text-primary-70">
-                                        Add
+                                        No Skills Added
                                     </span>
                                 </div>
                             )}
@@ -569,8 +479,8 @@ export default function ApplyPopup({
                         >
                             <Image
                                 src={"/plus-icon.svg"}
-                                width={9}
-                                height={9}
+                                width={12}
+                                height={12}
                                 className="m-2"
                             />
                             <span className="text-xs text-primary-70">Add</span>
@@ -746,25 +656,13 @@ export default function ApplyPopup({
                             className="flex flex-col justify-center items-center my-10 mx-auto"
                         >
                             <button
-                                onClick={onSubmit}
-                                className="submit-btn-left ml-3"
-                                type={"submit"}
-                            >
-                                {loading && <span className="loader"></span>}
-                                {!loading && (
-                                    <span className="">
-                                        Submit your application
-                                    </span>
-                                )}
-                            </button>
-                            <button
                                 onClick={whenClosed}
                                 className="submit-btn-secondary mr-3"
                                 type={"button"}
                             >
                                 {/* {loading && <span className="loader"></span>} */}
                                 {/* {!loading && <span className="">Cancel</span>} */}
-                                <span className="">Cancel</span>
+                                <span className="">Done</span>
                             </button>
 
                             {/* <div className="w-full flex flex-row flex-wrap justify-center items-center ">
