@@ -5,7 +5,7 @@ export default function Switch({ on, onChangeOn }) {
                 onClick={() => {
                     onChangeOn(!on);
                 }}
-                className={`cursor-pointer relative  flex flex-row flex-nowrap  items-center
+                className={` w-12 h-max cursor-pointer relative  flex flex-row flex-nowrap  items-center
         ${on ? "justify-end" : "justify-start"}`}
             >
                 <p className="absolute w-12 h-4  bg-primary-40 rounded-lg"></p>

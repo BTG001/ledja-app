@@ -91,11 +91,11 @@ export default function () {
                         </label>
                         <div
                             onClick={() => {
-                                setWithResume(1);
+                                setWithResume("yes");
                             }}
                             className={`flex flex-row flex-nowrap justify-start items-center border border-solid  px-2 rounded-md text-dark-50 mb-8 cursor-pointer
                         ${
-                            withResume
+                            withResume == "yes"
                                 ? "border-primary-70"
                                 : "border-my-gray-70"
                         }
@@ -103,7 +103,7 @@ export default function () {
                         >
                             <p
                                 className={`w-4 h-4 rounded-full border border-primary-70
-                                ${withResume ? "bg-primary-70" : ""}`}
+                                ${withResume == "yes" ? "bg-primary-70" : ""}`}
                             ></p>
                             <p className="mx-4 my-1 text-xs">
                                 Yes <br />
@@ -112,11 +112,11 @@ export default function () {
                         </div>
                         <div
                             onClick={() => {
-                                setWithResume(0);
+                                setWithResume("no");
                             }}
                             className={`flex flex-row flex-nowrap justify-start items-center border border-solid  px-2 rounded-md text-dark-50 mb-8 cursor-pointer
                         ${
-                            !withResume
+                            withResume == "no"
                                 ? "border-primary-70"
                                 : "border-my-gray-70"
                         }
@@ -124,7 +124,7 @@ export default function () {
                         >
                             <p
                                 className={`w-4 h-4 rounded-full border border-primary-70
-                                ${!withResume ? "bg-primary-70" : ""}`}
+                                ${withResume == "no" ? "bg-primary-70" : ""}`}
                             ></p>
                             <p className="mx-4 my-1 text-xs">
                                 No
@@ -132,8 +132,26 @@ export default function () {
                                 People will not be required to submit a resume
                             </p>
                         </div>
-                        <div className="flex flex-row flex-nowrap justify-start items-center border border-solid border-my-gray-70 px-2 rounded-md text-dark-50 mb-8">
-                            <p className="w-4 h-4 rounded-full border border-primary-70"></p>
+                        <div
+                            onClick={() => {
+                                setWithResume("optional");
+                            }}
+                            className={`flex flex-row flex-nowrap justify-start items-center border border-solid  px-2 rounded-md text-dark-50 mb-8 cursor-pointer
+                            ${
+                                withResume == "optional"
+                                    ? "border-primary-70"
+                                    : "border-my-gray-70"
+                            }
+                            `}
+                        >
+                            <p
+                                className={`w-4 h-4 rounded-full border border-primary-70
+                                    ${
+                                        withResume == "optional"
+                                            ? "bg-primary-70"
+                                            : ""
+                                    }`}
+                            ></p>
                             <p className="mx-4 my-1 text-xs">
                                 Optional <br></br>
                                 People have the option of including resume

@@ -53,8 +53,10 @@ export default function () {
     }, [activeApplication]);
 
     useEffect(() => {
-        if (activeJob.id) {
+        if (activeJob && activeJob.id) {
             filterActiveJobApplications();
+        } else {
+            setApplicationsLoading(false);
         }
     }, [filters, activeJob]);
 

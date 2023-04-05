@@ -224,9 +224,12 @@ export default function JobSearch() {
                             />
 
                             <LeftCaretSelect
-                                placeholder={"Job type"}
+                                placeholder={"Select Job type"}
                                 options={Config.JOB_TYPES}
                                 value={filters.jobType}
+                                className={
+                                    "w-max min-w-50-screen md:min-w-20-screen"
+                                }
                                 onChangeActiveValue={(value) => {
                                     setFilters((prevValues) => {
                                         return {

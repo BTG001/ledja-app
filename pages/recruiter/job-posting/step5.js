@@ -7,13 +7,23 @@ import { useState, useEffect } from "react";
 import JobCategories from "../../../components/recuriters/job-categories";
 import Utils from "../../../Utils";
 import Switch from "../../../components/switch";
+import ErrorPopup from "../../../components/errorPopup";
+import LeftCaretSelect from "../../../components/LeftCaretSelect";
+import SkillsAssessmentSelect from "../../../components/SkillsAssessmentSelect";
 
 export default function () {
     const router = useRouter();
 
     const [localJobPost, setLocalJobPost] = useState();
     const [activeJobCategoryId, setActiveJobCategoryId] = useState();
-    const [withAssessment, setWithAssessment] = useState(true);
+    const [withAssessment, setWithAssessment] = useState(false);
+    const [showErrorPopup, setShowErrorPopup] = useState(false);
+    const [errorMessage, setErrorMessage] = useState("An Error Occured");
+    const [selectedAssessment, setSelectedAssessment] = useState();
+    const [assessments, setAssessments] = useState([
+        { title: "assessment 1", id: 1 },
+        { title: "assessment 2", id: 2 },
+    ]);
 
     useEffect(() => {
         const theLocalJobPost = Utils.getLocalJobPost();
@@ -23,7 +33,16 @@ export default function () {
         setLocalJobPost(theLocalJobPost);
 
         setActiveJobCategoryId(theLocalJobPost.job_category_id);
+        if (theLocalJobPost.with_assessment) {
+            onChangeWithAssessment(true);
+        }
     }, []);
+
+    useEffect(() => {
+        if (withAssessment) {
+            onChangeWithAssessment(true);
+        }
+    }, [activeJobCategoryId]);
 
     const onNext = (e) => {
         e.preventDefault();
@@ -47,10 +66,28 @@ export default function () {
     };
 
     const onChangeWithAssessment = (newValue) => {
+        if (
+            newValue &&
+            activeJobCategoryId != Config.JOB_CATEGORIES.premium.id
+        ) {
+            setWithAssessment(false);
+            setErrorMessage("Only premium jobs can have an assessment");
+            setShowErrorPopup(true);
+            return;
+        }
         setWithAssessment(newValue);
+    };
+
+    const onClose = () => {
+        setShowErrorPopup(false);
     };
     return (
         <>
+            <ErrorPopup
+                showPopup={showErrorPopup}
+                message={errorMessage}
+                onClose={onClose}
+            />
             <JobPostNavbar
                 currentStepText={"Step 5 of 6 - Customize application process"}
             />
@@ -80,17 +117,49 @@ export default function () {
                                 <span className="text-xs my-1 mx-2 text-my-gray-70   ">
                                     Add a skills assessment for this job
                                 </span>
-                                <Image
+                                {/* <Image
                                     src={"/switch-off-icon.svg"}
                                     width={34}
                                     height={20}
-                                />
-                                {/* <Switch
+                                /> */}
+                                <Switch
                                     on={withAssessment}
                                     onChangeOn={onChangeWithAssessment}
-                                /> */}
+                                />
                             </div>
                         </div>
+                        {withAssessment && (
+                            <div>
+                                <span className=" my-1 text-dark-60 text-lg   ">
+                                    Select or add an assessment
+                                </span>
+                                <div className="flex flex-row flex-wrap-reverse justify-between items-center">
+                                    <div className="min-w-50-screen md:min-w-30-screen">
+                                        <SkillsAssessmentSelect
+                                            placeholder={"Please Select"}
+                                            options={assessments}
+                                            value={selectedAssessment}
+                                            className={"w-full"}
+                                            onChangeActiveValue={(value) => {
+                                                setSelectedAssessment(value);
+                                            }}
+                                        />
+                                    </div>
+
+                                    <div className="flex flex-row flex-nowrap justify-center items-center md:px-4 py-1 cursor-pointer my-5 ">
+                                        <Image
+                                            src={"/plus-icon.svg"}
+                                            width={15}
+                                            height={15}
+                                            className="m-2"
+                                        />
+                                        <span className=" text-primary-70">
+                                            Add a new assessment
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
                     </div>
 
                     <div className="w-full flex flex-row flex-wrap justify-center items-center ">
