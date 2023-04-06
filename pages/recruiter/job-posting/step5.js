@@ -10,6 +10,7 @@ import Switch from "../../../components/switch";
 import ErrorPopup from "../../../components/errorPopup";
 import LeftCaretSelect from "../../../components/LeftCaretSelect";
 import SkillsAssessmentSelect from "../../../components/SkillsAssessmentSelect";
+import AddSkillsAssessmentPopup from "../../../components/recuriters/skills-assessment/add-skills-assessment-popup";
 
 export default function () {
     const router = useRouter();
@@ -20,10 +21,12 @@ export default function () {
     const [showErrorPopup, setShowErrorPopup] = useState(false);
     const [errorMessage, setErrorMessage] = useState("An Error Occured");
     const [selectedAssessment, setSelectedAssessment] = useState();
-    const [assessments, setAssessments] = useState([
-        { title: "assessment 1", id: 1 },
-        { title: "assessment 2", id: 2 },
-    ]);
+    const [assessments, setAssessments] = useState();
+
+    const [showAddSkillsAssessmentPopup, setShowAddSkillsAssessmentPopup] =
+        useState(false);
+
+    // const [assessmentsLoading,setAssessmentsLoading] = useState(false)
 
     useEffect(() => {
         const theLocalJobPost = Utils.getLocalJobPost();
@@ -35,6 +38,7 @@ export default function () {
         setActiveJobCategoryId(theLocalJobPost.job_category_id);
         if (theLocalJobPost.with_assessment) {
             onChangeWithAssessment(true);
+            onFetchUserAssessments(theLocalJobPost);
         }
     }, []);
 
@@ -48,6 +52,18 @@ export default function () {
         e.preventDefault();
 
         localJobPost.job_category_id = activeJobCategoryId;
+
+        localJobPost.with_assessment = withAssessment;
+
+        if (withAssessment) {
+            if (!selectedAssessment) {
+                setErrorMessage("You forgot to add an assessment");
+                setShowErrorPopup(true);
+
+                return;
+            }
+            localJobPost.skills_assessment_id = selectedAssessment.id;
+        }
 
         console.log(localJobPost);
 
@@ -66,8 +82,15 @@ export default function () {
     };
 
     const onChangeWithAssessment = (newValue) => {
+        console.log(
+            "assessment change: ",
+            newValue,
+            activeJobCategoryId,
+            Config.JOB_CATEGORIES
+        );
         if (
             newValue &&
+            activeJobCategoryId &&
             activeJobCategoryId != Config.JOB_CATEGORIES.premium.id
         ) {
             setWithAssessment(false);
@@ -80,13 +103,68 @@ export default function () {
 
     const onClose = () => {
         setShowErrorPopup(false);
+        setShowAddSkillsAssessmentPopup(false);
     };
+
+    const onFetchUserAssessments = (localJobPost) => {
+        const userId = localStorage.getItem("user_id");
+
+        const userAssessmentsURL = `${Config.API_URL}/filter_assessments`;
+
+        const assessmentFormData = new FormData();
+
+        // assessmentFormData.append("title", `${localJobPost.title} Test`);
+        assessmentFormData.append("user_id", userId);
+
+        Utils.makeRequest(async () => {
+            try {
+                let theAssessments = await Utils.postForm(
+                    userAssessmentsURL,
+                    assessmentFormData
+                );
+
+                theAssessments = theAssessments.data.data;
+
+                setAssessments(theAssessments);
+
+                console.log("assessments: ", theAssessments);
+                console.log("local job post", localJobPost);
+                if (localJobPost.skills_assessment_id) {
+                    for (let i = 0; i < theAssessments.length; i++) {
+                        const assessment = theAssessments[i];
+                        if (
+                            assessment.id == localJobPost.skills_assessment_id
+                        ) {
+                            setSelectedAssessment(assessment);
+                            break;
+                        }
+                    }
+                }
+            } catch (error) {
+                console.log("fetching assessments error: ", error);
+            }
+        });
+    };
+
+    const onAddSkillsAssessmentSuccess = (newAssessment) => {
+        setShowAddSkillsAssessmentPopup(false);
+        setSelectedAssessment(newAssessment);
+        setAssessments((prevValues) => {
+            return [newAssessment, ...prevValues];
+        });
+    };
+
     return (
         <>
             <ErrorPopup
                 showPopup={showErrorPopup}
                 message={errorMessage}
                 onClose={onClose}
+            />
+            <AddSkillsAssessmentPopup
+                showPopup={showAddSkillsAssessmentPopup}
+                onClose={onClose}
+                onSuccess={onAddSkillsAssessmentSuccess}
             />
             <JobPostNavbar
                 currentStepText={"Step 5 of 6 - Customize application process"}
@@ -133,11 +211,27 @@ export default function () {
                                 <span className=" my-1 text-dark-60 text-lg   ">
                                     Select or add an assessment
                                 </span>
+                                {selectedAssessment && (
+                                    <div className="flex flex-row flex-nowrap justify-start items-center w-max bg-primary-70 px-4 py-2 rounded-lg">
+                                        <p className="text-white mr-2">
+                                            {selectedAssessment.title}
+                                        </p>
+                                        <Image
+                                            onClick={() => {
+                                                setSelectedAssessment(null);
+                                            }}
+                                            src={"/x-icon.svg"}
+                                            className="cursor-pointer p-2 ml-2 text-red-500 bg-my-gray-40 rounded-full"
+                                            width={30}
+                                            height={30}
+                                        />
+                                    </div>
+                                )}
                                 <div className="flex flex-row flex-wrap-reverse justify-between items-center">
                                     <div className="min-w-50-screen md:min-w-30-screen">
                                         <SkillsAssessmentSelect
                                             placeholder={"Please Select"}
-                                            options={assessments}
+                                            options={assessments || []}
                                             value={selectedAssessment}
                                             className={"w-full"}
                                             onChangeActiveValue={(value) => {
@@ -146,7 +240,14 @@ export default function () {
                                         />
                                     </div>
 
-                                    <div className="flex flex-row flex-nowrap justify-center items-center md:px-4 py-1 cursor-pointer my-5 ">
+                                    <div
+                                        onClick={() => {
+                                            setShowAddSkillsAssessmentPopup(
+                                                true
+                                            );
+                                        }}
+                                        className="flex flex-row flex-nowrap justify-center items-center md:px-4 py-1 cursor-pointer my-5 "
+                                    >
                                         <Image
                                             src={"/plus-icon.svg"}
                                             width={15}

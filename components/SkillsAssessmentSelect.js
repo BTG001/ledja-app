@@ -46,7 +46,7 @@ export default function SkillsAssessmentSelect({
                 <FaAngleDown className="text-primary-70 ml-3 mr-1" />
 
                 <div
-                    className={`absolute top-full translate-y-2 left-0 bg-white text-primary-70 w-full p-2 rounded-sm shadow-md border border-primary-40 
+                    className={`absolute top-full translate-y-2 left-0 bg-white text-primary-70 w-full p-2 rounded-sm shadow-md border border-primary-40 max-h-20-screen md:max-h-30-screen overflow-y-auto
                     ${
                         showOptions
                             ? "flex flex-col justify-top items-center"

@@ -1,9 +1,7 @@
 import { useEffect, useState } from "react";
-import PrimaryBtn from "../buttons/PrimaryBtn";
-import SecondaryBtn from "../buttons/SecondaryBtn";
 import Image from "next/image";
 
-export default function ApplySuccessPopup({ showPopup, onClose }) {
+export default function ComingSoon({ showPopup, onClose }) {
     useEffect(() => {
         if (showPopup) {
             document.body.style.overflowY = "hidden";
@@ -30,13 +28,14 @@ export default function ApplySuccessPopup({ showPopup, onClose }) {
                         />
                     </p>
                     <Image
-                        src={"/success-icon.svg"}
+                        src={"/warning-icon.svg"}
                         width={80}
                         height={80}
                         className="my-5 mx-auto"
                     />
                     <p className="text-dark-50 text-lg  text-center my-3">
-                        Thanks! Your application has been submitted
+                        The functionality you are trying to access is coming
+                        soon, Please bear with us
                     </p>
                     {/* <p className="text-dark-50 font-medium text-md text-center my-3">
                         An assessment test is required for this application
@@ -57,7 +56,7 @@ export default function ApplySuccessPopup({ showPopup, onClose }) {
                                 "cursor-pointer my-5 mx-4 w-max px-4 py-2  bg-primary-70 rounded-10 text-white "
                             }
                         >
-                            Okay
+                            Okay, I'll wait {":)"}
                         </p>
                         {/* <SecondaryBtn
                             text={"Take test later"}

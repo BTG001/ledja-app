@@ -13,6 +13,8 @@ import axios from "axios";
 import { BsBuilding } from "react-icons/bs";
 import ErrorPopup from "../../components/errorPopup";
 import SearchJobsJobsSkeletonLoader from "../../components/skeleton-loaders/search-jobs-jobs-loader";
+import HasAssessmentPopup from "../../components/job-seekers/has-assessment-popup";
+import ComingSoon from "../../components/coming-soon-popup";
 
 export default function JobSearch() {
     const [showApplyPopup, setShowApplyPopup] = useState(false);
@@ -27,12 +29,17 @@ export default function JobSearch() {
     const [showErrorPopup, setShowErrorPopup] = useState(false);
     const [errorMessage, setErrorMessage] = useState("An Error Occured");
 
+    const [showHasAssessmentPopup, setShowHasAssessmentPopup] = useState(false);
+
+    const [showTakeTestPopup, setShowTakeTestPopup] = useState(false);
+
     useEffect(() => {
         fetchJobs();
     }, []);
 
     const onApply = (e) => {
         e.preventDefault();
+
         setShowApplyPopup(true);
     };
 
@@ -116,6 +123,11 @@ export default function JobSearch() {
 
     const onSuccessfullApplication = () => {
         setShowApplyPopup(false);
+
+        if (activeJob.skills_assessment_id) {
+            setShowHasAssessmentPopup(true);
+            return;
+        }
         setShowSuccessPopup(true);
     };
 
@@ -133,18 +145,35 @@ export default function JobSearch() {
         setShowErrorPopup(false);
     };
 
+    const onTakeTestNow = () => {
+        setShowTakeTestPopup(true);
+    };
+
+    const onClose = () => {
+        setShowTakeTestPopup(false);
+        setShowHasAssessmentPopup(false);
+    };
+
     return (
         <>
+            <ComingSoon showPopup={showTakeTestPopup} onClose={onClose} />
             <ApplyPopup
                 showPopup={showApplyPopup}
                 onClose={onCloseApplyPopup}
                 onSuccess={onSuccessfullApplication}
                 onFailure={onFailedApplication}
                 jobId={activeJob.id}
+                job={activeJob}
             />
             <ApplySuccessPopup
                 showPopup={showSuccessPopup}
                 onClose={onCloseSuccessPopup}
+            />
+
+            <HasAssessmentPopup
+                showPopup={showHasAssessmentPopup}
+                onClose={onClose}
+                onTakeTestNow={onTakeTestNow}
             />
 
             <ErrorPopup
@@ -152,6 +181,7 @@ export default function JobSearch() {
                 onClose={onCloseError}
                 message={errorMessage}
             />
+
             <JobSeekerNavbar active="job-search" />
 
             <div className="w-4/5 mx-auto my-5">
@@ -293,7 +323,7 @@ export default function JobSearch() {
                             Recently posted jobs
                         </p>
                         <div className="md:grid md:grid-cols-5  md:border-x md:border-t  md:border-solid border-my-gray-70 min-h-40-screen rounded-sm mb-16">
-                            <sidebar className="col-span-2 h-full flex flex-row flex-nowrap overflow-x-auto md:block p-2 pl-0 md:p-0">
+                            <sidebar className="col-span-2 h-full flex flex-row flex-nowrap overflow-x-auto md:block p-2 pl-0 md:p-0 md:border-b  md:border-solid border-my-gray-70 ">
                                 {jobs.map((job, index) => {
                                     return (
                                         <div
@@ -302,12 +332,18 @@ export default function JobSearch() {
                                                 setActiveJobIndex(index);
                                             }}
                                             key={index}
-                                            className={`min-w-60-screen sm:min-w-40-screen md:min-w-10-screen hover:bg-primary-40 cursor-pointer flex flex-row flex-nowrap justify-start items-center p-2 border md:border-0  md:border-b border-solid border-my-gray-70 mr-2 md:mr-auto
+                                            className={`min-w-60-screen sm:min-w-40-screen md:min-w-10-screen hover:bg-primary-40 cursor-pointer flex flex-row flex-nowrap justify-start items-center p-2 border md:border-0   border-solid border-my-gray-70 mr-2 md:mr-auto
                                         ${
                                             activeJobIndex == index
                                                 ? "bg-my-gray-50"
                                                 : ""
-                                        }`}
+                                        }
+                                        ${
+                                            index < jobs.length - 1
+                                                ? "md:border-b"
+                                                : ""
+                                        }
+                                        `}
                                         >
                                             <p className="flex justify-center items-center row-span-3 p-2">
                                                 {(!job.user ||
@@ -387,6 +423,7 @@ export default function JobSearch() {
                                     />
                                     <span>{activeJob.salary || ""} </span>
                                 </p>
+
                                 <div className="flex flex-row flex-wrap justify-start items-center my-3">
                                     <p
                                         className="w-max my-2 mr-4 py-2 px-5 bg-primary-70 text-white rounded-10 cursor-pointer"
@@ -394,7 +431,10 @@ export default function JobSearch() {
                                     >
                                         Apply
                                     </p>
-                                    <p className="w-max my-2 mr-4 py-2 px-5 bg-white text-primary-70 border border-solid border-primary-70 hover:border-primary-60 rounded-10">
+                                    <p
+                                        onClick={onTakeTestNow}
+                                        className="cursor-pointer w-max my-2 mr-4 py-2 px-5 bg-white text-primary-70 border border-solid border-primary-70 hover:border-primary-60 rounded-10"
+                                    >
                                         Save
                                     </p>
                                 </div>

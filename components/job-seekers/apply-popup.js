@@ -8,6 +8,7 @@ import axios from "axios";
 import Config from "../../Config";
 import Utils from "../../Utils";
 import { MdOutlineOpenInNew } from "react-icons/md";
+import ResumeRequiredPopup from "./resume-required-popup";
 
 export default function ApplyPopup({
     showPopup,
@@ -15,6 +16,7 @@ export default function ApplyPopup({
     onSuccess,
     jobId,
     onFailure,
+    job,
 }) {
     const router = useRouter();
     const [hasWorkExperience, setHasWorkExperience] = useState();
@@ -42,6 +44,15 @@ export default function ApplyPopup({
     const [errors, setErrors] = useState({});
 
     const [loading, setLoading] = useState(false);
+
+    const [showResumeRequiredPopup, setShowResumeRequiredPopup] =
+        useState(true);
+
+    useEffect(() => {
+        if (job && job.with_resume && job.with_resume.toLowerCase() == "yes") {
+            setShowResumeRequiredPopup(true);
+        }
+    }, [job]);
 
     useEffect(() => {
         if (showPopup) {
@@ -78,6 +89,8 @@ export default function ApplyPopup({
                 setLoading(false);
                 console.log("application results: ", applicationResults);
                 setCoverLetter("");
+                setErrors({});
+
                 onSuccess();
             } catch (error) {
                 extractErrors(error);
@@ -189,14 +202,22 @@ export default function ApplyPopup({
         }
     };
 
+    const onCloseResumeRequiredPopup = () => {
+        setShowResumeRequiredPopup(false);
+    };
+
     return (
         showPopup && (
             <>
+                <ResumeRequiredPopup
+                    showPopup={showResumeRequiredPopup}
+                    onClose={onCloseResumeRequiredPopup}
+                />
                 <div
                     onClick={whenClosed}
                     className="fixed bg-my-gray-70 opacity-40 w-full h-full top-0 left-0 bottom-0 right-0 "
                 ></div>
-                <div className="z-50 fixed w-4/5 md:w-3/4 lg:w-2/3 left-1/2 -translate-x-1/2 top-0  p-10 bg-white opacity-100 rounded-10 shadow-md  my-10">
+                <div className="z-30 fixed w-4/5 md:w-3/4 lg:w-2/3 left-1/2 -translate-x-1/2 top-0  p-5 bg-white opacity-100 rounded-10 shadow-md  my-5">
                     <p className="w-full flex flex-row justify-between flex-wrap-reverse items-center text-lg font-medium">
                         <span>Review your application</span>
                         <Image
@@ -208,7 +229,7 @@ export default function ApplyPopup({
                         />
                     </p>
 
-                    <section className="col-span-2 h-max max-h-60-screen overflow-y-auto pl-6 pr-6 my-3">
+                    <section className="col-span-2 h-max max-h-70-screen overflow-y-auto pl-6 pr-6 my-1">
                         <h3 className="text-xl font-medium p-2 pl-0">
                             Cover Letter
                         </h3>
@@ -216,7 +237,7 @@ export default function ApplyPopup({
                         <div className="form-input-container p-2">
                             <textarea
                                 className="form-input"
-                                rows={10}
+                                rows={7}
                                 placeholder="This is why you should hire me...."
                                 name="end_year"
                                 value={coverLetter}
@@ -362,23 +383,18 @@ export default function ApplyPopup({
                             )}
                             {!hasBasicInfo && (
                                 <div
-                                    onClick={() => {
-                                        router.push(
-                                            "/job-seeker/profile-setup/step1"
-                                        );
-                                    }}
                                     className={
-                                        "mt-4 px-4 py-1 border border-solid border-my-gray-70  rounded-md flex flex-row flex-nowrap justify-start items-center cursor-pointer"
+                                        "mt-4 px-4 py-1 border border-solid border-my-gray-70  rounded-md flex flex-row flex-nowrap justify-start items-center "
                                     }
                                 >
                                     <Image
-                                        src={"/plus-icon.svg"}
-                                        width={9}
-                                        height={9}
+                                        src={"/not-interested-active-icon.svg"}
+                                        width={13}
+                                        height={13}
                                         className="m-2"
                                     />
                                     <span className="text-xs text-primary-70">
-                                        Add your basic info and social links
+                                        No About Information Added
                                     </span>
                                 </div>
                             )}
@@ -401,47 +417,63 @@ export default function ApplyPopup({
                                     </span>
                                 )} */}
                             </div>
-                            {hasWorkExperience && (
-                                <div className="mt-4 px-4 py-1 border border-solid border-my-gray-70  rounded-md">
-                                    {workExperiences.map((workExperience) => {
-                                        return (
-                                            <div className="my-2">
-                                                <p className="text-lg my-1 ">
-                                                    {workExperience.title}
-                                                </p>
-                                                <p className=" my-1">
-                                                    {workExperience.company}
-                                                </p>
-                                                <p className="my-1 text-my-gray-70 text-sm">
-                                                    {workExperience.duration}
-                                                </p>
-                                                {/* <p classname="text-sm">{workExperience.description}</p> */}
-                                                <p className="text-sm">
-                                                    {workExperience.description}
-                                                </p>
-                                            </div>
-                                        );
-                                    })}
-                                </div>
-                            )}
+                            {hasWorkExperience &&
+                                workExperiences &&
+                                workExperiences.length > 0 && (
+                                    <div className="mt-4 px-4 py-1 border border-solid border-my-gray-70  rounded-md">
+                                        {workExperiences.map(
+                                            (workExperience) => {
+                                                return (
+                                                    <div className="my-2">
+                                                        <p className="text-lg my-1 ">
+                                                            {
+                                                                workExperience.title
+                                                            }
+                                                        </p>
+                                                        <p className=" my-1">
+                                                            {
+                                                                workExperience.company
+                                                            }
+                                                        </p>
+                                                        <p className="my-1 text-my-gray-70 text-sm">
+                                                            {
+                                                                workExperience.duration
+                                                            }
+                                                        </p>
+                                                        {/* <p classname="text-sm">{workExperience.description}</p> */}
+                                                        <p className="text-sm">
+                                                            {
+                                                                workExperience.description
+                                                            }
+                                                        </p>
+                                                    </div>
+                                                );
+                                            }
+                                        )}
+                                    </div>
+                                )}
 
-                            {!hasWorkExperience && (
-                                <div
-                                    className={
-                                        "mt-4 px-4 py-1 border border-solid border-my-gray-70  rounded-md flex flex-row flex-nowrap justify-start items-center cursor-pointer"
-                                    }
-                                >
-                                    <Image
-                                        src={"/plus-icon.svg"}
-                                        width={9}
-                                        height={9}
-                                        className="m-2"
-                                    />
-                                    <span className="text-xs text-primary-70">
-                                        Add
-                                    </span>
-                                </div>
-                            )}
+                            {!hasWorkExperience ||
+                                !workExperiences ||
+                                (workExperiences.length < 1 && (
+                                    <div
+                                        className={
+                                            "mt-4 px-4 py-1 border border-solid border-my-gray-70  rounded-md flex flex-row flex-nowrap justify-start items-center "
+                                        }
+                                    >
+                                        <Image
+                                            src={
+                                                "/not-interested-active-icon.svg"
+                                            }
+                                            width={13}
+                                            height={13}
+                                            className="m-2"
+                                        />
+                                        <span className="text-xs text-primary-70">
+                                            No Work Experience
+                                        </span>
+                                    </div>
+                                ))}
                         </div>
 
                         <div className="form-input-container ">
@@ -461,47 +493,53 @@ export default function ApplyPopup({
                                 )} */}
                             </div>
 
-                            {hasEducation && (
-                                <div
-                                    className={
-                                        "mt-4 px-4 py-1 border border-solid border-my-gray-70  rounded-md "
-                                    }
-                                >
-                                    {hasEducation &&
-                                        educations.map((education) => {
-                                            return (
-                                                <>
-                                                    <p className="my-1 ">
-                                                        {
-                                                            education.certification
-                                                        }
-                                                    </p>
-                                                    <p className="text-sm">
-                                                        {education.institution}
-                                                    </p>
-                                                    <p className="my-1 text-my-gray-70 text-xs">
-                                                        {education.duration}
-                                                    </p>
-                                                </>
-                                            );
-                                        })}
-                                </div>
-                            )}
+                            {hasEducation &&
+                                educations &&
+                                educations.length > 0 && (
+                                    <div
+                                        className={
+                                            "mt-4 px-4 py-1 border border-solid border-my-gray-70  rounded-md "
+                                        }
+                                    >
+                                        {hasEducation &&
+                                            educations.map((education) => {
+                                                return (
+                                                    <>
+                                                        <p className="my-1 ">
+                                                            {
+                                                                education.certification
+                                                            }
+                                                        </p>
+                                                        <p className="text-sm">
+                                                            {
+                                                                education.institution
+                                                            }
+                                                        </p>
+                                                        <p className="my-1 text-my-gray-70 text-xs">
+                                                            {education.duration}
+                                                        </p>
+                                                    </>
+                                                );
+                                            })}
+                                    </div>
+                                )}
 
-                            {!hasEducation && (
+                            {(!hasEducation ||
+                                !educations ||
+                                educations.length < 1) && (
                                 <div
                                     className={
                                         "mt-4 px-4 py-1 border border-solid border-my-gray-70  rounded-md flex flex-row flex-nowrap justify-start items-center"
                                     }
                                 >
                                     <Image
-                                        src={"/plus-icon.svg"}
-                                        width={9}
-                                        height={9}
+                                        src={"/not-interested-active-icon.svg"}
+                                        width={13}
+                                        height={13}
                                         className="m-2"
                                     />
                                     <span className="text-xs text-primary-70">
-                                        Add
+                                        No Education Added
                                     </span>
                                 </div>
                             )}
@@ -523,7 +561,7 @@ export default function ApplyPopup({
                                     </span>
                                 )} */}
                             </div>
-                            {hasSkills && (
+                            {hasSkills && skills && skills.length > 0 && (
                                 <div
                                     className={
                                         "mt-4 border border-solid border-my-gray-70  rounded-md p-4 flex- flex-row justify-start items-center "
@@ -539,20 +577,20 @@ export default function ApplyPopup({
                                 </div>
                             )}
 
-                            {!hasSkills && (
+                            {(!hasSkills || !skills || skills.length < 1) && (
                                 <div
                                     className={
-                                        "mt-4 px-4 py-1 border border-solid border-my-gray-70  rounded-md flex flex-row flex-nowrap justify-start items-center"
+                                        "mt-4 px-4 py-1 border border-solid border-my-gray-70  rounded-md flex flex-row flex-nowrap justify-start items-center cursor-pointer"
                                     }
                                 >
                                     <Image
-                                        src={"/plus-icon.svg"}
-                                        width={9}
-                                        height={9}
+                                        src={"/not-interested-active-icon.svg"}
+                                        width={13}
+                                        height={13}
                                         className="m-2"
                                     />
                                     <span className="text-xs text-primary-70">
-                                        Add
+                                        No Skills Added
                                     </span>
                                 </div>
                             )}
@@ -633,25 +671,42 @@ export default function ApplyPopup({
                             )}
 
                             {!hasResume && (
-                                <div
-                                    onClick={() => {
-                                        router.push(
-                                            "/job-seeker/profile-setup/step4"
-                                        );
-                                    }}
-                                    className={
-                                        "mt-4 px-4 py-1 border border-solid border-my-gray-70  rounded-md flex flex-row flex-nowrap justify-start items-center cursor-pointer"
-                                    }
-                                >
-                                    <Image
-                                        src={"/not-interested-active-icon.svg"}
-                                        width={13}
-                                        height={13}
-                                        className="m-2"
-                                    />
-                                    <span className="text-xs text-primary-70">
-                                        No Resume Added
-                                    </span>
+                                <div>
+                                    <div
+                                        className={
+                                            "mt-4 px-4 py-1 border border-solid border-my-gray-70  rounded-md flex flex-row flex-nowrap justify-start items-center"
+                                        }
+                                    >
+                                        <Image
+                                            src={
+                                                "/not-interested-active-icon.svg"
+                                            }
+                                            width={13}
+                                            height={13}
+                                            className="m-2"
+                                        />
+                                        <span className="text-xs text-primary-70">
+                                            No Resume Added
+                                        </span>
+                                    </div>
+                                    {job.with_resume.toLowerCase() == "yes" && (
+                                        <div
+                                            className={
+                                                "mt-4 px-4 py-1 rounded-md flex flex-row flex-nowrap justify-start items-end "
+                                            }
+                                        >
+                                            <Image
+                                                src={"/warning-icon.svg"}
+                                                width={30}
+                                                height={30}
+                                                className="m-3 ml-0"
+                                            />
+                                            <span className=" text-primary-70 m-3 ml-0">
+                                                A resume is required for this
+                                                job
+                                            </span>
+                                        </div>
+                                    )}
                                 </div>
                             )}
                         </div>
@@ -739,39 +794,39 @@ export default function ApplyPopup({
                                 </div>
                             )}
                         </div>
-                        <div
-                            onClick={() => {
-                                document.body.style.overflowY = "visible";
-                            }}
-                            className="flex flex-col justify-center items-center my-10 mx-auto"
+                    </section>
+                    <div
+                        onClick={() => {
+                            document.body.style.overflowY = "visible";
+                        }}
+                        className="flex flex-row justify-center items-center my-1 mx-auto"
+                    >
+                        <button
+                            onClick={onSubmit}
+                            className="submit-btn-left mx-3"
+                            type={"submit"}
                         >
-                            <button
-                                onClick={onSubmit}
-                                className="submit-btn-left ml-3"
-                                type={"submit"}
-                            >
-                                {loading && <span className="loader"></span>}
-                                {!loading && (
-                                    <span className="">
-                                        Submit your application
-                                    </span>
-                                )}
-                            </button>
-                            <button
-                                onClick={whenClosed}
-                                className="submit-btn-secondary mr-3"
-                                type={"button"}
-                            >
-                                {/* {loading && <span className="loader"></span>} */}
-                                {/* {!loading && <span className="">Cancel</span>} */}
-                                <span className="">Cancel</span>
-                            </button>
+                            {loading && <span className="loader"></span>}
+                            {!loading && (
+                                <span className="">
+                                    Submit your application
+                                </span>
+                            )}
+                        </button>
+                        <button
+                            onClick={whenClosed}
+                            className="submit-btn-secondary mx-3"
+                            type={"button"}
+                        >
+                            {/* {loading && <span className="loader"></span>} */}
+                            {/* {!loading && <span className="">Cancel</span>} */}
+                            <span className="">Cancel</span>
+                        </button>
 
-                            {/* <div className="w-full flex flex-row flex-wrap justify-center items-center ">
+                        {/* <div className="w-full flex flex-row flex-wrap justify-center items-center ">
                             
                         </div> */}
-                        </div>
-                    </section>
+                    </div>
                 </div>
             </>
         )

@@ -43,7 +43,8 @@ export default class Utils {
             with_recommendation: null,
             with_resume: null,
             communication_preferences: null,
-            skills_assessment: null,
+            with_assessment: null,
+            skills_assessment_id: null,
             apply_method: null,
         };
 

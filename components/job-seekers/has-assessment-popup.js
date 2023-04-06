@@ -3,7 +3,11 @@ import PrimaryBtn from "../buttons/PrimaryBtn";
 import SecondaryBtn from "../buttons/SecondaryBtn";
 import Image from "next/image";
 
-export default function ApplySuccessPopup({ showPopup, onClose }) {
+export default function HasAssessmentPopup({
+    showPopup,
+    onClose,
+    onTakeTestNow,
+}) {
     useEffect(() => {
         if (showPopup) {
             document.body.style.overflowY = "hidden";
@@ -35,15 +39,15 @@ export default function ApplySuccessPopup({ showPopup, onClose }) {
                         height={80}
                         className="my-5 mx-auto"
                     />
-                    <p className="text-dark-50 text-lg  text-center my-3">
+                    <h3 className="text-dark-50 text-xl font-medium text-center my-3">
                         Thanks! Your application has been submitted
-                    </p>
-                    {/* <p className="text-dark-50 font-medium text-md text-center my-3">
+                    </h3>
+                    <p className="text-dark-50 font-medium text-md text-center my-3">
                         An assessment test is required for this application
                     </p>
                     <p className="text-dark-50 font-medium text-md text-center my-3">
                         What would you like to do?
-                    </p> */}
+                    </p>
                     <div
                         onClick={() => {
                             document.body.style.overflowY = "visible";
@@ -54,19 +58,28 @@ export default function ApplySuccessPopup({ showPopup, onClose }) {
                         <p
                             onClick={onClose}
                             className={
+                                "cursor-pointer my-5 mx-4 w-max px-4 py-2 border border-solid border-primary-70 rounded-10 "
+                            }
+                        >
+                            Take test later
+                        </p>
+                        <p
+                            onClick={onTakeTestNow}
+                            className={
                                 "cursor-pointer my-5 mx-4 w-max px-4 py-2  bg-primary-70 rounded-10 text-white "
                             }
                         >
-                            Okay
+                            Take test now
                         </p>
+
                         {/* <SecondaryBtn
                             text={"Take test later"}
                             path=""
                             className={"my-5 mx-4 w-max"}
-                        /> */}
-                        {/* <PrimaryBtn
+                        />
+                        <PrimaryBtn
                             text={"Take test now"}
-                            path=""
+                            path="/jobseeker/my-jobs"
                             className={"my-5 mx-4 w-max"}
                         /> */}
                     </div>
