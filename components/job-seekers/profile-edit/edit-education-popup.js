@@ -37,17 +37,15 @@ export default function EditEducationPopup({
 
     const updateEducationState = (source) => {
         if (source) {
-            const durationArray = source.duration.trim().split("-");
-            console.log("duratin array: ", durationArray);
-            const startArray = durationArray[0].trim().split(" ");
-            const endArray = durationArray[1].trim().split(" ");
+            const startDate = new Date(source.start_date);
+            const endDate = new Date(source.end_date);
             setEducation({
                 certification: source.certification,
                 institution: source.institution,
-                startMonth: startArray[0],
-                startYear: startArray[1],
-                endMonth: endArray[0],
-                endYear: endArray[1],
+                startMonth: startDate.getMonth(),
+                startYear: startDate.getFullYear(),
+                endMonth: endDate.getMonth(),
+                endYear: endDate.getFullYear(),
             });
         }
     };
@@ -69,14 +67,24 @@ export default function EditEducationPopup({
 
         const userId = localStorage.getItem("user_id");
 
-        const duration = `${education.startMonth} ${education.startYear}  - ${education.endMonth} ${education.endYear}`;
+        const startDate = Utils.getTime(
+            new Date(education.startYear, education.startMonth)
+        );
+
+        const endDate = Utils.getTime(
+            new Date(education.endYear, education.endMonth)
+        );
+
+        // const duration = `${education.startMonth} ${education.startYear}  - ${education.endMonth} ${education.endYear}`;
 
         const educationFormData = new FormData();
 
         educationFormData.append("user_id", userId);
         educationFormData.append("certification", education.certification);
         educationFormData.append("institution", education.institution);
-        educationFormData.append("duration", duration);
+        educationFormData.append("start_date", startDate);
+        educationFormData.append("end_date", endDate);
+        // educationFormData.append("duration", duration);
 
         Utils.makeRequest(async () => {
             try {
@@ -280,13 +288,15 @@ export default function EditEducationPopup({
                                         <option value={monthEmptyValue}>
                                             {monthEmptyValue}
                                         </option>
-                                        {Config.MONTH_NAMES.map((monthName) => {
-                                            return (
-                                                <option value={monthName}>
-                                                    {monthName}
-                                                </option>
-                                            );
-                                        })}
+                                        {Config.MONTH_NAMES.map(
+                                            (monthName, index) => {
+                                                return (
+                                                    <option value={index}>
+                                                        {monthName}
+                                                    </option>
+                                                );
+                                            }
+                                        )}
                                     </select>
                                     <p className="text-red-500 text-left ml-2  ">
                                         {errors.startMonth || ""}
@@ -352,13 +362,15 @@ export default function EditEducationPopup({
                                         <option value={monthEmptyValue}>
                                             {monthEmptyValue}
                                         </option>
-                                        {Config.MONTH_NAMES.map((monthName) => {
-                                            return (
-                                                <option value={monthName}>
-                                                    {monthName}
-                                                </option>
-                                            );
-                                        })}
+                                        {Config.MONTH_NAMES.map(
+                                            (monthName, index) => {
+                                                return (
+                                                    <option value={index}>
+                                                        {monthName}
+                                                    </option>
+                                                );
+                                            }
+                                        )}
                                     </select>
                                     <p className="text-red-500 text-left ml-2 ">
                                         {errors.endMonth || ""}

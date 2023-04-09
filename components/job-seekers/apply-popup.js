@@ -799,7 +799,7 @@ export default function ApplyPopup({
                         onClick={() => {
                             document.body.style.overflowY = "visible";
                         }}
-                        className="flex flex-row justify-center items-center my-1 mx-auto"
+                        className="flex flex-row justify-center items-center my-1 mx-auto border-t border-solid border-my-gray-50"
                     >
                         <button
                             onClick={onSubmit}

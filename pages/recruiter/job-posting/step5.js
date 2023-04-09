@@ -35,16 +35,21 @@ export default function () {
 
         setLocalJobPost(theLocalJobPost);
 
+        onFetchUserAssessments(theLocalJobPost);
+
         setActiveJobCategoryId(theLocalJobPost.job_category_id);
         if (theLocalJobPost.with_assessment) {
             onChangeWithAssessment(true);
-            onFetchUserAssessments(theLocalJobPost);
         }
     }, []);
 
     useEffect(() => {
+        console.log("refreshing...");
         if (withAssessment) {
             onChangeWithAssessment(true);
+            if (!assessments) {
+                console.log("local Job post: ", localJobPost);
+            }
         }
     }, [activeJobCategoryId]);
 
@@ -81,32 +86,13 @@ export default function () {
         router.back();
     };
 
-    const onChangeWithAssessment = (newValue) => {
-        console.log(
-            "assessment change: ",
-            newValue,
-            activeJobCategoryId,
-            Config.JOB_CATEGORIES
-        );
-        if (
-            newValue &&
-            activeJobCategoryId &&
-            activeJobCategoryId != Config.JOB_CATEGORIES.premium.id
-        ) {
-            setWithAssessment(false);
-            setErrorMessage("Only premium jobs can have an assessment");
-            setShowErrorPopup(true);
-            return;
-        }
-        setWithAssessment(newValue);
-    };
-
     const onClose = () => {
         setShowErrorPopup(false);
         setShowAddSkillsAssessmentPopup(false);
     };
 
     const onFetchUserAssessments = (localJobPost) => {
+        console.log("fetching assessments...");
         const userId = localStorage.getItem("user_id");
 
         const userAssessmentsURL = `${Config.API_URL}/filter_assessments`;
@@ -144,6 +130,28 @@ export default function () {
                 console.log("fetching assessments error: ", error);
             }
         });
+    };
+
+    const onChangeWithAssessment = (newValue) => {
+        console.log(
+            "assessment change: ",
+            newValue,
+            activeJobCategoryId,
+            Config.JOB_CATEGORIES
+        );
+        if (
+            newValue &&
+            activeJobCategoryId &&
+            activeJobCategoryId != Config.JOB_CATEGORIES.premium.id
+        ) {
+            console.log("error setting assessment");
+            setWithAssessment(false);
+            setErrorMessage("Only premium jobs can have an assessment");
+            setShowErrorPopup(true);
+            return;
+        }
+
+        setWithAssessment(newValue);
     };
 
     const onAddSkillsAssessmentSuccess = (newAssessment) => {

@@ -35,18 +35,16 @@ export default function EditWorkExperiencePopup({
 
     const updatedWorkExperienceState = (source) => {
         if (source) {
-            const durationArray = source.duration.trim().split("-");
-            console.log("duratin array: ", durationArray);
-            const startArray = durationArray[0].trim().split(" ");
-            const endArray = durationArray[1].trim().split(" ");
+            const startDate = new Date(source.start_date);
+            const endDate = new Date(source.end_date);
             setWorkExperience({
                 companyName: source.company,
                 title: source.title,
                 description: source.description,
-                startMonth: startArray[0],
-                startYear: startArray[1],
-                endMonth: endArray[0],
-                endYear: endArray[1],
+                startMonth: startDate.getMonth(),
+                startYear: startDate.getFullYear(),
+                endMonth: endDate.getMonth(),
+                endYear: endDate.getFullYear(),
             });
         }
     };
@@ -70,14 +68,25 @@ export default function EditWorkExperiencePopup({
 
         const userId = localStorage.getItem("user_id");
 
-        const duration = `${workExperience.startMonth} ${workExperience.startYear} - ${workExperience.endMonth} ${workExperience.endYear}`;
+        const startDate = Utils.getTime(
+            new Date(workExperience.startYear, workExperience.startMonth)
+        );
+
+        const endDate = Utils.getTime(
+            new Date(workExperience.endYear, workExperience.endMonth)
+        );
+        // const duration = `${workExperience.startMonth} ${workExperience.startYear} - ${workExperience.endMonth} ${workExperience.endYear}`;
 
         const experienceFormData = new FormData();
 
         experienceFormData.append("user_id", userId);
         experienceFormData.append("title", workExperience.title);
         experienceFormData.append("company", workExperience.companyName);
-        experienceFormData.append("duration", duration);
+
+        experienceFormData.append("start_date", startDate);
+        experienceFormData.append("end_date", endDate);
+        // experienceFormData.append("duration", duration);
+
         experienceFormData.append("description", workExperience.description);
 
         Utils.makeRequest(async () => {
@@ -384,13 +393,15 @@ export default function EditWorkExperiencePopup({
                                         <option value={monthEmptyValue}>
                                             {monthEmptyValue}
                                         </option>
-                                        {Config.MONTH_NAMES.map((monthName) => {
-                                            return (
-                                                <option value={monthName}>
-                                                    {monthName}
-                                                </option>
-                                            );
-                                        })}
+                                        {Config.MONTH_NAMES.map(
+                                            (monthName, index) => {
+                                                return (
+                                                    <option value={index}>
+                                                        {monthName}
+                                                    </option>
+                                                );
+                                            }
+                                        )}
                                     </select>
                                     <p className="text-red-500 text-left ml-2  ">
                                         {errors.startMonth || ""}
@@ -456,13 +467,15 @@ export default function EditWorkExperiencePopup({
                                         <option value={monthEmptyValue}>
                                             {monthEmptyValue}
                                         </option>
-                                        {Config.MONTH_NAMES.map((monthName) => {
-                                            return (
-                                                <option value={monthName}>
-                                                    {monthName}
-                                                </option>
-                                            );
-                                        })}
+                                        {Config.MONTH_NAMES.map(
+                                            (monthName, index) => {
+                                                return (
+                                                    <option value={index}>
+                                                        {monthName}
+                                                    </option>
+                                                );
+                                            }
+                                        )}
                                     </select>
                                     <p className="text-red-500 text-left ml-2 ">
                                         {errors.endMonth || ""}

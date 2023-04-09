@@ -68,6 +68,8 @@ module.exports = {
                 "90-screen": "90vh",
                 "80-screen": "80vh",
                 "70-screen": "70vh",
+                "63-screen": "63vh",
+                "65-screen": "65vh",
                 "60-screen": "60vh",
                 "50-screen": "50vh",
                 "40-screen": "40vh",

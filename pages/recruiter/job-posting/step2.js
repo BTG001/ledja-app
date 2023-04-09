@@ -36,7 +36,7 @@ export default function () {
 
         setActiveJobCategoryId(theLocalJobPost.job_category_id);
 
-        setSelectedJobType(theLocalJobPost.type);
+        // setSelectedJobType(theLocalJobPost.type);
 
         setNoOfHires(theLocalJobPost.no_of_hires);
         setHireSpeed(theLocalJobPost.hiring_speed);
@@ -59,12 +59,13 @@ export default function () {
 
         localJobPost.job_category_id = activeJobCategoryId;
 
-        localJobPost.type = selectedJobType;
+        // localJobPost.type = selectedJobType;
 
         localJobPost.no_of_hires = noOfHires;
         localJobPost.hiring_speed = hireSpeed;
         localJobPost.salary = salary;
         localJobPost.experience_level = experienceLevel;
+        localJobPost.job_type_id = 1;
 
         console.log(localJobPost);
 
@@ -95,12 +96,12 @@ export default function () {
             });
         }
 
-        if (!selectedJobType) {
-            hasErrors = true;
-            setErrors((prevValues) => {
-                return { ...prevValues, jobType: "Job type is required" };
-            });
-        }
+        // if (!selectedJobType) {
+        //     hasErrors = true;
+        //     setErrors((prevValues) => {
+        //         return { ...prevValues, jobType: "Job type is required" };
+        //     });
+        // }
 
         if (!noOfHires) {
             hasErrors = true;

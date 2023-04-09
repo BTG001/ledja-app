@@ -87,7 +87,7 @@ export default function () {
             localJobPost.company_sub_industry
         );
         JobFormData.append("title", localJobPost.title);
-        JobFormData.append("type", localJobPost.type);
+        // JobFormData.append("type", localJobPost.type);
         JobFormData.append("location", localJobPost.location);
         JobFormData.append("description", localJobPost.description);
         JobFormData.append("no_of_hires", localJobPost.no_of_hires);
@@ -96,7 +96,7 @@ export default function () {
         JobFormData.append("apply_method", "email");
 
         JobFormData.append("communication_preferences", "mobile_no");
-        JobFormData.append("job_status", "new");
+        JobFormData.append("job_status", "active");
         JobFormData.append("own_completion", localJobPost.own_completion);
         JobFormData.append(
             "with_recommendation",
@@ -106,6 +106,12 @@ export default function () {
         JobFormData.append("experience_level", localJobPost.experience_level);
         JobFormData.append("salary", localJobPost.salary);
         JobFormData.append("send_to_email", localJobPost.send_to_email);
+
+        JobFormData.append(
+            "skills_assessment_id",
+            localJobPost.skills_assessment_id
+        );
+        JobFormData.append("job_type_id", localJobPost.job_type_id);
 
         // console.log("file: ", fileInput.current.files[0]);
 

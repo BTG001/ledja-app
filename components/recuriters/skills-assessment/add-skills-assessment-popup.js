@@ -305,10 +305,10 @@ export default function AddSkillsAssessmentPopup({
                                         <div className="col-span-2">
                                             <p>{question.content}</p>
                                             <p className="text-my-gray-70">
-                                                {question.choice_a} |{" "}
-                                                {question.choice_b} |{" "}
-                                                {question.choice_c} |{" "}
-                                                {question.choice_d}
+                                                {"A. "} {question.choice_a} |{" "}
+                                                {"B. "} {question.choice_b} |{" "}
+                                                {"C. "} {question.choice_c} |{" "}
+                                                {"D. "} {question.choice_d}
                                             </p>
                                         </div>
                                         <span>

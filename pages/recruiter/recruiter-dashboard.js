@@ -9,6 +9,8 @@ import axios from "axios";
 import Utils from "../../Utils";
 import JobsTable from "../../components/recuriters/jobsTable";
 import DashboardJobsLoaderSkeleton from "../../components/skeleton-loaders/dashboard-jobs-loader-skeleton";
+import DashboardCreditLoaderSkeleton from "../../components/skeleton-loaders/dashboard-credit-skeleton-loader";
+import DashboardMessageCounterLoaderSkeleton from "../../components/skeleton-loaders/dashboard-messages-counter-skeleton-loader";
 
 export default function RecruiterDashbaord() {
     const [jobs, setJobs] = useState();
@@ -16,10 +18,16 @@ export default function RecruiterDashbaord() {
     const [wallet, setWallet] = useState({});
     const [jobsLoading, setJobsLoading] = useState(true);
 
+    const [messages, setMessages] = useState({});
+
+    const [messagesLoading, setMessagesLoading] = useState(true);
+    const [recruiterLoading, setRecruiterLoading] = useState(true);
+
     useEffect(() => {
         // console.log("jobs: ", jobs);
         getJobs();
         fetchRecruiter();
+        fetchRecruiterMessages();
     }, []);
 
     async function getJobs() {
@@ -48,6 +56,7 @@ export default function RecruiterDashbaord() {
     }
 
     async function fetchRecruiter() {
+        setRecruiterLoading(true);
         try {
             const userId = localStorage.getItem("user_id");
             const url = `${Config.API_URL}/users/${userId}`;
@@ -65,9 +74,32 @@ export default function RecruiterDashbaord() {
                 setWallet(recruiter.wallet);
             }
 
+            setRecruiterLoading(false);
             console.log("recruiter: ", recruiter);
         } catch (error) {
+            setRecruiterLoading(false);
             console.log("recruiter profile Error: ", error);
+        }
+    }
+
+    async function fetchRecruiterMessages() {
+        setMessagesLoading(true);
+        try {
+            const userId = localStorage.getItem("user_id");
+            const url = `${Config.API_URL}/messages/user/${userId}`;
+            let recruiterMessages = await axios.get(url, {
+                headers: Utils.getHeaders(),
+            });
+
+            recruiterMessages = recruiterMessages.data.data;
+
+            setMessages(recruiterMessages);
+
+            console.log("recruiter messages: ", recruiterMessages);
+            setMessagesLoading(false);
+        } catch (error) {
+            setMessagesLoading(false);
+            console.log("recruiter messages Error: ", error);
         }
     }
 
@@ -111,38 +143,62 @@ export default function RecruiterDashbaord() {
                 </div>
                 <div className="md:grid md:grid-cols-2 gap-4">
                     <div className="shadow-md my-3 p-3 rounded-10 min-h-40-screen flex flex-col justify-center items-center border border-solid border-my-gray-40">
-                        <h3 className="font-medium">Job listing credit </h3>
-                        <p className="my-3">
-                            <span className="text-dark-50 text-sm">Ksh</span>
-                            <span className="text-4xl text-dark-50">
-                                {" "}
-                                {wallet.amount
-                                    ? wallet.amount.toFixed(2)
-                                    : "0,00"}{" "}
-                            </span>
-                        </p>
-                        <div className="flex flex-row flex-wrap justify-center items-center">
-                            <p className="text-primary-70 border border-primary-70 border-solid hover:border-primary-60 bg-white rounded-lg py-1 px-4 m-2 cursor-pointer">
-                                Add Credits
-                            </p>
-                            <p className="text-primary-70 border border-primary-70 border-solid hover:border-primary-60 bg-white rounded-lg py-1 px-4 m-2 cursor-pointer">
-                                Credit history
-                            </p>
-                        </div>
+                        {recruiterLoading && <DashboardCreditLoaderSkeleton />}
+
+                        {wallet && !recruiterLoading && (
+                            <>
+                                <h3 className="font-medium">
+                                    Job listing credit{" "}
+                                </h3>
+                                <p className="my-3">
+                                    <span className="text-dark-50 text-sm">
+                                        Ksh
+                                    </span>
+                                    <span className="text-4xl text-dark-50">
+                                        {" "}
+                                        {wallet.amount
+                                            ? wallet.amount.toFixed(2)
+                                            : "0,00"}{" "}
+                                    </span>
+                                </p>
+                                <div className="flex flex-row flex-wrap justify-center items-center">
+                                    <p className="text-primary-70 border border-primary-70 border-solid hover:border-primary-60 bg-white rounded-lg py-1 px-4 m-2 cursor-pointer">
+                                        Add Credits
+                                    </p>
+                                    <p className="text-primary-70 border border-primary-70 border-solid hover:border-primary-60 bg-white rounded-lg py-1 px-4 m-2 cursor-pointer">
+                                        Credit history
+                                    </p>
+                                </div>
+                            </>
+                        )}
                     </div>
-                    <div className="shadow-md my-3 p-3 rounded-10 min-h-40-screen flex flex-col justify-center items-center border border-solid border-my-gray-40">
-                        <h3 className="font-medium text-center">
-                            Unread messages (0)
-                        </h3>
-                        <Image
-                            src={"/message-icon.svg"}
-                            width={60}
-                            height={50}
-                            className="my-3 p-2"
-                        />
-                        <p className="text-sm text-center">
-                            You have no messages
-                        </p>
+                    <div className=" shadow-md my-3 p-3 rounded-10 min-h-40-screen flex flex-col justify-center items-center border border-solid border-my-gray-40">
+                        {messagesLoading && (
+                            <DashboardMessageCounterLoaderSkeleton />
+                        )}
+
+                        {messages && !messagesLoading && (
+                            <>
+                                <Link
+                                    href={"/recruiter/messages"}
+                                    className="font-medium text-center"
+                                >
+                                    Unread messages ({messages.length})
+                                </Link>
+                                <Image
+                                    src={"/message-icon.svg"}
+                                    width={60}
+                                    height={50}
+                                    className="my-3 p-2"
+                                />
+                                <Link
+                                    href={"/recruiter/messages"}
+                                    className="text-sm text-center"
+                                >
+                                    You have {messages.length} messages
+                                </Link>
+                            </>
+                        )}
                     </div>
                 </div>
                 <p className="text-dark-50 font-medium my-3">
@@ -163,7 +219,10 @@ export default function RecruiterDashbaord() {
                             />
                         </h3>
                         <p className="my-3 text-xs text-dark-50 text-center">
-                            one-sentence description about the progress card
+                            {jobs && jobs.length != 1
+                                ? `${jobs.length} active jobs`
+                                : ""}
+                            {jobs && jobs.length == 1 ? `1 active job ` : ""}
                         </p>
                     </Link>
 

@@ -42,9 +42,9 @@ export default function JobSeekerNavbar({ active }) {
                             ? "border-b-2 border-dark-60 border-solid"
                             : ""
                     }`}
-                    href={"/message"}
+                    href={"/job-seeker/messages"}
                 >
-                    Message
+                    Messages
                 </Link>
 
                 {/* <Image

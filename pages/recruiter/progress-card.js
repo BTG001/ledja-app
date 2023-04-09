@@ -547,7 +547,11 @@ export default function () {
                                                             className="m-1"
                                                         />
                                                         <span className="font-semibold text-xl m-1">
-                                                            8.7
+                                                            {application.score
+                                                                ? application
+                                                                      .score
+                                                                      .score
+                                                                : "N/A"}
                                                         </span>
                                                     </h3>
                                                 </div>
@@ -588,11 +592,14 @@ export default function () {
                                                     className="mr-3"
                                                 />
                                                 <span className="text-2xl m-2">
-                                                    8.7
+                                                    {activeApplication.score
+                                                        ? activeApplication
+                                                              .score.score
+                                                        : "N/A"}
                                                 </span>
                                                 <span className="text-sm">
                                                     {" "}
-                                                    out of 10
+                                                    out of 100
                                                 </span>
                                             </h3>
                                         </div>
@@ -613,7 +620,12 @@ export default function () {
                                                 </span>
                                             </p>
                                             <p className="text-right">
-                                                # 09/100
+                                                #{" "}
+                                                {activeApplication.score
+                                                    ? activeApplication.score
+                                                          .rating
+                                                    : "N/A"}
+                                                /{applications.length}
                                             </p>
                                         </div>
                                         <div className="flex flex-row flex-wrap justify-between items-center">
@@ -738,9 +750,43 @@ export default function () {
                                             </div>
                                         </div>
                                         <div className="bg-white p-3 mx-auto my-8 rounded-10 flex  ">
-                                            <p className="w-full text-center p-6">
-                                                No Assessment!
-                                            </p>
+                                            {!activeApplication.score &&
+                                                !applicationsLoading && (
+                                                    <p className="w-full text-center p-6">
+                                                        No Assessment!
+                                                    </p>
+                                                )}
+
+                                            {activeApplication.score &&
+                                                !applicationsLoading && (
+                                                    <div>
+                                                        <p className="grid grid-cols-2 gap-2 p-2 border-b border-my-gray-50">
+                                                            <span className=" text-primary-70">
+                                                                Assessment Title
+                                                            </span>
+                                                            <span className="text-primary-70 w-full text-center">
+                                                                Applicant Score
+                                                            </span>
+                                                        </p>
+
+                                                        <p className="grid grid-cols-2 gap-2 p-2">
+                                                            <span className="">
+                                                                {
+                                                                    activeApplication
+                                                                        .assessment
+                                                                        .title
+                                                                }
+                                                            </span>
+                                                            <span className="w-full text-center">
+                                                                {
+                                                                    activeApplication
+                                                                        .score
+                                                                        .score
+                                                                }
+                                                            </span>
+                                                        </p>
+                                                    </div>
+                                                )}
                                         </div>
                                     </div>
                                 </section>

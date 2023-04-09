@@ -44,23 +44,36 @@ export default function AddExperiencePopup({ showPopup, onClose, onSuccess }) {
             setLoading(true);
         }
 
-        const hasErrors = validateValues();
+        // const hasErrors = validateValues();
 
-        if (hasErrors) {
-            setLoading(false);
-            return;
-        }
+        // if (hasErrors) {
+        //     setLoading(false);
+        //     return;
+        // }
 
         const userId = localStorage.getItem("user_id");
 
-        const duration = `${workExperience.startMonth} ${workExperience.startYear} - ${workExperience.endMonth} ${workExperience.endYear}`;
+        // const duration = `${workExperience.startMonth} ${workExperience.startYear} - ${workExperience.endMonth} ${workExperience.endYear}`;
 
+        const startDate = Utils.getTime(
+            new Date(workExperience.startYear, workExperience.startMonth)
+        );
+
+        const endDate = Utils.getTime(
+            new Date(workExperience.endYear, workExperience.endMonth)
+        );
+
+        // console.log("work experience: ", workExperience, startDate, endDate);
+        // setLoading(false);
+        // return;
         const experienceFormData = new FormData();
 
         experienceFormData.append("user_id", userId || "");
         experienceFormData.append("title", workExperience.title || "");
         experienceFormData.append("company", workExperience.companyName || "");
-        experienceFormData.append("duration", duration || "");
+        experienceFormData.append("start_date", startDate);
+        experienceFormData.append("end_date", endDate);
+        // experienceFormData.append("duration", duration || "");
         experienceFormData.append(
             "description",
             workExperience.description || ""
@@ -307,7 +320,7 @@ export default function AddExperiencePopup({ showPopup, onClose, onSuccess }) {
                                 {errors.location || ""}
                             </p>
                         </div> */}
-                        <div className="flex flex-row flex-nowrap justify-start items-center">
+                        {/* <div className="flex flex-row flex-nowrap justify-start items-center">
                             <input
                                 className="m-2"
                                 type={"checkbox"}
@@ -329,7 +342,7 @@ export default function AddExperiencePopup({ showPopup, onClose, onSuccess }) {
                                 }}
                             />
                             <p>I am currently working in this role</p>
-                        </div>
+                        </div> */}
                         <div className="my-3 p-2">
                             <div className="form-input-container">
                                 <label
@@ -388,19 +401,24 @@ export default function AddExperiencePopup({ showPopup, onClose, onSuccess }) {
                                         <option value={monthEmptyValue}>
                                             {monthEmptyValue}
                                         </option>
-                                        {Config.MONTH_NAMES.map((monthName) => {
-                                            return (
-                                                <option value={monthName}>
-                                                    {monthName}
-                                                </option>
-                                            );
-                                        })}
+                                        {Config.MONTH_NAMES.map(
+                                            (monthName, index) => {
+                                                return (
+                                                    <option value={index}>
+                                                        {monthName}
+                                                    </option>
+                                                );
+                                            }
+                                        )}
                                     </select>
                                     <p className="text-red-500 text-left ml-2  ">
                                         {errors.startMonth || ""}
                                     </p>
                                 </div>
                             </div>
+                            <p className="text-red-500 text-left  ">
+                                {errors.start_date || ""}
+                            </p>
                         </div>
                         <div className="my-3 p-2">
                             <div className="form-input-container">
@@ -460,19 +478,24 @@ export default function AddExperiencePopup({ showPopup, onClose, onSuccess }) {
                                         <option value={monthEmptyValue}>
                                             {monthEmptyValue}
                                         </option>
-                                        {Config.MONTH_NAMES.map((monthName) => {
-                                            return (
-                                                <option value={monthName}>
-                                                    {monthName}
-                                                </option>
-                                            );
-                                        })}
+                                        {Config.MONTH_NAMES.map(
+                                            (monthName, index) => {
+                                                return (
+                                                    <option value={index}>
+                                                        {monthName}
+                                                    </option>
+                                                );
+                                            }
+                                        )}
                                     </select>
                                     <p className="text-red-500 text-left ml-2 ">
                                         {errors.endMonth || ""}
                                     </p>
                                 </div>
                             </div>
+                            <p className="text-red-500 text-left  ">
+                                {errors.end_date || ""}
+                            </p>
                         </div>
                         {/* <div className="form-input-container my-3 p-2">
                             <label className="form-label-light form-label-required">

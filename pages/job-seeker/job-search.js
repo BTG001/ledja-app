@@ -15,6 +15,7 @@ import ErrorPopup from "../../components/errorPopup";
 import SearchJobsJobsSkeletonLoader from "../../components/skeleton-loaders/search-jobs-jobs-loader";
 import HasAssessmentPopup from "../../components/job-seekers/has-assessment-popup";
 import ComingSoon from "../../components/coming-soon-popup";
+import TakeTestPopup from "../../components/job-seekers/take-test-popup";
 
 export default function JobSearch() {
     const [showApplyPopup, setShowApplyPopup] = useState(false);
@@ -32,10 +33,19 @@ export default function JobSearch() {
     const [showHasAssessmentPopup, setShowHasAssessmentPopup] = useState(false);
 
     const [showTakeTestPopup, setShowTakeTestPopup] = useState(false);
+    const [showComingSoonPopup, setShowComingSoonPopup] = useState(false);
+
+    const [activeAssessmentId, setActiveAssessmentId] = useState();
 
     useEffect(() => {
         fetchJobs();
     }, []);
+
+    useEffect(() => {
+        if (activeJob) {
+            setActiveAssessmentId(activeJob.skills_assessment_id);
+        }
+    }, [activeJob]);
 
     const onApply = (e) => {
         e.preventDefault();
@@ -146,17 +156,30 @@ export default function JobSearch() {
     };
 
     const onTakeTestNow = () => {
+        setShowHasAssessmentPopup(false);
         setShowTakeTestPopup(true);
+    };
+
+    const onTestAssessmentSuccess = () => {
+        setShowTakeTestPopup(false);
+        setShowSuccessPopup(true);
     };
 
     const onClose = () => {
         setShowTakeTestPopup(false);
         setShowHasAssessmentPopup(false);
+        setShowComingSoonPopup(false);
     };
 
     return (
         <>
-            <ComingSoon showPopup={showTakeTestPopup} onClose={onClose} />
+            <ComingSoon showPopup={showComingSoonPopup} onClose={onClose} />
+            <TakeTestPopup
+                showPopup={showTakeTestPopup}
+                onClose={onClose}
+                assessmentId={activeJob.skills_assessment_id}
+                onSuccess={onTestAssessmentSuccess}
+            />
             <ApplyPopup
                 showPopup={showApplyPopup}
                 onClose={onCloseApplyPopup}
@@ -432,7 +455,9 @@ export default function JobSearch() {
                                         Apply
                                     </p>
                                     <p
-                                        onClick={onTakeTestNow}
+                                        onClick={() => {
+                                            setShowComingSoonPopup(true);
+                                        }}
                                         className="cursor-pointer w-max my-2 mr-4 py-2 px-5 bg-white text-primary-70 border border-solid border-primary-70 hover:border-primary-60 rounded-10"
                                     >
                                         Save

@@ -23,7 +23,7 @@ export default function () {
 
         setLocalJobPost(theLocalJobPost);
         if (theLocalJobPost.with_recommendation) {
-            setWithRecommendation(theLocalJobPost.withRecommendation);
+            setWithRecommendation(theLocalJobPost.with_recommendation);
         }
 
         if (theLocalJobPost.own_completion) {

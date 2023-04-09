@@ -36,7 +36,8 @@ export default class Utils {
             title: null,
             location: null,
             description: null,
-            type: null,
+            // type: null,
+            job_type_id: null,
             no_of_hires: null,
             hiring_speed: null,
             own_completion: null,
@@ -134,5 +135,12 @@ export default class Utils {
         }
 
         return `${toReturn.value} ${toReturn.label}`;
+    }
+
+    static getTime(datetime) {
+        return new Date(datetime - datetime.getTimezoneOffset() * 60 * 1000)
+            .toJSON()
+            .replace("T", " ")
+            .split(".")[0];
     }
 }

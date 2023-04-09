@@ -43,7 +43,15 @@ export default function AddEducationPopup({ showPopup, onClose, onSuccess }) {
 
         const userId = localStorage.getItem("user_id");
 
-        const duration = `${education.startMonth} ${education.startYear}  - ${education.endMonth} ${education.endYear}`;
+        const startDate = Utils.getTime(
+            new Date(education.startYear, education.startMonth)
+        );
+
+        const endDate = Utils.getTime(
+            new Date(education.endYear, education.endMonth)
+        );
+
+        // const duration = `${education.startMonth} ${education.startYear}  - ${education.endMonth} ${education.endYear}`;
 
         const educationFormData = new FormData();
 
@@ -53,7 +61,9 @@ export default function AddEducationPopup({ showPopup, onClose, onSuccess }) {
             education.certification || ""
         );
         educationFormData.append("institution", education.institution || "");
-        educationFormData.append("duration", duration || "");
+        educationFormData.append("start_date", startDate);
+        educationFormData.append("end_date", endDate);
+        // educationFormData.append("duration", duration || "");
 
         Utils.makeRequest(async () => {
             try {
@@ -273,13 +283,15 @@ export default function AddEducationPopup({ showPopup, onClose, onSuccess }) {
                                         <option value={monthEmptyValue}>
                                             {monthEmptyValue}
                                         </option>
-                                        {Config.MONTH_NAMES.map((monthName) => {
-                                            return (
-                                                <option value={monthName}>
-                                                    {monthName}
-                                                </option>
-                                            );
-                                        })}
+                                        {Config.MONTH_NAMES.map(
+                                            (monthName, index) => {
+                                                return (
+                                                    <option value={index}>
+                                                        {monthName}
+                                                    </option>
+                                                );
+                                            }
+                                        )}
                                     </select>
                                     <p className="text-red-500 text-left ml-2  ">
                                         {errors.startMonth || ""}
@@ -345,13 +357,15 @@ export default function AddEducationPopup({ showPopup, onClose, onSuccess }) {
                                         <option value={monthEmptyValue}>
                                             {monthEmptyValue}
                                         </option>
-                                        {Config.MONTH_NAMES.map((monthName) => {
-                                            return (
-                                                <option value={monthName}>
-                                                    {monthName}
-                                                </option>
-                                            );
-                                        })}
+                                        {Config.MONTH_NAMES.map(
+                                            (monthName, index) => {
+                                                return (
+                                                    <option value={index}>
+                                                        {monthName}
+                                                    </option>
+                                                );
+                                            }
+                                        )}
                                     </select>
                                     <p className="text-red-500 text-left ml-2 ">
                                         {errors.endMonth || ""}

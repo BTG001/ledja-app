@@ -33,6 +33,9 @@ export default function ComingSoon({ showPopup, onClose }) {
                         height={80}
                         className="my-5 mx-auto"
                     />
+                    <h3 className="text-xl font-medium text-center w-full">
+                        coming Soon
+                    </h3>
                     <p className="text-dark-50 text-lg  text-center my-3">
                         The functionality you are trying to access is coming
                         soon, Please bear with us

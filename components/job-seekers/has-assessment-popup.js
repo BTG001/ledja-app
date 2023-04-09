@@ -51,7 +51,6 @@ export default function HasAssessmentPopup({
                     <div
                         onClick={() => {
                             document.body.style.overflowY = "visible";
-                            onClose();
                         }}
                         className="flex flex-row flex-wrap justify-center items-center my-10 mx-auto"
                     >

@@ -70,9 +70,9 @@ export default function RecruiterNavbar({
                         : ""
                 }
                 `}
-                        href={"/message"}
+                        href={"/recruiter/messages"}
                     >
-                        Message
+                        Messages
                     </Link>
                 </div>
             )}
