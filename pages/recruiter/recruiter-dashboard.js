@@ -183,7 +183,7 @@ export default function RecruiterDashbaord() {
                                     href={"/recruiter/messages"}
                                     className="font-medium text-center"
                                 >
-                                    Unread messages ({messages.length})
+                                    Unread messages ({messages.unread_messages})
                                 </Link>
                                 <Image
                                     src={"/message-icon.svg"}
@@ -195,7 +195,7 @@ export default function RecruiterDashbaord() {
                                     href={"/recruiter/messages"}
                                     className="text-sm text-center"
                                 >
-                                    You have {messages.length} messages
+                                    You have {messages.messages.length} messages
                                 </Link>
                             </>
                         )}

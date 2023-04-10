@@ -36,6 +36,7 @@ export default function JobSearch() {
     const [showComingSoonPopup, setShowComingSoonPopup] = useState(false);
 
     const [activeAssessmentId, setActiveAssessmentId] = useState();
+    const [saveLoading, setSaveLoading] = useState(false);
 
     useEffect(() => {
         fetchJobs();
@@ -55,29 +56,29 @@ export default function JobSearch() {
 
     const onSearch = () => {
         setJobsLoading(true);
-        if (loading) {
+        if (jobsLoading) {
             return;
         } else {
-            setLoading(true);
+            setJobsLoading(true);
         }
 
-        const filtersFormData = new FormData();
-        filtersFormData.append("title", filters.title || "");
-        filtersFormData.append("location", filters.location || "");
-        filtersFormData.append("type", filters.jobType || "");
-        filtersFormData.append("salary", filters.salary || "");
-        filtersFormData.append(
+        const filterFormData = new FormData();
+        filterFormData.append("title", filters.title || "");
+        filterFormData.append("location", filters.location || "");
+        filterFormData.append("type", filters.jobType || "");
+        filterFormData.append("salary", filters.salary || "");
+        filterFormData.append(
             "experience_level",
             filters.experienceLevel || ""
         );
-        filtersFormData.append("date_posted", filters.datePosted || "");
+        filterFormData.append("date_posted", filters.datePosted || "");
 
         Utils.makeRequest(async () => {
             try {
                 const filterURL = `${Config.API_URL}/filter_jobs`;
                 let filterResults = await Utils.postForm(
                     filterURL,
-                    filtersFormData
+                    filterFormData
                 );
 
                 filterResults = filterResults.data.data;
@@ -169,6 +170,37 @@ export default function JobSearch() {
         setShowTakeTestPopup(false);
         setShowHasAssessmentPopup(false);
         setShowComingSoonPopup(false);
+    };
+
+    const saveJob = () => {
+        if (saveLoading) {
+            return;
+        } else {
+            setSaveLoading(true);
+        }
+
+        const userId = localStorage.getItem("user_id");
+
+        const saveFormData = new FormData();
+
+        saveFormData.append("status", "saved");
+
+        Utils.makeRequest(async () => {
+            try {
+                const saveURL = `${Config.API_URL}/saved_jobs/user/${userId}/job/${activeJob.id}`;
+                let saveResults = await Utils.postForm(saveURL, saveFormData);
+
+                saveResults = saveResults.data.data;
+
+                console.log("save results: ", saveResults);
+                setSaveLoading(false);
+                // setLoading(false);
+            } catch (error) {
+                console.log("saved Error: ", error);
+                // setLoading(false);
+                setSaveLoading(false);
+            }
+        });
     };
 
     return (
@@ -456,11 +488,16 @@ export default function JobSearch() {
                                     </p>
                                     <p
                                         onClick={() => {
-                                            setShowComingSoonPopup(true);
+                                            saveJob();
                                         }}
                                         className="cursor-pointer w-max my-2 mr-4 py-2 px-5 bg-white text-primary-70 border border-solid border-primary-70 hover:border-primary-60 rounded-10"
                                     >
-                                        Save
+                                        {saveLoading && (
+                                            <span className="loader-secondary"></span>
+                                        )}
+                                        {!saveLoading && (
+                                            <span className="">Save</span>
+                                        )}
                                     </p>
                                 </div>
                                 <p className="text-lg">Job Description</p>

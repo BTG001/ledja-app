@@ -1,6 +1,6 @@
 export default {
-    // BAPI_URL: "http://localhost:8000/api",
-    // ASE_URL: "http://localhost:8000",
+    // API_URL: "http://localhost:8000/api",
+    // BASE_URL: "http://localhost:8000",
     // API_URL: "http://34.118.66.234/api",
     // BASE_URL: "http://34.118.66.234",
     API_URL: "https://api.direktory.biz/api",

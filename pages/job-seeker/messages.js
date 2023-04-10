@@ -3,7 +3,7 @@ import RecruiterNavbar from "../../components/navbars/RecruiterNavbar";
 import Config from "../../Config";
 import Utils from "../../Utils";
 import axios from "axios";
-import RecruiterMessagesLoaderSkeleton from "../../components/skeleton-loaders/recruiter-messages-skeleton-loader";
+import userMessagesLoaderSkeleton from "../../components/skeleton-loaders/recruiter-messages-skeleton-loader";
 import JobSeekerNavbar from "../../components/navbars/JobSeekerNavbar";
 
 export default function JobSeekerMessages() {
@@ -20,26 +20,27 @@ export default function JobSeekerMessages() {
         try {
             const userId = localStorage.getItem("user_id");
             const url = `${Config.API_URL}/messages/user/${userId}`;
-            let recruiterMessages = await axios.get(url, {
+            let userMessages = await axios.get(url, {
                 headers: Utils.getHeaders(),
             });
 
-            recruiterMessages = recruiterMessages.data.data;
+            userMessages = userMessages.data.data.messages;
 
-            setMessages(recruiterMessages);
+            setMessages(userMessages);
 
-            console.log("recruiter messages: ", recruiterMessages);
+            console.log("recruiter messages: ", userMessages);
             setMessagesLoading(false);
         } catch (error) {
             setMessagesLoading(false);
             console.log("recruiter messages Error: ", error);
         }
     }
+
     return (
         <>
             <JobSeekerNavbar active={"message"} />
             <section className="md:w-4/5 w-5/6 mx-auto my-5">
-                {messagesLoading && <RecruiterMessagesLoaderSkeleton />}
+                {messagesLoading && <userMessagesLoaderSkeleton />}
                 {messages &&
                     !messagesLoading &&
                     messages.map((message) => {

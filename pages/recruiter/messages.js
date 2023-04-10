@@ -23,7 +23,7 @@ export default function RecruiterMessages() {
                 headers: Utils.getHeaders(),
             });
 
-            recruiterMessages = recruiterMessages.data.data;
+            recruiterMessages = recruiterMessages.data.data.messages;
 
             setMessages(recruiterMessages);
 

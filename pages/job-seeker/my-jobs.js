@@ -20,13 +20,13 @@ import MyJobsApplicationsSkeleton from "../../components/skeleton-loaders/my-job
 
 export default function MyJobs() {
     const [showApplyPopup, setShowApplyPopup] = useState(false);
-    // const [showSuccessPopup, setShowSuccessPopup] = useState(false);
-    // const [jobs, setJobs] = useState([]);
-    // const [activeJob, setActiveJob] = useState({});
-    // const [activeJobIndex, setActiveJobIndex] = useState(0);
+    const [showSuccessPopup, setShowSuccessPopup] = useState(false);
+    const [jobs, setJobs] = useState([]);
+    const [activeJob, setActiveJob] = useState({});
+    const [activeJobIndex, setActiveJobIndex] = useState(0);
     // const [filters, setFilters] = useState({});
     // const [loading, setLoading] = useState(false);
-    // const [jobsLoading, setJobsLoading] = useState(true);
+    const [jobsLoading, setJobsLoading] = useState(true);
 
     const [applications, setApplications] = useState();
     const [activeApplication, setActiveApplication] = useState({});
@@ -37,7 +37,7 @@ export default function MyJobs() {
     const [showErrorPopup, setShowErrorPopup] = useState(false);
     const [errorMessage, setErrorMessage] = useState("An Error Occured");
 
-    // const [showHasAssessmentPopup, setShowHasAssessmentPopup] = useState(false);
+    const [showHasAssessmentPopup, setShowHasAssessmentPopup] = useState(false);
 
     const [showTakeTestPopup, setShowTakeTestPopup] = useState(false);
     const [showComingSoonPopup, setShowComingSoonPopup] = useState(false);
@@ -45,119 +45,47 @@ export default function MyJobs() {
     const [activeAssessmentId, setActiveAssessmentId] = useState();
     const [activeTab, setActiveTab] = useState("applied");
 
-    // useEffect(() => {
-    //     fetchJobs();
-    // }, []);
+    const [unSaveLoading, setUnSaveLoading] = useState(false);
 
     useEffect(() => {
-        filterActiveJobApplications();
+        if (activeTab == "saved") {
+            fetchSavedJobs();
+        } else {
+            filterActiveJobApplications();
+        }
     }, [activeTab]);
 
-    // useEffect(() => {
-    //     if (activeJob) {
-    //         setActiveAssessmentId(activeJob.skills_assessment_id);
-    //     }
-    // }, [activeJob]);
+    useEffect(() => {
+        if (activeJob) {
+            setActiveAssessmentId(activeJob.skills_assessment_id);
+        }
+    }, [activeJob]);
 
-    // const onApply = (e) => {
-    //     e.preventDefault();
+    const onApply = (e) => {
+        e.preventDefault();
 
-    //     setShowApplyPopup(true);
-    // };
+        setShowApplyPopup(true);
+    };
 
-    // const onSearch = () => {
-    //     setJobsLoading(true);
-    //     if (loading) {
-    //         return;
-    //     } else {
-    //         setLoading(true);
-    //     }
+    const onCloseApplyPopup = () => {
+        setShowApplyPopup(false);
+    };
 
-    //     const filtersFormData = new FormData();
-    //     filtersFormData.append("title", filters.title || "");
-    //     filtersFormData.append("location", filters.location || "");
-    //     filtersFormData.append("type", filters.jobType || "");
-    //     filtersFormData.append("salary", filters.salary || "");
-    //     filtersFormData.append(
-    //         "experience_level",
-    //         filters.experienceLevel || ""
-    //     );
-    //     filtersFormData.append("date_posted", filters.datePosted || "");
+    const onSuccessfullApplication = () => {
+        setShowApplyPopup(false);
 
-    //     Utils.makeRequest(async () => {
-    //         try {
-    //             const filterURL = `${Config.API_URL}/filter_jobs`;
-    //             let filterResults = await Utils.postForm(
-    //                 filterURL,
-    //                 filtersFormData
-    //             );
+        if (activeJob.skills_assessment_id) {
+            setShowHasAssessmentPopup(true);
+            return;
+        }
+        setShowSuccessPopup(true);
+    };
 
-    //             filterResults = filterResults.data.data;
-
-    //             setJobs(filterResults);
-
-    //             if (filterResults.length > 0) {
-    //                 console.log("setting active job", filterResults[0]);
-    //                 setActiveJob(filterResults[0]);
-    //             }
-
-    //             console.log("filter results: ", filterResults);
-    //             setJobsLoading(false);
-    //             setLoading(false);
-    //         } catch (error) {
-    //             console.log("filter Error: ", error);
-    //             setLoading(false);
-    //             setJobsLoading(false);
-    //         }
-    //     });
-    // };
-
-    // async function fetchJobs(url) {
-    //     setJobsLoading(true);
-    //     if (!url) {
-    //         url = `${Config.API_URL}/jobs`;
-    //     }
-
-    //     try {
-    //         let theJobs = await axios.get(url, {
-    //             headers: Utils.getHeaders(),
-    //         });
-
-    //         theJobs = theJobs.data.data.data;
-
-    //         setJobs(theJobs);
-
-    //         if (theJobs.length > 0) {
-    //             setActiveJob(theJobs[0]);
-    //         }
-
-    //         console.log("user Jobs: ", theJobs);
-    //         setJobsLoading(false);
-    //     } catch (error) {
-    //         setJobsLoading(false);
-    //         console.log("user Jobs request error: ", error);
-    //     }
-    // }
-
-    // const onCloseApplyPopup = () => {
-    //     setShowApplyPopup(false);
-    // };
-
-    // const onSuccessfullApplication = () => {
-    //     setShowApplyPopup(false);
-
-    //     if (activeJob.skills_assessment_id) {
-    //         setShowHasAssessmentPopup(true);
-    //         return;
-    //     }
-    //     setShowSuccessPopup(true);
-    // };
-
-    // const onFailedApplication = () => {
-    //     setShowApplyPopup(false);
-    //     setErrorMessage("Application Failed");
-    //     setShowErrorPopup(true);
-    // };
+    const onFailedApplication = () => {
+        setShowApplyPopup(false);
+        setErrorMessage("Application Failed");
+        setShowErrorPopup(true);
+    };
 
     const onCloseSuccessPopup = () => {
         setShowSuccessPopup(false);
@@ -167,10 +95,10 @@ export default function MyJobs() {
         setShowErrorPopup(false);
     };
 
-    // const onTakeTestNow = () => {
-    //     setShowHasAssessmentPopup(false);
-    //     setShowTakeTestPopup(true);
-    // };
+    const onTakeTestNow = () => {
+        setShowHasAssessmentPopup(false);
+        setShowTakeTestPopup(true);
+    };
 
     const onTestAssessmentSuccess = () => {
         setShowTakeTestPopup(false);
@@ -179,7 +107,7 @@ export default function MyJobs() {
 
     const onClose = () => {
         setShowTakeTestPopup(false);
-        // setShowHasAssessmentPopup(false);
+        setShowHasAssessmentPopup(false);
         setShowComingSoonPopup(false);
     };
 
@@ -220,6 +148,69 @@ export default function MyJobs() {
         });
     }
 
+    async function fetchSavedJobs() {
+        setJobsLoading(true);
+
+        const userId = localStorage.getItem("user_id");
+
+        const url = `${Config.API_URL}/get_user_saved_jobs/user/${userId}`;
+
+        try {
+            let theJobs = await axios.get(url, {
+                headers: Utils.getHeaders(),
+            });
+
+            console.log("the jobs: ", theJobs);
+
+            theJobs = theJobs.data.data;
+
+            if (theJobs.length > 0) {
+                setActiveJob(theJobs[0].the_job);
+            }
+
+            setJobs(theJobs);
+
+            console.log("user saved Jobs: ", theJobs);
+            setJobsLoading(false);
+        } catch (error) {
+            setJobsLoading(false);
+            console.log("user saved Jobs request error: ", error);
+        }
+    }
+
+    const unSaveJob = () => {
+        if (unSaveLoading) {
+            return;
+        } else {
+            setUnSaveLoading(true);
+        }
+
+        const userId = localStorage.getItem("user_id");
+
+        const saveFormData = new FormData();
+
+        saveFormData.append("status", "deleted");
+
+        Utils.makeRequest(async () => {
+            try {
+                const saveURL = `${Config.API_URL}/saved_jobs/user/${userId}/job/${activeJob.id}`;
+                let saveResults = await Utils.postForm(saveURL, saveFormData);
+
+                saveResults = saveResults.data.data;
+
+                fetchSavedJobs();
+
+                console.log("unsave results: ", saveResults);
+                setUnSaveLoading(false);
+                // setLoading(false);
+            } catch (error) {
+                console.log("unsave Error: ", error);
+                // setLoading(false);
+                setUnSaveLoading(false);
+            }
+        });
+    };
+
     return (
         <>
             <ComingSoon showPopup={showComingSoonPopup} onClose={onClose} />
@@ -229,24 +220,24 @@ export default function MyJobs() {
                 assessmentId={activeAssessmentId}
                 onSuccess={onTestAssessmentSuccess}
             />
-            {/* <ApplyPopup
+            <ApplyPopup
                 showPopup={showApplyPopup}
                 onClose={onCloseApplyPopup}
                 onSuccess={onSuccessfullApplication}
                 onFailure={onFailedApplication}
                 jobId={activeJob.id}
                 job={activeJob}
-            /> */}
-            {/* <ApplySuccessPopup
+            />
+            <ApplySuccessPopup
                 showPopup={showSuccessPopup}
                 onClose={onCloseSuccessPopup}
-            /> */}
+            />
 
-            {/* <HasAssessmentPopup
+            <HasAssessmentPopup
                 showPopup={showHasAssessmentPopup}
                 onClose={onClose}
                 onTakeTestNow={onTakeTestNow}
-            /> */}
+            />
 
             <ErrorPopup
                 showPopup={showErrorPopup}
@@ -260,7 +251,7 @@ export default function MyJobs() {
                 <p className="flex flex-row justify-start items-center w-full mt-8 mb-5">
                     <span
                         onClick={() => {
-                            setShowComingSoonPopup(true);
+                            // setShowComingSoonPopup(true);
                             setActiveTab("saved");
                         }}
                         className={`px-6  py-3  mx-3 rounded-3xl cursor-pointer hover:bg-my-gray-50
@@ -289,11 +280,10 @@ export default function MyJobs() {
                     </span>
                 </p>
 
-                {activeTab == "applied" && applicationsLoading && (
-                    <MyJobsApplicationsSkeleton />
-                )}
+                {(activeTab == "applied" || activeTab == "interview") &&
+                    applicationsLoading && <MyJobsApplicationsSkeleton />}
 
-                {activeTab == "applied" &&
+                {(activeTab == "applied" || activeTab == "interview") &&
                     !applicationsLoading &&
                     !applications && <p>No Applications</p>}
 
@@ -397,6 +387,169 @@ export default function MyJobs() {
                             })}
                         </div>
                     )}
+
+                {activeTab == "saved" && (
+                    <>
+                        <div className="w-full mx-auto my-5">
+                            {jobsLoading && <SearchJobsJobsSkeletonLoader />}
+                            {(!jobs || jobs.length <= 0) && !jobsLoading && (
+                                <p className="w-full text-center text-lg">
+                                    No Saved Jobs Yet!
+                                </p>
+                            )}
+
+                            {jobs && jobs.length > 0 && (
+                                <>
+                                    <div className="md:grid md:grid-cols-5  md:border-x md:border-t  md:border-solid border-my-gray-70 min-h-40-screen rounded-sm mb-16">
+                                        <sidebar className="col-span-2 h-full flex flex-row flex-nowrap overflow-x-auto md:block p-2 pl-0 md:p-0 md:border-b  md:border-solid border-my-gray-70 ">
+                                            {jobs.map((job, index) => {
+                                                job = job.the_job;
+                                                return (
+                                                    <div
+                                                        onClick={() => {
+                                                            setActiveJob(job);
+                                                            setActiveJobIndex(
+                                                                index
+                                                            );
+                                                        }}
+                                                        key={index}
+                                                        className={`min-w-60-screen sm:min-w-40-screen md:min-w-10-screen hover:bg-primary-40 cursor-pointer flex flex-row flex-nowrap justify-start items-center p-2 border md:border-0   border-solid border-my-gray-70 mr-2 md:mr-auto
+                                        ${
+                                            activeJobIndex == index
+                                                ? "bg-my-gray-50"
+                                                : ""
+                                        }
+                                        ${
+                                            index < jobs.length - 1
+                                                ? "md:border-b"
+                                                : ""
+                                        }
+                                        `}
+                                                    >
+                                                        <p className="flex justify-center items-center row-span-3 p-2">
+                                                            {(!job.user ||
+                                                                !job.user
+                                                                    .basic_info_recruiter ||
+                                                                !job.user
+                                                                    .basic_info_recruiter
+                                                                    .company_avatar_url) && (
+                                                                <BsBuilding className="text-8xl text-center block" />
+                                                            )}
+
+                                                            {job.user &&
+                                                                job.user
+                                                                    .basic_info_recruiter &&
+                                                                job.user
+                                                                    .basic_info_recruiter
+                                                                    .company_avatar_url && (
+                                                                    <Image
+                                                                        src={
+                                                                            job
+                                                                                .user
+                                                                                .basic_info_recruiter
+                                                                                .company_avatar_url
+                                                                        }
+                                                                        width={
+                                                                            100
+                                                                        }
+                                                                        height={
+                                                                            80
+                                                                        }
+                                                                        className="flex justify-center items-center"
+                                                                    />
+                                                                )}
+                                                        </p>
+                                                        <div>
+                                                            <h3 className="font-medium text-xl mb-1">
+                                                                {job.title}
+                                                            </h3>
+                                                            <p className="text-sm">
+                                                                {job.recruiter_basic_info
+                                                                    ? job
+                                                                          .recruiter_basic_info
+                                                                          .company_name
+                                                                    : ""}
+                                                            </p>
+                                                            <p className="text-sm">
+                                                                {job.location}
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                );
+                                            })}
+                                        </sidebar>
+                                        <section className="col-span-3 p-4 border-l border-t border-b border-r md:border-r-0 md:border-t-0 border-my-gray-70 border-solid">
+                                            <h3 className="font-medium text-xl">
+                                                {activeJob.title || ""}
+                                            </h3>
+                                            <p className="text-sm text-my-gray-70">
+                                                {activeJob.recruiter_basic_info
+                                                    ? activeJob
+                                                          .recruiter_basic_info
+                                                          .company_name
+                                                    : ""}
+                                            </p>
+                                            <p className="text-sm text-my-gray-70 flex flex-row flex-nowrap justify-start items-center">
+                                                <Image
+                                                    className="mr-3"
+                                                    src="/map-icon.svg"
+                                                    width={12}
+                                                    height={15}
+                                                />
+                                                <span>
+                                                    {activeJob.location || ""} •{" "}
+                                                    {activeJob.type || ""}
+                                                </span>
+                                            </p>
+                                            <p className="text-sm text-my-gray-70 flex flex-row flex-nowrap justify-start items-center">
+                                                <Image
+                                                    className="mr-3"
+                                                    src="/money-icon.svg"
+                                                    width={15}
+                                                    height={11}
+                                                />
+                                                <span>
+                                                    {activeJob.salary || ""}{" "}
+                                                </span>
+                                            </p>
+
+                                            <div className="flex flex-row flex-wrap justify-start items-center my-3">
+                                                <p
+                                                    className="w-max my-2 mr-4 py-2 px-5 bg-primary-70 text-white rounded-10 cursor-pointer"
+                                                    onClick={onApply}
+                                                >
+                                                    Apply
+                                                </p>
+                                                <p
+                                                    onClick={() => {
+                                                        unSaveJob();
+                                                    }}
+                                                    className="cursor-pointer w-max my-2 mr-4 py-2 px-5 bg-white text-primary-70 border border-solid border-primary-70 hover:border-primary-60 rounded-10"
+                                                >
+                                                    {unSaveLoading && (
+                                                        <span className="loader-secondary"></span>
+                                                    )}
+                                                    {!unSaveLoading && (
+                                                        <span className="">
+                                                            Unsave
+                                                        </span>
+                                                    )}
+                                                </p>
+                                            </div>
+                                            <p className="text-lg">
+                                                Job Description
+                                            </p>
+                                            <p className="mt-5 mb-12">
+                                                {activeJob.description ||
+                                                    "No Description"}
+                                            </p>
+                                        </section>
+                                    </div>
+                                </>
+                            )}
+                        </div>
+                    </>
+                )}
             </div>
             <Footer />
         </>

@@ -24,6 +24,8 @@ import JobSeekerProfileLoader from "../../components/skeleton-loaders/jobseeker-
 import AddExperiencePopup from "../../components/job-seekers/profile-setup-step-3/add-experience-popup";
 import AddEducationPopup from "../../components/job-seekers/profile-setup-step-3/add-education-popup";
 import AddSkillPopup from "../../components/job-seekers/profile-setup-step-3/add-skill-popup";
+import ConfirmationPopup from "../../components/confirmation-popup";
+import { AiOutlineSwap } from "react-icons/ai";
 
 export default function Profile() {
     const router = useRouter();
@@ -42,14 +44,16 @@ export default function Profile() {
     const [basicInfo, setBasicInfo] = useState({});
     const [links, setLinks] = useState({});
     const [aboutJobSeeker, setAboutJobSeeker] = useState({});
-    const [workExperiences, setWorkExperiences] = useState();
-    const [educations, setEducations] = useState();
-    const [skills, setSkills] = useState();
+    const [workExperiences, setWorkExperiences] = useState([]);
+    const [educations, setEducations] = useState([]);
+    const [skills, setSkills] = useState([]);
     const [email, setEmail] = useState();
     const [resume, setResume] = useState();
     const [otherDocs, setOtherDocs] = useState();
     const [profilePic, setProfilePic] = useState();
     const profileImageInput = useRef();
+
+    const addOtherDocsInput = useRef();
 
     const [alreadyShowedIncompletePopups, setAlreadyShowedIncompletePopups] =
         useState(false);
@@ -93,11 +97,46 @@ export default function Profile() {
     const [showAddEducationPopup, setShowAddEducationPopup] = useState(false);
     const [showAddSkillPopup, setShowAddSkillPopup] = useState(false);
 
+    const [
+        showWorkExperienceConfirmationPopup,
+        setShowWorkExperienceConfirmationPopup,
+    ] = useState(false);
+    const [showEducationConfirmationPopup, setShowEducationConfirmationPopup] =
+        useState(false);
+    const [showSkillsConfirmationPopup, setShowSkillsConfirmationPopup] =
+        useState(false);
+
+    const [showDocumentConfirmationPopup, setShowDocumentConfirmationPopup] =
+        useState(false);
+    const [activeDocument, setActiveDocument] = useState();
+
     const otherDocsInput = useRef();
 
     useEffect(() => {
         fetchJobSeeker();
     }, []);
+
+    async function fetchUPloadJob(id) {
+        setProfileLoading(true);
+        try {
+            const url = `${Config.API_URL}/upload_jobs/${id}`;
+            let theUploadJob = await axios.get(url, {
+                headers: Utils.getHeaders(),
+            });
+
+            theUploadJob = theUploadJob.data.data;
+
+            if (theUploadJob.other_documents) {
+                setOtherDocs(theUploadJob.other_documents);
+                setHasOtherDocs(true);
+            }
+
+            setProfileLoading(false);
+        } catch (error) {
+            setProfileLoading(false);
+            console.log("get upload jobs Error: ", error);
+        }
+    }
 
     async function fetchJobSeeker() {
         setProfileLoading(true);
@@ -138,32 +177,25 @@ export default function Profile() {
                     setHasResume(true);
                 }
 
-                if (jobSeeker.upload_job.other_docs) {
-                    const otherDocsArray = jobSeeker.upload_job.other_docs_urls
-                        .trim()
-                        .split("|");
-                    setOtherDocs(otherDocsArray);
-                    setHasOtherDocs(true);
-                }
-
+                fetchUPloadJob(jobSeeker.upload_job.id);
                 setUploadJobsId(jobSeeker.upload_job.id);
             }
 
-            if (
-                jobSeeker.work_experiences &&
-                jobSeeker.work_experiences.length > 0
-            ) {
+            if (jobSeeker.work_experiences) {
                 setWorkExperiences(jobSeeker.work_experiences);
+
                 setHasWorkExperience(true);
             }
 
-            if (jobSeeker.education && jobSeeker.education.length > 0) {
+            if (jobSeeker.education) {
                 setEducations(jobSeeker.education);
+
                 setHasEducation(true);
             }
 
-            if (jobSeeker.skills && jobSeeker.skills.length > 0) {
+            if (jobSeeker.skills) {
                 setSkills(jobSeeker.skills);
+
                 setHasSkills(true);
             }
 
@@ -273,6 +305,10 @@ export default function Profile() {
         setShowAddEducationPopup(false);
         setShowAddExperiencePopup(false);
         setShowAddSkillPopup(false);
+        setShowWorkExperienceConfirmationPopup(false);
+        setShowEducationConfirmationPopup(false);
+        setShowSkillsConfirmationPopup(false);
+        setShowDocumentConfirmationPopup(false);
     };
 
     const onExperienceUpdated = (updatedWorkExperience) => {
@@ -293,16 +329,79 @@ export default function Profile() {
         fetchJobSeeker();
     };
 
-    const deleteWorkExperience = (itemIndex) => {
-        console.log("work experience to delete", workExperiences[itemIndex]);
+    const deleteWorkExperience = () => {
+        setShowWorkExperienceConfirmationPopup(false);
+        const url = `${Config.API_URL}/work_experiences/${activeWorkExperience.id}`;
+
+        Utils.makeRequest(async () => {
+            try {
+                const deletionResults = await axios.delete(url, {
+                    headers: Utils.getHeaders(),
+                });
+
+                console.log(
+                    "work experience deletion result: ",
+                    deletionResults
+                );
+                fetchJobSeeker();
+            } catch (error) {
+                console.log("work experience deletion error: ", error);
+            }
+        });
     };
 
-    const deleteEducation = (itemIndex) => {
-        console.log("education To Delete", educations[itemIndex]);
+    const deleteEducation = () => {
+        setShowEducationConfirmationPopup(false);
+        const url = `${Config.API_URL}/education/${activeEducation.id}`;
+
+        Utils.makeRequest(async () => {
+            try {
+                const deletionResults = await axios.delete(url, {
+                    headers: Utils.getHeaders(),
+                });
+
+                console.log("education deletion result: ", deletionResults);
+                fetchJobSeeker();
+            } catch (error) {
+                console.log("education deletion error: ", error);
+            }
+        });
     };
 
-    const deleteSkill = (itemIndex) => {
-        console.log("delete Skill", skills[itemIndex]);
+    const deleteSkill = () => {
+        setShowSkillsConfirmationPopup(false);
+        const url = `${Config.API_URL}/skills/${activeSkill.id}`;
+
+        Utils.makeRequest(async () => {
+            try {
+                const deletionResults = await axios.delete(url, {
+                    headers: Utils.getHeaders(),
+                });
+
+                console.log("skills deletion result: ", deletionResults);
+                fetchJobSeeker();
+            } catch (error) {
+                console.log("skills deletion error: ", error);
+            }
+        });
+    };
+
+    const deleteDocument = () => {
+        setShowDocumentConfirmationPopup(false);
+        const url = `${Config.API_URL}/other_documents/${activeDocument.id}`;
+
+        Utils.makeRequest(async () => {
+            try {
+                const deletionResults = await axios.delete(url, {
+                    headers: Utils.getHeaders(),
+                });
+
+                console.log("document deletion result: ", deletionResults);
+                fetchJobSeeker();
+            } catch (error) {
+                console.log("document deletion error: ", error);
+            }
+        });
     };
 
     const onSuccess = (workExperience) => {
@@ -400,8 +499,88 @@ export default function Profile() {
         });
     };
 
+    const addOtherDocs = (e) => {
+        e.preventDefault();
+
+        Utils.makeRequest(async () => {
+            try {
+                let index = 0;
+                if (addOtherDocsInput.current.files.length > 0) {
+                    console.log("has other files...");
+                    for (const otherFile of addOtherDocsInput.current.files) {
+                        console.log("file index: ", index);
+                        const otherFileFormData = new FormData();
+                        const userId = localStorage.getItem("user_id");
+                        otherFileFormData.append("document", otherFile);
+                        otherFileFormData.append("upload_job_id", uploadJobsId);
+                        otherFileFormData.append("user_id", userId);
+
+                        const otherFileResults = await Utils.postForm(
+                            `${Config.API_URL}/other_documents`,
+                            otherFileFormData
+                        );
+
+                        console.log(
+                            `File ${index + 1} results: `,
+                            otherFileResults
+                        );
+
+                        // if (otherFileResults.data.success) {
+                        //     setSuccesses((prevValues) => {
+                        //         return {
+                        //             ...prevValues,
+                        //             otherFiles: [
+                        //                 ...prevValues.otherFiles,
+                        //                 `${index}. File ${otherFile.name.substr(
+                        //                     0,
+                        //                     5
+                        //                 )}... Uploaded Successfully`,
+                        //             ],
+                        //         };
+                        //     });
+                        // }
+
+                        if (
+                            index ==
+                            addOtherDocsInput.current.files.length - 1
+                        ) {
+                            console.log("--------last file----");
+                            fetchUPloadJob(uploadJobsId);
+                        }
+
+                        index = index + 1;
+                    }
+                }
+            } catch (error) {
+                console.log("step 4 Error: ", error);
+                extractErrors(error);
+                setLoadingNext(false);
+            }
+        });
+    };
+
     return (
         <>
+            <ConfirmationPopup
+                showPopup={showWorkExperienceConfirmationPopup}
+                onClose={onClose}
+                onYes={deleteWorkExperience}
+            />
+            <ConfirmationPopup
+                showPopup={showEducationConfirmationPopup}
+                onClose={onClose}
+                onYes={deleteEducation}
+            />
+            <ConfirmationPopup
+                showPopup={showSkillsConfirmationPopup}
+                onClose={onClose}
+                onYes={deleteSkill}
+            />
+            <ConfirmationPopup
+                showPopup={showDocumentConfirmationPopup}
+                onClose={onClose}
+                onYes={deleteDocument}
+            />
             <MissingJobSeekerProfilePopup
                 onClose={onClose}
                 showPopup={showMissingJobSeekerProfilePopup}
@@ -429,6 +608,12 @@ export default function Profile() {
                 onClose={onClose}
                 onSuccess={onSuccessEducation}
             />
+            <AddSkillPopup
+                showPopup={showAddSkillPopup}
+                onClose={onClose}
+                onSuccess={onSuccessSkill}
+            />
+
             <AddSkillPopup
                 showPopup={showAddSkillPopup}
                 onClose={onClose}
@@ -641,69 +826,75 @@ export default function Profile() {
                                     Add
                                 </span>
                             </div>
-                            {hasWorkExperience && (
-                                <div className="mt-4 px-4 py-1 border border-solid border-my-gray-70  rounded-md">
-                                    {workExperiences.map(
-                                        (workExperience, index) => {
-                                            return (
-                                                <div
-                                                    className="my-4"
-                                                    key={index}
-                                                >
-                                                    <p className="text-lg my-1 ">
-                                                        {workExperience.title}
-                                                    </p>
-                                                    <p className=" my-1">
-                                                        {workExperience.company}
-                                                    </p>
-                                                    <p className="my-1 text-my-gray-70 text-sm">
-                                                        {
-                                                            workExperience.duration
-                                                        }
-                                                    </p>
-                                                    {/* <p classname="text-sm">{workExperience.description}</p> */}
-                                                    <p className="text-sm">
-                                                        {workExperience.description ||
-                                                            ""}
-                                                    </p>
-                                                    <div className="flex flex-row flex-nowrap justify-start items-center py-2">
-                                                        <TbEdit
-                                                            onClick={() => {
-                                                                setActiveWorkExperience(
-                                                                    workExperience
-                                                                );
-                                                                setActiveWorkExperienceIndex(
-                                                                    index
-                                                                );
-                                                                setShowWorkExperienceEditPopup(
-                                                                    true
-                                                                );
-                                                            }}
-                                                            className="text-3xl p-1 mr-1 text-primary-70 cursor-pointer"
-                                                        />
-                                                        <HiOutlineTrash
-                                                            onClick={() => {
-                                                                setActiveWorkExperience(
-                                                                    workExperience
-                                                                );
-                                                                setActiveWorkExperienceIndex(
-                                                                    index
-                                                                );
-                                                                deleteWorkExperience(
-                                                                    index
-                                                                );
-                                                            }}
-                                                            className="text-3xl p-1 mx-1 text-red-500 cursor-pointer"
-                                                        />
+                            {hasWorkExperience &&
+                                workExperiences.length > 0 && (
+                                    <div className="mt-4 px-4 py-1 border border-solid border-my-gray-70  rounded-md">
+                                        {workExperiences.map(
+                                            (workExperience, index) => {
+                                                return (
+                                                    <div
+                                                        className="my-4"
+                                                        key={index}
+                                                    >
+                                                        <p className="text-lg my-1 ">
+                                                            {
+                                                                workExperience.title
+                                                            }
+                                                        </p>
+                                                        <p className=" my-1">
+                                                            {
+                                                                workExperience.company
+                                                            }
+                                                        </p>
+                                                        <p className="my-1 text-my-gray-70 text-sm">
+                                                            {
+                                                                workExperience.duration
+                                                            }
+                                                        </p>
+                                                        {/* <p classname="text-sm">{workExperience.description}</p> */}
+                                                        <p className="text-sm">
+                                                            {workExperience.description ||
+                                                                ""}
+                                                        </p>
+                                                        <div className="flex flex-row flex-nowrap justify-start items-center py-2">
+                                                            <TbEdit
+                                                                onClick={() => {
+                                                                    setActiveWorkExperience(
+                                                                        workExperience
+                                                                    );
+                                                                    setActiveWorkExperienceIndex(
+                                                                        index
+                                                                    );
+                                                                    setShowWorkExperienceEditPopup(
+                                                                        true
+                                                                    );
+                                                                }}
+                                                                className="text-3xl p-1 mr-1 text-primary-70 cursor-pointer"
+                                                            />
+                                                            <HiOutlineTrash
+                                                                onClick={() => {
+                                                                    setActiveWorkExperience(
+                                                                        workExperience
+                                                                    );
+                                                                    setActiveWorkExperienceIndex(
+                                                                        index
+                                                                    );
+                                                                    setShowWorkExperienceConfirmationPopup(
+                                                                        true
+                                                                    );
+                                                                }}
+                                                                className="text-3xl p-1 mx-1 text-red-500 cursor-pointer"
+                                                            />
+                                                        </div>
                                                     </div>
-                                                </div>
-                                            );
-                                        }
-                                    )}
-                                </div>
-                            )}
+                                                );
+                                            }
+                                        )}
+                                    </div>
+                                )}
 
-                            {!hasWorkExperience && (
+                            {(!hasWorkExperience ||
+                                workExperiences.length < 1) && (
                                 <div
                                     onClick={() => {
                                         router.push(
@@ -748,7 +939,7 @@ export default function Profile() {
                                 </span>
                             </div>
 
-                            {hasEducation && (
+                            {hasEducation && educations.length > 0 && (
                                 <div
                                     className={
                                         "mt-4 px-4 py-1 border border-solid border-my-gray-70  rounded-md cursor-pointer "
@@ -792,8 +983,8 @@ export default function Profile() {
                                                                 setActiveEducationIndex(
                                                                     index
                                                                 );
-                                                                deleteEducation(
-                                                                    index
+                                                                setShowEducationConfirmationPopup(
+                                                                    true
                                                                 );
                                                             }}
                                                             className="text-3xl p-1 mx-1 text-red-500 cursor-pointer"
@@ -805,7 +996,7 @@ export default function Profile() {
                                 </div>
                             )}
 
-                            {!hasEducation && (
+                            {(!hasEducation || educations.length < 1) && (
                                 <div
                                     onClick={() => {
                                         router.push(
@@ -849,7 +1040,7 @@ export default function Profile() {
                                     Add
                                 </span>
                             </div>
-                            {hasSkills && (
+                            {hasSkills && skills.length > 0 && (
                                 <div
                                     className={
                                         "mt-4 border border-solid border-my-gray-70  rounded-md p-4 flex flex-row justify-start items-center "
@@ -883,7 +1074,9 @@ export default function Profile() {
                                                         setActiveSkillIndex(
                                                             index
                                                         );
-                                                        deleteSkill(index);
+                                                        setShowSkillsConfirmationPopup(
+                                                            true
+                                                        );
                                                     }}
                                                     className="text-3xl p-1  text-red-500 cursor-pointer"
                                                 />
@@ -893,7 +1086,7 @@ export default function Profile() {
                                 </div>
                             )}
 
-                            {!hasSkills && (
+                            {(!hasSkills || skills.length < 1) && (
                                 <div
                                     onClick={() => {
                                         router.push(
@@ -946,9 +1139,10 @@ export default function Profile() {
                                         onClick={() => {
                                             resumeInput.current.click();
                                         }}
-                                        className="text-primary-70 cursor-pointer"
+                                        className="text-primary-70 cursor-pointer flex justify-center items-center flex-nowrap"
                                     >
-                                        Edit
+                                        <AiOutlineSwap className="mr-2 text-primary-70" />
+                                        Replace
                                     </span>
                                 )}
                             </div>
@@ -1024,11 +1218,26 @@ export default function Profile() {
                                         onClick={() => {
                                             otherDocsInput.current.click();
                                         }}
-                                        className="text-primary-70 cursor-pointer"
+                                        className="text-primary-70 cursor-pointer flex flex-nowrap justify-center items-center"
                                     >
-                                        Edit
+                                        <AiOutlineSwap className="mr-2 text-primary-70" />
+                                        Replace all
                                     </span>
                                 )}
+                                <span
+                                    onClick={() => {
+                                        addOtherDocsInput.current.click();
+                                    }}
+                                    className="text-primary-70 test-sm cursor-pointer flex flex-row flex-nowrap justify-center items-center"
+                                >
+                                    <Image
+                                        src={"/plus-icon.svg"}
+                                        width={12}
+                                        height={12}
+                                        className="m-2"
+                                    />
+                                    Add
+                                </span>
                             </div>
 
                             {hasOtherDocs && (
@@ -1039,18 +1248,31 @@ export default function Profile() {
                                 >
                                     {otherDocs.map((otherDoc, index) => {
                                         return (
-                                            <Link
-                                                key={index}
-                                                href={otherDoc}
-                                                target="_blank"
-                                                className="flex flex-row flex-nowrap justify-start items-center"
-                                            >
-                                                <AiOutlineFileText />
-                                                <span className="text-xs text-primary-70 p-2">
-                                                    Other Doc_{index + 1}
-                                                </span>
-                                                <MdOutlineOpenInNew className="ml-2 text-primary-70" />
-                                            </Link>
+                                            <div className="flex flex-row flex-nowrap">
+                                                <Link
+                                                    key={index}
+                                                    href={otherDoc.document_url}
+                                                    target="_blank"
+                                                    className="flex flex-row flex-nowrap justify-start items-center"
+                                                >
+                                                    <AiOutlineFileText />
+                                                    <span className="text-xs text-primary-70 p-2">
+                                                        Other Doc_{index + 1}
+                                                    </span>
+                                                    <MdOutlineOpenInNew className="ml-2 text-primary-70" />
+                                                </Link>
+                                                <HiOutlineTrash
+                                                    onClick={() => {
+                                                        setActiveDocument(
+                                                            otherDoc
+                                                        );
+                                                        setShowDocumentConfirmationPopup(
+                                                            true
+                                                        );
+                                                    }}
+                                                    className="text-3xl p-1 mx-1 text-red-500 cursor-pointer"
+                                                />
+                                            </div>
                                         );
                                     })}
                                     <input
@@ -1070,6 +1292,26 @@ export default function Profile() {
                                                 };
                                             });
                                             updateOtherDocs();
+                                        }}
+                                    />
+
+                                    <input
+                                        ref={addOtherDocsInput}
+                                        className="hidden"
+                                        name="other_docs[]"
+                                        accept=".pdf,.doc,.docx"
+                                        type={"file"}
+                                        multiple
+                                        onChange={(e) => {
+                                            const value = e.target.files;
+                                            console.log(value);
+                                            // setUploadJobs((prevValues) => {
+                                            //     return {
+                                            //         ...prevValues,
+                                            //         others: value,
+                                            //     };
+                                            // });
+                                            addOtherDocs(e);
                                         }}
                                     />
                                 </div>
