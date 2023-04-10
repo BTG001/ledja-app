@@ -12,7 +12,7 @@ export default function AddSkillsAssessmentPopup({
     const selectEmptyValue = "Please Select";
 
     const [skillsAssessment, setSkillsAssessment] = useState({
-        title: "Test assessement title",
+        // title: "Test assessement title",
     });
     const [activeQuestion, setActiveQuestion] = useState({
         content: "Who is the CEO for Apple?",

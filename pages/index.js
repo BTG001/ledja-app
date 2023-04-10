@@ -6,9 +6,42 @@ import Utils from "../Utils";
 import { useContext, useEffect, useState } from "react";
 import AuthenticatedNavbar from "../components/navbars/authenticatedNavbar";
 import { AuthContext } from "./_app";
+import JobsCardsLoaderSkeleton from "../components/skeleton-loaders/jobs-cards-skeleton-loader";
+import Config from "../Config";
+import axios from "axios";
+import Link from "next/link";
+import { BsBuilding } from "react-icons/bs";
 
 export default function Home() {
     const auth = useContext(AuthContext);
+
+    const [jobs, setJobs] = useState();
+    const [jobsLoading, setJobsLoading] = useState(true);
+
+    useEffect(() => {
+        fetchJobs();
+    }, []);
+
+    async function fetchJobs(url) {
+        setJobsLoading(true);
+        if (!url) {
+            url = `${Config.API_URL}/jobs`;
+        }
+
+        try {
+            let theJobs = await axios.get(url);
+
+            theJobs = theJobs.data.data.data;
+
+            setJobs(theJobs);
+
+            console.log("Jobs: ", theJobs);
+            setJobsLoading(false);
+        } catch (error) {
+            setJobsLoading(false);
+            console.log("Jobs request error: ", error);
+        }
+    }
 
     return (
         <>
@@ -213,7 +246,7 @@ export default function Home() {
                     />
                 </div>
             </div>
-            <div className="w-3/4 my-3 mx-auto">
+            <div className="w-3/4 md:w-2/3 my-3 mx-auto">
                 <h2 className="font-medium text-2xl text-center">
                     Explore Now!
                 </h2>
@@ -230,65 +263,54 @@ export default function Home() {
                     </span>
                 </p>
 
-                <div className="w-3/4 my-3 mx-auto">
-                    <div className="grid grid-cols-4 mb-10 gap-2 items-center">
-                        <Image
-                            className="col-span-1"
-                            src={"/job-1.png"}
-                            width={120}
-                            height={120}
-                        />
-                        <div className="col-span-3 flex flex-col flex-nowrap justify-start items-start">
-                            <h2 className="font-semibold text-lg mb-4">
-                                Front-end Developer
-                            </h2>
-                            <p>
-                                amazee.io is looking for front-end developer who
-                                will work with the UI team to implement design
-                                system, future iterations, and a set of
-                                components on our...
-                            </p>
-                        </div>
-                    </div>
-                    <div className="grid grid-cols-4 mb-10 gap-2 items-center">
-                        <Image
-                            className="col-span-1"
-                            src={"/job-2.png"}
-                            width={120}
-                            height={120}
-                        />
-                        <div className="col-span-3 flex flex-col flex-nowrap justify-start items-start">
-                            <h2 className="font-semibold text-lg mb-4">
-                                Product Designer
-                            </h2>
-                            <p>
-                                We are seeking a talented and passionate Product
-                                Designer to join our team to be responsible for
-                                driving user experience across our new mobile
-                                app and other dig...
-                            </p>
-                        </div>
-                    </div>
-                    <div className="grid grid-cols-4 mb-10 gap-2  items-center">
-                        <Image
-                            className="col-span-1"
-                            src={"/job-3.png"}
-                            width={120}
-                            height={120}
-                        />
-                        <div className="col-span-3 flex flex-col flex-nowrap justify-start items-start">
-                            <h2 className="font-semibold text-lg mb-4">
-                                Experienced SEO Generalist
-                            </h2>
-                            <p>
-                                We’re looking for someone well-rounded, who can
-                                optimize processes, identify opportunities, and
-                                prevent issues in all 4 main areas of SEO:
-                                on-page, off-page...
-                            </p>
-                        </div>
-                    </div>
-                </div>
+                {jobsLoading && <JobsCardsLoaderSkeleton />}
+                {!jobsLoading &&
+                    jobs &&
+                    jobs.length > 0 &&
+                    jobs.map((job) => {
+                        return (
+                            <>
+                                <Link
+                                    href={`/public/jobs/${job.id}`}
+                                    className="flex flex-col md:flex-row justify-start items-center p-2 border border-white hover:border-my-gray-50 hover:shadow-md my-3"
+                                >
+                                    <p className="flex justify-center items-center row-span-3 p-2">
+                                        {(!job.user ||
+                                            !job.user.basic_info_recruiter ||
+                                            !job.user.basic_info_recruiter
+                                                .company_avatar_url) && (
+                                            <BsBuilding className="text-8xl text-center block" />
+                                        )}
+
+                                        {job.user &&
+                                            job.user.basic_info_recruiter &&
+                                            job.user.basic_info_recruiter
+                                                .company_avatar_url && (
+                                                <Image
+                                                    src={
+                                                        job.user
+                                                            .basic_info_recruiter
+                                                            .company_avatar_url
+                                                    }
+                                                    width={100}
+                                                    height={80}
+                                                    className="flex justify-center items-center"
+                                                />
+                                            )}
+                                    </p>
+                                    <div>
+                                        <p className="text-2xl font-semibold  md:w-3/4 p-2 px-5 text-center md:text-left ">
+                                            {job.title}
+                                        </p>
+                                        <p className="text-justify md:w-3/4 p-2 px-5">
+                                            {job.description.substr(0, 250)}
+                                            ...
+                                        </p>
+                                    </div>
+                                </Link>
+                            </>
+                        );
+                    })}
             </div>
             <div className="w-3/4 mx-auto py-10 flex justify-center items-center">
                 <PrimaryBtn

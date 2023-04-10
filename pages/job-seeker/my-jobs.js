@@ -285,7 +285,9 @@ export default function MyJobs() {
 
                 {(activeTab == "applied" || activeTab == "interview") &&
                     !applicationsLoading &&
-                    !applications && <p>No Applications</p>}
+                    (!applications || applications.length < 1) && (
+                        <p className="text-center">No Applications</p>
+                    )}
 
                 {(activeTab == "applied" || activeTab == "interview") &&
                     !applicationsLoading &&

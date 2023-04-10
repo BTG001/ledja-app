@@ -119,6 +119,14 @@ export default function () {
 
         Utils.makeRequest(async () => {
             try {
+                if (activeJob.skills_assessment_id) {
+                    const scoresCalculation = await axios.get(
+                        `${Config.API_URL}/calculate_scores/${activeJob.skills_assessment_id}`,
+                        {
+                            headers: Utils.getHeaders(),
+                        }
+                    );
+                }
                 let theApplications = await Utils.postForm(
                     url,
                     filterApplicationsFormData
@@ -595,11 +603,15 @@ export default function () {
                                                     {activeApplication.score
                                                         ? activeApplication
                                                               .score.score
-                                                        : "N/A"}
+                                                        : ""}
                                                 </span>
                                                 <span className="text-sm">
                                                     {" "}
-                                                    out of 100
+                                                    out of{" "}
+                                                    {activeApplication.score
+                                                        ? activeApplication
+                                                              .score.out_of
+                                                        : ""}
                                                 </span>
                                             </h3>
                                         </div>
@@ -623,9 +635,8 @@ export default function () {
                                                 #{" "}
                                                 {activeApplication.score
                                                     ? activeApplication.score
-                                                          .rating
-                                                    : "N/A"}
-                                                /{applications.length}
+                                                          .rank
+                                                    : ""}
                                             </p>
                                         </div>
                                         <div className="flex flex-row flex-wrap justify-between items-center">
