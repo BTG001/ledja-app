@@ -20,6 +20,8 @@ export default function RecruiterDashbaord() {
 
     const [messages, setMessages] = useState({});
 
+    const [publicProfileURL, setPublicProfileURL] = useState();
+
     const [messagesLoading, setMessagesLoading] = useState(true);
     const [recruiterLoading, setRecruiterLoading] = useState(true);
 
@@ -59,6 +61,11 @@ export default function RecruiterDashbaord() {
         setRecruiterLoading(true);
         try {
             const userId = localStorage.getItem("user_id");
+
+            setPublicProfileURL(
+                `${location.origin}/public/users/recruiters/${userId}`
+            );
+
             const url = `${Config.API_URL}/users/${userId}`;
             let recruiter = await axios.get(url, {
                 headers: Utils.getHeaders(),
@@ -268,9 +275,17 @@ export default function RecruiterDashbaord() {
                         </p>
                         <div className="border border-solid border-my-gray-70 my-3 px-4 py-2 rounded-md flex flex-row flex-wrap justify-between items-center">
                             <span className="text-my-gray-70 text-xs">
-                                https://www.ledja.co.ke/employer/sign-up?ref=064d8569
+                                {publicProfileURL}
                             </span>
-                            <span className="text-primary-70 text-sm cursor-pointer">
+                            <span
+                                onClick={() => {
+                                    navigator.clipboard.writeText(
+                                        publicProfileURL
+                                    );
+                                    alert("copied!");
+                                }}
+                                className="text-primary-70 text-sm cursor-pointer"
+                            >
                                 Copy link
                             </span>
                         </div>

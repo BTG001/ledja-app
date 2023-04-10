@@ -11,7 +11,7 @@ import JobsCardsLoaderSkeleton from "../../../components/skeleton-loaders/jobs-c
 import { useRouter } from "next/router";
 import JobLoaderSkeleton from "../../../components/skeleton-loaders/job-skeleton-loader";
 
-export default function Jobs() {
+export default function Job() {
     const router = useRouter();
     const { jobId } = router.query;
 
