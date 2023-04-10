@@ -1,10 +1,10 @@
 export default {
-    API_URL: "http://localhost:8000/api",
-    BASE_URL: "http://localhost:8000",
+    // API_URL: "http://localhost:8000/api",
+    // BASE_URL: "http://localhost:8000",
     // API_URL: "http://34.118.66.234/api",
     // BASE_URL: "http://34.118.66.234",
-    // API_URL: "https://api.direktory.biz/api",
-    // BASE_URL: "https://api.direktory.biz",
+    API_URL: "https://api.direktory.biz/api",
+    BASE_URL: "https://api.direktory.biz",
     RECRUITER_USER_TYPE_ID: 2,
     JOB_SEEKER_USER_TYPE_ID: 1,
     JOB_CATEGORIES: {
