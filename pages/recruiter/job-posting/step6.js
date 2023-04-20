@@ -109,9 +109,9 @@ export default function () {
 
         JobFormData.append(
             "skills_assessment_id",
-            localJobPost.skills_assessment_id
+            localJobPost.skills_assessment_id || ""
         );
-        JobFormData.append("job_type_id", localJobPost.job_type_id);
+        JobFormData.append("job_type_ids", localJobPost.job_type_ids);
 
         // console.log("file: ", fileInput.current.files[0]);
 

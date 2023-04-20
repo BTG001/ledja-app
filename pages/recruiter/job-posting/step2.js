@@ -9,6 +9,9 @@ import { BiPlus } from "react-icons/bi";
 import { useRef } from "react";
 import ErrorPopup from "../../../components/errorPopup";
 import Utils from "../../../Utils";
+import axios from "axios";
+import JobTypesSkeletonLoader from "../../../components/skeleton-loaders/job-types-skeleton-loader";
+import { AiOutlineMinus } from "react-icons/ai";
 
 export default function () {
     const router = useRouter();
@@ -17,11 +20,14 @@ export default function () {
 
     const [localJobPost, setLocalJobPost] = useState();
     const [activeJobCategoryId, setActiveJobCategoryId] = useState();
-    const [selectedJobType, setSelectedJobType] = useState();
+    const [selectedJobType, setSelectedJobType] = useState([]);
     const [noOfHires, setNoOfHires] = useState();
     const [hireSpeed, setHireSpeed] = useState();
     const [salary, setSalary] = useState();
     const [experienceLevel, setExperienceLevel] = useState();
+
+    const [jobTypes, setJobTypes] = useState();
+    const [jobTypesLoading, setJobTypesLoading] = useState(false);
 
     const [showErrorPopup, setShowErrorPopup] = useState(false);
     const [errorMessage, setErrorMessage] = useState("An Error Occured");
@@ -29,6 +35,8 @@ export default function () {
 
     useEffect(() => {
         const theLocalJobPost = Utils.getLocalJobPost();
+
+        fetchJobTypes();
 
         console.log("local Job post: ", theLocalJobPost);
 
@@ -42,6 +50,9 @@ export default function () {
         setHireSpeed(theLocalJobPost.hiring_speed);
         setSalary(theLocalJobPost.salary);
         setExperienceLevel(theLocalJobPost.experience_level);
+        if (theLocalJobPost.job_type_ids) {
+            setSelectedJobType(theLocalJobPost.job_type_ids.split(","));
+        }
     }, []);
 
     const onNext = async (e) => {
@@ -65,7 +76,7 @@ export default function () {
         localJobPost.hiring_speed = hireSpeed;
         localJobPost.salary = salary;
         localJobPost.experience_level = experienceLevel;
-        localJobPost.job_type_id = 1;
+        localJobPost.job_type_ids = selectedJobType.join(",");
 
         console.log(localJobPost);
 
@@ -141,6 +152,29 @@ export default function () {
         setShowErrorPopup(false);
     };
 
+    const fetchJobTypes = async () => {
+        setJobTypesLoading(true);
+        const url = `${Config.API_URL}/job_types`;
+
+        try {
+            let jobTypes = await axios.get(url, {
+                headers: Utils.getHeaders(),
+            });
+
+            jobTypes = jobTypes.data.data.data;
+
+            console.log("job types: ", jobTypes);
+            setJobTypes(jobTypes);
+
+            setJobTypesLoading(false);
+        } catch (error) {
+            setJobTypesLoading(false);
+            setErrorMessage("Could not resolve job types");
+            setShowErrorPopup(true);
+            console.log("getting job types error: ", error);
+        }
+    };
+
     return (
         <>
             <ErrorPopup
@@ -166,27 +200,73 @@ export default function () {
                             Please select the job type
                         </label>
                         <div className="my-4 flex">
-                            {Config.JOB_TYPES.map((jobType) => {
-                                return (
-                                    <p
-                                        onClick={() => {
-                                            setSelectedJobType(jobType);
-                                        }}
-                                        className={`mx-3 flex flex-row flex-nowrap justify-center items-center p-2 text-primary-70 border border-solid border-primary-2 rounded-10 cursor-pointer
+                            {jobTypesLoading && <JobTypesSkeletonLoader />}
+
+                            {jobTypes &&
+                                !jobTypesLoading &&
+                                jobTypes.map((jobType) => {
+                                    return (
+                                        <p
+                                            onClick={() => {
+                                                setSelectedJobType(
+                                                    (prevValues) => {
+                                                        const alreadyExists =
+                                                            prevValues.find(
+                                                                (id) => {
+                                                                    return (
+                                                                        id ==
+                                                                        jobType.id
+                                                                    );
+                                                                }
+                                                            ) == jobType.id;
+
+                                                        if (alreadyExists) {
+                                                            const newValues =
+                                                                prevValues.filter(
+                                                                    (value) => {
+                                                                        return (
+                                                                            value !=
+                                                                            jobType.id
+                                                                        );
+                                                                    }
+                                                                );
+
+                                                            return newValues;
+                                                        } else {
+                                                            return [
+                                                                ...prevValues,
+                                                                jobType.id,
+                                                            ];
+                                                        }
+                                                    }
+                                                );
+                                            }}
+                                            className={`mx-3 flex flex-row flex-nowrap justify-center items-center p-2 text-primary-70 border border-solid border-primary-2 rounded-10 cursor-pointer
                                     ${
-                                        selectedJobType == jobType
+                                        selectedJobType.find((id) => {
+                                            return id == jobType.id;
+                                        }) == jobType.id
                                             ? "bg-primary-60 text-white"
                                             : "bg-white text-primary-70"
                                     }
                                     `}
-                                    >
-                                        <BiPlus className="text-inherit" />
-                                        <span className="text-inherit">
-                                            {jobType}
-                                        </span>
-                                    </p>
-                                );
-                            })}
+                                        >
+                                            {selectedJobType.find((id) => {
+                                                return id == jobType.id;
+                                            }) != jobType.id && (
+                                                <BiPlus className="text-inherit" />
+                                            )}
+                                            {selectedJobType.find((id) => {
+                                                return id == jobType.id;
+                                            }) == jobType.id && (
+                                                <AiOutlineMinus className="text-inherit font-semibold pr-1" />
+                                            )}
+                                            <span className="text-inherit">
+                                                {jobType.title}
+                                            </span>
+                                        </p>
+                                    );
+                                })}
                             <p className="text-red-500 text-left py-2 ">
                                 {errors.jobType}
                             </p>

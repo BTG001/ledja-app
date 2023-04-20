@@ -127,6 +127,7 @@ export default function () {
                         }
                     );
                 }
+
                 let theApplications = await Utils.postForm(
                     url,
                     filterApplicationsFormData

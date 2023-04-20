@@ -80,6 +80,7 @@ export default function AddEducationPopup({ showPopup, onClose, onSuccess }) {
 
                 setLoading(false);
 
+                setEducation({});
                 onSuccess(addEducationResults);
             } catch (error) {
                 console.log("Add Education Error: ", error);

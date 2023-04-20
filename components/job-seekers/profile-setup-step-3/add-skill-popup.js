@@ -63,6 +63,7 @@ export default function AddSkillPopup({ showPopup, onClose, onSuccess }) {
 
                 setLoading(false);
 
+                setSkill({});
                 onSuccess(addSkillResults);
             } catch (error) {
                 console.log("Add Skill Error: ", error);

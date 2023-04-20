@@ -45,7 +45,7 @@ export default function LeftCaretSelect({
                 )}
 
                 <div
-                    className={`absolute top-full left-0 bg-white text-primary-70 w-full p-2 rounded-sm shadow-md border border-primary-40 max-h-20-screen md:max-h-30-screen overflow-y-auto
+                    className={`z-50 absolute top-full left-0 bg-white text-primary-70 w-full p-2 rounded-sm shadow-md border border-primary-40 max-h-20-screen md:max-h-30-screen overflow-y-auto
                     ${
                         showOptions
                             ? "flex flex-col justify-top items-center"

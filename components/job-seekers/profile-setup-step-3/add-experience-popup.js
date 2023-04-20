@@ -94,6 +94,8 @@ export default function AddExperiencePopup({ showPopup, onClose, onSuccess }) {
 
                 setLoading(false);
 
+                setWorkExperience({});
+
                 onSuccess(addExperienceResults);
             } catch (error) {
                 console.log("Add Experience Error: ", error);

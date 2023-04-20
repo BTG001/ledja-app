@@ -37,7 +37,7 @@ export default class Utils {
             location: null,
             description: null,
             // type: null,
-            job_type_id: null,
+            job_type_ids: null,
             no_of_hires: null,
             hiring_speed: null,
             own_completion: null,

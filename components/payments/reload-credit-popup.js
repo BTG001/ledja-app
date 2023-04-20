@@ -18,6 +18,8 @@ export default function ReloadCreditPopup({
     const [requestFinished, setRequestFinished] = useState(false);
     const [amountType, setamountType] = useState("fixed");
     const [amount, setAmount] = useState(10000);
+    const [recruiter, setRecruiter] = useState();
+
     useEffect(() => {
         if (showPopup) {
             document.body.style.overflowY = "hidden";
@@ -34,11 +36,12 @@ export default function ReloadCreditPopup({
 
     useEffect(() => {
         getJobCategories();
+        fetchRecruiter();
     }, []);
 
     const onBack = () => {
         if (selectedPaymentMethod) {
-            setSelectedPaymentMethod(false);
+            setSelectedPaymentMethod(null);
             return;
         }
         document.body.style.overflowY = "visible";
@@ -47,41 +50,9 @@ export default function ReloadCreditPopup({
 
     const [selectedPaymentMethod, setSelectedPaymentMethod] = useState(false);
 
-    const onSelectedPaymentMethod = () => {
-        setSelectedPaymentMethod(true);
-    };
-
-    const onReloadCredit = () => {
-        if (!selectedPaymentMethod) {
-            return;
-        }
-        document.body.style.overflowY = "visible";
-
-        const transactionFormData = new FormData();
-
-        transactionFormData.append("type", "credit");
-        transactionFormData.append("amount", amount);
-
-        const userId = localStorage.getItem("user_id");
-
-        const url = `${Config.API_URL}/transactions/${userId}`;
-
-        Utils.makeRequest(async () => {
-            try {
-                let transaction = await Utils.postForm(
-                    url,
-                    transactionFormData
-                );
-
-                transaction = transaction.data.data;
-
-                console.log("transaction results: ", transaction);
-
-                onReloaded(transaction.wallet, amount);
-            } catch (error) {
-                console.log("transaction Error: ", error);
-            }
-        });
+    const onSelectedPaymentMethod = (theMethod) => {
+        console.log("selected payment method.........");
+        setSelectedPaymentMethod(theMethod);
     };
 
     async function getJobCategories() {
@@ -101,6 +72,22 @@ export default function ReloadCreditPopup({
             // setErrorMessage("Could not resolve job categories");
             // setShowErrorPopup(true);
             console.log("getting job categories error: ", error);
+        }
+    }
+
+    async function fetchRecruiter() {
+        try {
+            const userId = localStorage.getItem("user_id");
+            const url = `${Config.API_URL}/users/${userId}`;
+            let theRecruiter = await axios.get(url, {
+                headers: Utils.getHeaders(),
+            });
+
+            theRecruiter = theRecruiter.data.data;
+            console.log("recruiter: ", theRecruiter);
+            setRecruiter(theRecruiter);
+        } catch (error) {
+            console.log("recruiter profile Error: ", error);
         }
     }
 
@@ -255,28 +242,13 @@ export default function ReloadCreditPopup({
                             2. Select a Payment method
                         </p>
                         <PaymentOptions
+                            selectedPaymentMethod={selectedPaymentMethod}
                             amount={amount}
                             onSelectedPaymentMethod={onSelectedPaymentMethod}
+                            onBack={onBack}
+                            onReloaded={onReloaded}
+                            recruiter={recruiter}
                         />
-
-                        <div className="flex flex-row flex-wrap justify-center items-center my-10 mx-auto">
-                            <p
-                                className="w-max my-2 mx-4 py-2 px-5  bg-white border border-solid border-primary-70 rounded-10 cursor-pointer"
-                                onClick={onBack}
-                            >
-                                Back
-                            </p>
-                            <p
-                                className={`w-max my-2 mx-4 py-2 px-5 ${
-                                    selectedPaymentMethod
-                                        ? "bg-primary-70 text-white"
-                                        : "bg-my-gray-60 text-my-gray-70"
-                                } rounded-10 cursor-pointer`}
-                                onClick={onReloadCredit}
-                            >
-                                Reload KSh {amount || "0"}
-                            </p>
-                        </div>
                     </div>
                 </div>
             </>

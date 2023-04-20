@@ -24,19 +24,41 @@ export default function JobSeekerProfileSetupStep4() {
         otherFiles: [],
     });
 
+    const [resumeUploaded, setResumeUploaded] = useState(false);
+
+    const [loadingResumeUpload, setLoadingResumeUpload] = useState(false);
+
+    const [loadingOthersUpload, setLoadingOthersUpload] = useState(false);
+    const [uploadOthersAfterResume, setUploadOthersAfterResume] =
+        useState(false);
+
     const uploadJobsForm = useRef();
     const resumeInput = useRef();
     const otherInput = useRef();
 
     const [errors, setErrors] = useState({});
 
-    const onNext = (e) => {
+    useEffect(() => {
+        if (uploadOthersAfterResume) {
+            uploadOtherFiles();
+        }
+    }, [uploadJobId]);
+
+    const uploadResume = (e) => {
         e.preventDefault();
 
-        if (loadingNext) {
+        if (uploadJobId) {
+            setErrorMessage(
+                "A resume is already uploaded, Go to your profile to update the resume"
+            );
+            setShowErrorPopup(true);
+            return;
+        }
+
+        if (loadingResumeUpload) {
             return;
         } else {
-            setLoadingNext(true);
+            setLoadingResumeUpload(true);
         }
 
         const hasErrors = validateData();
@@ -44,7 +66,7 @@ export default function JobSeekerProfileSetupStep4() {
         if (hasErrors) {
             setErrorMessage("Please resolve the errors shown");
             setShowErrorPopup(true);
-            setLoadingNext(false);
+            setLoadingResumeUpload(false);
             return;
         }
 
@@ -53,21 +75,52 @@ export default function JobSeekerProfileSetupStep4() {
         Utils.makeRequest(async () => {
             try {
                 let results;
-                if (!uploadJobId) {
-                    results = await Utils.postForm(
-                        `${Config.API_URL}/upload_jobs`,
-                        uploadJobsFormData
-                    );
+                results = await Utils.postForm(
+                    `${Config.API_URL}/upload_jobs`,
+                    uploadJobsFormData
+                );
 
-                    console.log("step 4 results: ", results);
-                    setSuccesses((prevValues) => {
-                        return {
-                            ...prevValues,
-                            resume: "Resume uploaded successfully",
-                        };
-                    });
-                    setUploadJobId(results.data.data.id);
-                }
+                console.log("step 4 results resume: ", results);
+                setSuccesses((prevValues) => {
+                    return {
+                        ...prevValues,
+                        resume: "Resume uploaded successfully",
+                    };
+                });
+                setUploadJobId(results.data.data.id);
+                setLoadingResumeUpload(false);
+            } catch (error) {
+                setLoadingResumeUpload(false);
+                console.log("step 4 Error resume: ", error);
+                extractErrors(error);
+                setLoadingNext(false);
+            }
+        });
+    };
+
+    const uploadOtherFiles = () => {
+        if (!uploadJobId) {
+            setUploadOthersAfterResume(true);
+            setLoadingOthersUpload(false);
+            return;
+        }
+
+        if (loadingOthersUpload) {
+            return;
+        } else {
+            setLoadingOthersUpload(true);
+        }
+
+        const hasErrors = validateData();
+
+        if (hasErrors) {
+            setErrorMessage("Please resolve the errors shown");
+            setShowErrorPopup(true);
+            setLoadingOthersUpload(false);
+            return;
+        }
+        Utils.makeRequest(async () => {
+            try {
                 let index = 0;
                 if (otherInput.current.files.length > 0) {
                     console.log("has other files...");
@@ -106,113 +159,27 @@ export default function JobSeekerProfileSetupStep4() {
                                 };
                             });
                         }
-                        index = index + 1;
+
                         if (index == otherInput.current.files.length - 1) {
                             console.log("last file");
-                            setLoadingNext(false);
+                            setLoadingOthersUpload(false);
                             setShowSuccessPopup(true);
                         }
+                        index = index + 1;
                     }
                 }
             } catch (error) {
-                console.log("step 4 Error: ", error);
+                console.log("step 4 others Error: ", error);
                 extractErrors(error);
-                setLoadingNext(false);
+                setLoadingOthersUpload(false);
             }
         });
     };
 
-    const onSaveAndExit = (e) => {
+    const onNext = (e) => {
         e.preventDefault();
-        if (loadingExit) {
-            return;
-        } else {
-            setLoadingExit(true);
-        }
-
-        // const hasErrors = validateData();
-
-        // if (hasErrors) {
-        //     setErrorMessage("Please resolve the errors shown");
-        //     setShowErrorPopup(true);
-        //     setLoadingNext(false);
-        //     return;
-        // }
-
-        const uploadJobsFormData = createFormData();
-
-        Utils.makeRequest(async () => {
-            try {
-                let results;
-                if (!uploadJobId) {
-                    results = await Utils.postForm(
-                        `${Config.API_URL}/upload_jobs`,
-                        uploadJobsFormData
-                    );
-
-                    console.log("step 4 results: ", results);
-                    setSuccesses((prevValues) => {
-                        return {
-                            ...prevValues,
-                            resume: "Resume uploaded successfully",
-                        };
-                    });
-                    setUploadJobId(results.data.data.id);
-                }
-
-                let index = 0;
-                if (otherInput.current.files.length > 0) {
-                    console.log("has other files...");
-                    for (const otherFile of otherInput.current.files) {
-                        console.log("file index: ", index);
-                        const otherFileFormData = new FormData();
-                        const userId = localStorage.getItem("user_id");
-                        otherFileFormData.append("document", otherFile);
-                        otherFileFormData.append(
-                            "upload_job_id",
-                            results.data.data.id
-                        );
-                        otherFileFormData.append("user_id", userId);
-
-                        const otherFileResults = await Utils.postForm(
-                            `${Config.API_URL}/other_documents`,
-                            uploadJobId || otherFileFormData
-                        );
-
-                        console.log(
-                            `File ${index + 1} results: `,
-                            otherFileResults
-                        );
-
-                        if (otherFileResults.data.success) {
-                            setSuccesses((prevValues) => {
-                                return {
-                                    ...prevValues,
-                                    otherFiles: [
-                                        ...prevValues.otherFiles,
-                                        `${index}. File ${otherFile.name.substr(
-                                            0,
-                                            5
-                                        )}... Uploaded Successfully`,
-                                    ],
-                                };
-                            });
-                        }
-                        index = index + 1;
-                        if (index == otherInput.current.files.length - 1) {
-                            console.log("last file");
-                            setLoadingExit(false);
-                            router.push("/job-seeker/profile");
-                        }
-                    }
-                }
-            } catch (error) {
-                console.log("step 4 Error: ", error);
-                //
-                extractErrors(error);
-                setLoadingExit(false);
-            }
-        });
+        setLoadingNext(false);
+        setShowSuccessPopup(true);
     };
 
     const createFormData = () => {
@@ -234,7 +201,7 @@ export default function JobSeekerProfileSetupStep4() {
 
         const uploadJobsFormData = new FormData(uploadJobsForm.current);
 
-        if (!uploadJobs.resume) {
+        if (!resumeInput.current.files[0]) {
             hasErrors = true;
             theErrors.resume = "Resume is required";
         }
@@ -385,6 +352,7 @@ export default function JobSeekerProfileSetupStep4() {
                                         resume: value,
                                     };
                                 });
+                                uploadResume(e);
                             }}
                         />
 
@@ -409,6 +377,14 @@ export default function JobSeekerProfileSetupStep4() {
                         <p className="text-red-500 text-left py-2 ">
                             {errors.resume || ""}
                         </p>
+
+                        {loadingResumeUpload && (
+                            <div className="flex  justify-start items-center">
+                                <span className="loader-secondary p-2"></span>
+                                <span className="p-2">Uploading resume...</span>
+                            </div>
+                        )}
+
                         {successes.resume && (
                             <p className="text-green-500 text-left py-2 before:h-full before:p-1 before:bg-green-500 before:mr-2 ">
                                 {successes.resume || ""}
@@ -428,6 +404,7 @@ export default function JobSeekerProfileSetupStep4() {
                             type={"file"}
                             multiple
                             onChange={(e) => {
+                                e.preventDefault();
                                 const value = e.target.files;
                                 console.log(value);
                                 setUploadJobs((prevValues) => {
@@ -436,8 +413,10 @@ export default function JobSeekerProfileSetupStep4() {
                                         others: value,
                                     };
                                 });
+                                uploadOtherFiles();
                             }}
                         />
+
                         {uploadJobs.others &&
                             Array.from(uploadJobs.others).map((file) => {
                                 return displayFile(file);
@@ -456,6 +435,14 @@ export default function JobSeekerProfileSetupStep4() {
                             />
                             <span className="text-xs text-primary-70">Add</span>
                         </div>
+                        {loadingOthersUpload && (
+                            <div className="flex  justify-start items-center">
+                                <span className="loader-secondary p-2"></span>
+                                <span className="p-2">
+                                    Uploading Other Documents...
+                                </span>
+                            </div>
+                        )}
                         <p className="text-red-500 text-left py-2 ">
                             {errors.document || ""}
                         </p>
@@ -471,7 +458,7 @@ export default function JobSeekerProfileSetupStep4() {
                     </div>
 
                     <div className="flex flex-row justify-start">
-                        <button
+                        {/* <button
                             className="submit-btn-secondary mr-3"
                             type={"submit"}
                             onClick={onSaveAndExit}
@@ -482,7 +469,7 @@ export default function JobSeekerProfileSetupStep4() {
                             {!loadingExit && (
                                 <span className="">Save and Exit</span>
                             )}
-                        </button>
+                        </button> */}
 
                         <button
                             className="submit-btn-left ml-3"

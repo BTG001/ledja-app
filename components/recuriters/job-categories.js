@@ -48,8 +48,9 @@ export default function JobCategories({
             );
             setCategoriesLoading(false);
         } catch (error) {
+            setCategoriesLoading(false);
             setErrorMessage("Could not resolve job categories");
-            setShowErrorPopup(false);
+            setShowErrorPopup(true);
             console.log("getting job categories error: ", error);
         }
     }
