@@ -6,7 +6,6 @@ import Image from "next/image";
 export default function ReloadSuccessPopup({
     showPopup,
     onAfterPayment,
-    onClose,
     balance,
     amountReloaded,
 }) {
@@ -20,10 +19,7 @@ export default function ReloadSuccessPopup({
     return (
         showPopup && (
             <>
-                <div
-                    onClick={onClose}
-                    className="fixed bg-my-gray-70 opacity-40 w-full h-full top-0 left-0 bottom-0 right-0 "
-                ></div>
+                <div className="fixed bg-my-gray-70 opacity-40 w-full h-full top-0 left-0 bottom-0 right-0 "></div>
                 <div className="z-50 fixed w-4/5 md:w-2/3 lg:w-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2    top-1/2 p-10 bg-white opacity-100 rounded-10 shadow-md">
                     <Image
                         src={"/success-icon.svg"}

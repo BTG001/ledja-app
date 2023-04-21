@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import axios from "axios";
 import Utils from "../../Utils";
@@ -11,6 +11,7 @@ export default function PaymentOptions({
     onBack,
     onReloaded,
     recruiter,
+    scrollableContainer,
 }) {
     const [enterMpesaDetails, setEnterMpesaDetails] = useState(false);
     const [enterCardDetails, setEnterCardDetails] = useState(false);
@@ -20,6 +21,12 @@ export default function PaymentOptions({
 
     const [paymentLoading, setPaymentLoading] = useState(false);
 
+    const [OTPCode, setOTPCode] = useState(null);
+    const [paymentInitiated, setPaymentInitiated] = useState(false);
+    const OTPContainer = useRef();
+
+    const [failedMessage, setFailedMessage] = useState("");
+
     const onPayWithMpesa = () => {
         setEnterMpesaDetails(true);
         setEnterCardDetails(false);
@@ -28,6 +35,9 @@ export default function PaymentOptions({
 
     const monthEmptyValue = "Select Month";
     const onPayWithCard = () => {
+        setCardDetails({});
+        setPaymentInitiated(false);
+        setOTPCode(null);
         setEnterMpesaDetails(false);
         setEnterCardDetails(true);
         onSelectedPaymentMethod("card");
@@ -71,7 +81,7 @@ export default function PaymentOptions({
             email: recruiter.email,
             card_number: cardDetails.card_number,
             cvv: cardDetails.cvv,
-            expiry_month: parseInt(cardDetails.expiry_month) + 1,
+            expiry_month: "04", //parseInt(cardDetails.expiry_month) + 1,
             expiry_year: cardDetails.expiry_year,
             redirect_url: location.href,
         };
@@ -93,30 +103,89 @@ export default function PaymentOptions({
 
                 console.log("transaction results: ", transaction);
 
-                // const authorizationURL = `${Config.API_URL}/authorize_payment`;
-
-                // let authorization = await axios.post(authorizationURL, values, {
-                //     headers: Utils.getHeaders(),
-                // });
-
-                // authorization = authorization.data.data;
-
-                // console.log("Authorization: ", authorization);
-
-                // let verification = await axios.post(authorizationURL, values, {
-                //     headers: Utils.getHeaders(),
-                // });
-
-                // const verificationURL = `${Config.API_URL}/authorize_payment`;
-
-                // verification = verification.data.data;
-
-                // console.log("Verification: ", verification);
-
-                // setCardDetails({});
-
-                // onReloaded(transaction.wallet, amount);
                 setPaymentLoading(false);
+                setPaymentInitiated(true);
+                setFailedMessage("");
+                // OTPContainer.current.scrollIntoView(false);
+            } catch (error) {
+                setPaymentLoading(false);
+                console.log("transaction Error: ", error);
+            }
+        });
+    };
+
+    const onAuthorizePayment = () => {
+        if (paymentLoading) {
+            return;
+        } else {
+            setPaymentLoading(true);
+        }
+
+        const hasErrors = verifyCardDetails();
+
+        if (hasErrors) {
+            setPaymentLoading(false);
+            return;
+        }
+
+        document.body.style.overflowY = "visible";
+
+        const url = `${Config.API_URL}/authorize_payment`;
+        console.log("card Details: ", cardDetails);
+
+        const values = {
+            amount: `${amount}`,
+            currency: "KES",
+            email: recruiter.email,
+            card_number: cardDetails.card_number,
+            cvv: cardDetails.cvv,
+            expiry_month: parseInt(cardDetails.expiry_month) + 1,
+            expiry_year: cardDetails.expiry_year,
+            redirect_url: location.href,
+        };
+
+        if (recruiter && recruiter.about_recruiter) {
+            values.fullname = `${recruiter.about_recruiter.fname} ${recruiter.about_recruiter.lname}`;
+            values.phone_number = recruiter.about_recruiter.phone_no;
+        }
+
+        values.authorization = {
+            mode: "pin",
+            pin: `${OTPCode}`,
+        };
+
+        console.log("values: ", values);
+
+        Utils.makeRequest(async () => {
+            try {
+                const authorizationURL = `${Config.API_URL}/authorize_payment`;
+
+                let authorization = await axios.post(authorizationURL, values, {
+                    headers: Utils.getHeaders(),
+                });
+
+                console.log("authorization Result: ", authorization);
+
+                authorization = authorization.data.data;
+
+                console.log("Authorization: ", authorization);
+                setPaymentLoading(false);
+
+                if (!authorization.data) {
+                    setFailedMessage(authorization);
+                } else {
+                    setFailedMessage("");
+                    localStorage.setItem(
+                        "payment_authorization_id",
+                        authorization.data.id
+                    );
+                    localStorage.setItem("payment_amount", amount);
+                    const redirectURL =
+                        authorization.meta.authorization.redirect;
+                    location.href = redirectURL;
+
+                    // onVerifyPayment(authorization.data.id);
+                }
             } catch (error) {
                 setPaymentLoading(false);
                 console.log("transaction Error: ", error);
@@ -423,6 +492,33 @@ export default function PaymentOptions({
                             className="py-2 px-4 border-solid border border-my-gray-70 outline-none placeholder:text-my-gray-70 placeholder:text-sm focus:outline-primary-70 rounded-tr-md rounded-br-md w-1/2"
                         />
                     </div>
+                    {paymentInitiated && (
+                        <div>
+                            <p className="text-dark-50 text-sm text-left my-3">
+                                Code Sent to your Email and Phone Number
+                            </p>
+                            <div
+                                ref={OTPContainer}
+                                className="flex flex-row flex-nowrap justify-start items-enter m-2 ml-0"
+                            >
+                                <p className="text-dark-50 p-2 pl-4 border border-r-0 border-solid border-my-gray-70 rounded-tl-md rounded-bl-md">
+                                    OTP Code
+                                </p>
+                                <input
+                                    onChange={(e) => {
+                                        const value = e.target.value;
+                                        setOTPCode(value);
+                                    }}
+                                    placeholder="e.g 7919"
+                                    value={OTPCode}
+                                    className="py-2 px-4 border-solid border border-my-gray-70 outline-none placeholder:text-my-gray-70 placeholder:text-sm focus:border-primary-70 rounded-tr-md rounded-br-md w-1/2"
+                                />
+                            </div>
+                            <p className="text-red-500 text-left">
+                                {failedMessage || ""}
+                            </p>
+                        </div>
+                    )}
                 </div>
             )}
 
@@ -480,16 +576,23 @@ export default function PaymentOptions({
                             : "bg-my-gray-60 text-my-gray-70"
                     } rounded-10 cursor-pointer`}
                     onClick={() => {
-                        if (selectedPaymentMethod == "mpesa") {
-                            onReloadCreditWithMPesa();
-                        } else if (selectedPaymentMethod == "card") {
-                            onReloadCreditWithCard();
+                        if (paymentInitiated) {
+                            onAuthorizePayment(OTPCode);
+                        } else {
+                            if (selectedPaymentMethod == "mpesa") {
+                                onReloadCreditWithMPesa();
+                            } else if (selectedPaymentMethod == "card") {
+                                onReloadCreditWithCard();
+                            }
                         }
                     }}
                 >
                     {paymentLoading && <span className="loader"></span>}
                     {!paymentLoading && (
-                        <span className="">Reload KSh {amount || "0"}</span>
+                        <span className="">
+                            {paymentInitiated ? "Authorize payment to " : ""}
+                            Reload KSh {amount || "0"}
+                        </span>
                     )}
                 </p>
             </div>

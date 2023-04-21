@@ -55,7 +55,9 @@ export default function () {
     // };
 
     const onNext = (e) => {
-        e.preventDefault();
+        if (e) {
+            e.preventDefault();
+        }
 
         if (loading) {
             return;
@@ -111,6 +113,7 @@ export default function () {
             "skills_assessment_id",
             localJobPost.skills_assessment_id || ""
         );
+
         JobFormData.append("job_type_ids", localJobPost.job_type_ids);
 
         // console.log("file: ", fileInput.current.files[0]);
@@ -157,8 +160,25 @@ export default function () {
 
     async function fetchRecruiter() {
         try {
+            const whenPaymentTheAmount = localStorage.getItem("payment_amount");
+
+            setAmountReloaded(whenPaymentTheAmount);
+
+            const whenPaymentTheAuthorizationId = localStorage.getItem(
+                "payment_authorization_id"
+            );
+
+            console.log(
+                "when payment------",
+                "Payment Authorization ID: ",
+                whenPaymentTheAuthorizationId,
+                "Amount: ",
+                whenPaymentTheAmount
+            );
+
             const userId = localStorage.getItem("user_id");
             const url = `${Config.API_URL}/users/${userId}`;
+
             let recruiter = await axios.get(url, {
                 headers: Utils.getHeaders(),
             });
@@ -167,6 +187,10 @@ export default function () {
 
             if (recruiter.wallet) {
                 setWallet(recruiter.wallet);
+
+                if (whenPaymentTheAmount && whenPaymentTheAuthorizationId) {
+                    onVerifyPayment(whenPaymentTheAuthorizationId);
+                }
             }
 
             console.log("recruiter: ", recruiter);
@@ -174,6 +198,37 @@ export default function () {
             console.log("recruiter profile Error: ", error);
         }
     }
+
+    const onVerifyPayment = (paymentId) => {
+        setShowReloadSuccessPopup(true);
+
+        Utils.makeRequest(async () => {
+            try {
+                const url = `${Config.API_URL}/verify_payment/${paymentId}`;
+
+                let verification = await axios.post(
+                    url,
+                    {},
+                    {
+                        headers: Utils.getHeaders(),
+                    }
+                );
+
+                verification = verification.data.data;
+
+                console.log("Verification: ", verification);
+
+                if (!verification.wallet) {
+                    setFailedMessage(verification);
+                } else {
+                    setWallet(verification.wallet);
+                    setShowReloadSuccessPopup(true);
+                }
+            } catch (error) {
+                console.log("transaction Error: ", error);
+            }
+        });
+    };
 
     const onChangeJobCategory = (newJobCategoryId) => {
         setActiveJobCategoryId(newJobCategoryId);
@@ -201,6 +256,9 @@ export default function () {
     const onAfterPayment = () => {
         console.log("on after payment");
         setShowReloadSuccessPopup(false);
+        localStorage.removeItem("payment_authorization_id");
+        localStorage.removeItem("payment_method");
+        onNext();
     };
 
     const onNavigateToStep1 = () => {
@@ -243,7 +301,6 @@ export default function () {
             <ReloadSuccessPopup
                 showPopup={showReloadSuccessPopup}
                 onAfterPayment={onAfterPayment}
-                onClose={onNext}
                 balance={wallet.amount}
                 amountReloaded={amountReloaded}
             />

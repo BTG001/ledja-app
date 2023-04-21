@@ -146,6 +146,15 @@ export default function TakeTestPopup({
                     resultFormData
                 );
 
+                const scoresCalculation = await axios.get(
+                    `${Config.API_URL}/calculate_scores/${skillsAssessment.id}`,
+                    {
+                        headers: Utils.getHeaders(),
+                    }
+                );
+
+                console.log("scores calculation results: ", scoresCalculation);
+
                 saveResultResults = saveResultResults.data.data;
 
                 console.log("save result: ", saveResultResults);

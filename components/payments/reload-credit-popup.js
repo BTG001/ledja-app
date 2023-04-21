@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import PrimaryBtn from "../buttons/PrimaryBtn";
 import SecondaryBtn from "../buttons/SecondaryBtn";
 import Image from "next/image";
@@ -19,6 +19,8 @@ export default function ReloadCreditPopup({
     const [amountType, setamountType] = useState("fixed");
     const [amount, setAmount] = useState(10000);
     const [recruiter, setRecruiter] = useState();
+
+    const scrollableContainer = useRef();
 
     useEffect(() => {
         if (showPopup) {
@@ -114,7 +116,10 @@ export default function ReloadCreditPopup({
                     <p className="text-dark-50 font-medium text-md text-left my-3">
                         Current balance: KSh {currentBalance}
                     </p>
-                    <div className="h-max max-h-50-screen overflow-y-auto pr-6 my-3">
+                    <div
+                        ref={scrollableContainer}
+                        className="h-max max-h-50-screen overflow-y-auto pr-6 my-3"
+                    >
                         <p className="text-dark-50 text-normal text-left my-3">
                             1. Select your amount
                         </p>
@@ -248,6 +253,7 @@ export default function ReloadCreditPopup({
                             onBack={onBack}
                             onReloaded={onReloaded}
                             recruiter={recruiter}
+                            scrollableContainer={scrollableContainer}
                         />
                     </div>
                 </div>
