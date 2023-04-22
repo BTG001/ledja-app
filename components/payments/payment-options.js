@@ -81,7 +81,9 @@ export default function PaymentOptions({
             email: recruiter.email,
             card_number: cardDetails.card_number,
             cvv: cardDetails.cvv,
-            expiry_month: "04", //parseInt(cardDetails.expiry_month) + 1,
+            expiry_month: `${
+                parseInt(cardDetails.expiry_month) + 1 < 10 ? "0" : ""
+            }${parseInt(cardDetails.expiry_month) + 1}`,
             expiry_year: cardDetails.expiry_year,
             redirect_url: location.href,
         };
@@ -139,7 +141,9 @@ export default function PaymentOptions({
             email: recruiter.email,
             card_number: cardDetails.card_number,
             cvv: cardDetails.cvv,
-            expiry_month: parseInt(cardDetails.expiry_month) + 1,
+            expiry_month: `${
+                parseInt(cardDetails.expiry_month) + 1 < 10 ? "0" : ""
+            }${parseInt(cardDetails.expiry_month) + 1}`,
             expiry_year: cardDetails.expiry_year,
             redirect_url: location.href,
         };
@@ -179,6 +183,7 @@ export default function PaymentOptions({
                         "payment_authorization_id",
                         authorization.data.id
                     );
+
                     localStorage.setItem("payment_amount", amount);
                     const redirectURL =
                         authorization.meta.authorization.redirect;

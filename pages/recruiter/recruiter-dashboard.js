@@ -11,6 +11,8 @@ import JobsTable from "../../components/recuriters/jobsTable";
 import DashboardJobsLoaderSkeleton from "../../components/skeleton-loaders/dashboard-jobs-loader-skeleton";
 import DashboardCreditLoaderSkeleton from "../../components/skeleton-loaders/dashboard-credit-skeleton-loader";
 import DashboardMessageCounterLoaderSkeleton from "../../components/skeleton-loaders/dashboard-messages-counter-skeleton-loader";
+import ReloadCreditPopup from "../../components/payments/reload-credit-popup";
+import ReloadSuccessPopup from "../../components/payments/reload-success-popup";
 
 export default function RecruiterDashbaord() {
     const [jobs, setJobs] = useState();
@@ -24,12 +26,20 @@ export default function RecruiterDashbaord() {
 
     const [messagesLoading, setMessagesLoading] = useState(true);
     const [recruiterLoading, setRecruiterLoading] = useState(true);
+    const [amountReloaded, setAmountReloaded] = useState(0);
+    const [showReloadCreditPopup, setShowReloadCreditPopup] = useState(false);
+    const [showReloadSuccessPopup, setShowReloadSuccessPopup] = useState(false);
+
+    let runOnce = false;
 
     useEffect(() => {
         // console.log("jobs: ", jobs);
-        getJobs();
-        fetchRecruiter();
-        fetchRecruiterMessages();
+        if (!runOnce) {
+            runOnce = true;
+            getJobs();
+            fetchRecruiter();
+            fetchRecruiterMessages();
+        }
     }, []);
 
     async function getJobs() {
@@ -60,6 +70,22 @@ export default function RecruiterDashbaord() {
     async function fetchRecruiter() {
         setRecruiterLoading(true);
         try {
+            const whenPaymentTheAmount = localStorage.getItem("payment_amount");
+
+            setAmountReloaded(whenPaymentTheAmount);
+
+            const whenPaymentTheAuthorizationId = localStorage.getItem(
+                "payment_authorization_id"
+            );
+
+            console.log(
+                "when payment------",
+                "Payment Authorization ID: ",
+                whenPaymentTheAuthorizationId,
+                "Amount: ",
+                whenPaymentTheAmount
+            );
+
             const userId = localStorage.getItem("user_id");
 
             setPublicProfileURL(
@@ -79,6 +105,9 @@ export default function RecruiterDashbaord() {
 
             if (recruiter.wallet) {
                 setWallet(recruiter.wallet);
+                if (whenPaymentTheAmount && whenPaymentTheAuthorizationId) {
+                    onVerifyPayment(whenPaymentTheAuthorizationId);
+                }
             }
 
             setRecruiterLoading(false);
@@ -88,6 +117,37 @@ export default function RecruiterDashbaord() {
             console.log("recruiter profile Error: ", error);
         }
     }
+
+    const onVerifyPayment = (paymentId) => {
+        setShowReloadSuccessPopup(true);
+
+        Utils.makeRequest(async () => {
+            try {
+                const url = `${Config.API_URL}/verify_payment/${paymentId}`;
+
+                let verification = await axios.post(
+                    url,
+                    {},
+                    {
+                        headers: Utils.getHeaders(),
+                    }
+                );
+
+                verification = verification.data.data;
+
+                console.log("Verification: ", verification);
+
+                if (!verification.wallet) {
+                    setFailedMessage(verification);
+                } else {
+                    setWallet(verification.wallet);
+                    setShowReloadSuccessPopup(true);
+                }
+            } catch (error) {
+                console.log("transaction Error: ", error);
+            }
+        });
+    };
 
     async function fetchRecruiterMessages() {
         setMessagesLoading(true);
@@ -110,8 +170,39 @@ export default function RecruiterDashbaord() {
         }
     }
 
+    const onClose = () => {
+        setShowReloadCreditPopup(false);
+        setShowReloadSuccessPopup(false);
+    };
+
+    const onAfterPayment = () => {
+        console.log("on after payment");
+        setShowReloadSuccessPopup(false);
+        localStorage.removeItem("payment_authorization_id");
+        localStorage.removeItem("payment_method");
+    };
+    const onReloaded = (wallet, theAmountReloaded) => {
+        setWallet(wallet);
+        setAmountReloaded(theAmountReloaded);
+        setShowReloadCreditPopup(false);
+        setShowReloadSuccessPopup(true);
+    };
+
     return (
         <>
+            <ReloadCreditPopup
+                showPopup={showReloadCreditPopup}
+                onClose={onClose}
+                wallet={wallet}
+                onReloaded={onReloaded}
+            />
+
+            <ReloadSuccessPopup
+                showPopup={showReloadSuccessPopup}
+                onAfterPayment={onAfterPayment}
+                balance={wallet.amount}
+                amountReloaded={amountReloaded}
+            />
             <RecruiterNavbar />
             <section className="md:w-4/5 w-5/6 mx-auto my-5">
                 <div className="my-16">
@@ -169,12 +260,17 @@ export default function RecruiterDashbaord() {
                                     </span>
                                 </p>
                                 <div className="flex flex-row flex-wrap justify-center items-center">
-                                    <p className="text-primary-70 border border-primary-70 border-solid hover:border-primary-60 bg-white rounded-lg py-1 px-4 m-2 cursor-pointer">
+                                    <p
+                                        onClick={() => {
+                                            setShowReloadCreditPopup(true);
+                                        }}
+                                        className="text-primary-70 border border-primary-70 border-solid hover:border-primary-60 bg-white rounded-lg py-1 px-4 m-2 cursor-pointer"
+                                    >
                                         Add Credits
                                     </p>
-                                    <p className="text-primary-70 border border-primary-70 border-solid hover:border-primary-60 bg-white rounded-lg py-1 px-4 m-2 cursor-pointer">
+                                    {/* <p className="text-primary-70 border border-primary-70 border-solid hover:border-primary-60 bg-white rounded-lg py-1 px-4 m-2 cursor-pointer">
                                         Credit history
-                                    </p>
+                                    </p> */}
                                 </div>
                             </>
                         )}
@@ -208,10 +304,12 @@ export default function RecruiterDashbaord() {
                         )}
                     </div>
                 </div>
+
                 <p className="text-dark-50 font-medium my-3">
                     Applicants management
                 </p>
-                <div className="md:grid md:grid-cols-4 gap-4">
+                {/* <div className="md:grid md:grid-cols-4 gap-4"> */}
+                <div className="">
                     <Link
                         href={"/recruiter/progress-card"}
                         className="col-span-2 shadow-md my-3 p-3 rounded-10 min-h-40-screen flex flex-col justify-center items-center border border-solid border-my-gray-40 hover:border hover:border-primary-40"
@@ -233,7 +331,7 @@ export default function RecruiterDashbaord() {
                         </p>
                     </Link>
 
-                    <div className="col-span-1 shadow-md my-3 p-3 rounded-10 min-h-40-screen flex flex-col justify-center items-center border border-solid border-my-gray-40">
+                    {/* <div className="col-span-1 shadow-md my-3 p-3 rounded-10 min-h-40-screen flex flex-col justify-center items-center border border-solid border-my-gray-40">
                         <h3 className="font-medium text-center">
                             Upcoming interview
                         </h3>
@@ -249,8 +347,8 @@ export default function RecruiterDashbaord() {
                                 className="m-2"
                             />
                         </p>
-                    </div>
-                    <div className="col-span-1 shadow-md my-3 p-3 rounded-10 min-h-40-screen flex flex-col justify-center items-center border border-solid border-my-gray-40">
+                    </div> */}
+                    {/* <div className="col-span-1 shadow-md my-3 p-3 rounded-10 min-h-40-screen flex flex-col justify-center items-center border border-solid border-my-gray-40">
                         <h3 className="font-medium text-center">
                             Waiting to confirm
                         </h3>
@@ -266,7 +364,7 @@ export default function RecruiterDashbaord() {
                                 className="m-2"
                             />
                         </p>
-                    </div>
+                    </div> */}
                 </div>
                 <div className="md:grid md:grid-cols-2 shadow-md my-3 p-4 rounded-10 min-h-20-screen border border-solid border-my-gray-40">
                     <div>

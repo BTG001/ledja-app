@@ -31,16 +31,21 @@ export default function () {
     const [activeJobCategoryId, setActiveJobCategoryId] = useState();
     const [amountReloaded, setAmountReloaded] = useState(0);
 
+    let runnedOnce = false;
+
     useEffect(() => {
-        const theLocalJobPost = Utils.getLocalJobPost();
+        if (!runnedOnce) {
+            runnedOnce = true;
+            const theLocalJobPost = Utils.getLocalJobPost();
 
-        console.log("local Job post: ", theLocalJobPost);
+            console.log("local Job post: ", theLocalJobPost);
 
-        setLocalJobPost(theLocalJobPost);
+            setLocalJobPost(theLocalJobPost);
 
-        fetchRecruiter();
+            fetchRecruiter();
 
-        setActiveJobCategoryId(theLocalJobPost.job_category_id);
+            setActiveJobCategoryId(theLocalJobPost.job_category_id);
+        }
     }, []);
 
     const onBack = (e) => {
