@@ -161,9 +161,16 @@ export default function JobSearch() {
         setShowTakeTestPopup(true);
     };
 
-    const onTestAssessmentSuccess = () => {
+    const onTestAssessmentSuccess = async () => {
         setShowTakeTestPopup(false);
         setShowSuccessPopup(true);
+        const scoresCalculation = await axios.get(
+            `${Config.API_URL}/calculate_scores/${activeJob.skills_assessment_id}`,
+            {
+                headers: Utils.getHeaders(),
+            }
+        );
+        console.log("scores calculation results: ", scoresCalculation);
     };
 
     const onClose = () => {

@@ -14,8 +14,11 @@ import DashboardJobsLoaderSkeleton from "../../components/skeleton-loaders/progr
 import ProgressCardApplicationsLoaderSkeleton from "../../components/skeleton-loaders/progress-card-applications-loader-skeleton";
 import JobSeekerProfilePopup from "../../components/recuriters/applicant-profile-popup";
 import InterviewStartedPopup from "../../components/recuriters/interviewing-started-popup";
+import { useRouter } from "next/router";
 
 export default function () {
+    const router = useRouter();
+
     const [jobsSearchFocus, setJobsSearchFocus] = useState(false);
     const [candidateSearchFocus, setCandidateSearchFocus] = useState(false);
     const [filterFocus, setFilterFocus] = useState(false);
@@ -42,8 +45,13 @@ export default function () {
 
     const [filters, setFilters] = useState({});
 
+    let hasLoadedOnce = false;
+
     useEffect(() => {
-        getJobs();
+        if (!hasLoadedOnce) {
+            getJobs();
+            hasLoadedOnce = true;
+        }
     }, []);
 
     useEffect(() => {
@@ -91,6 +99,23 @@ export default function () {
 
             setJobs(theJobs.data.data);
 
+            // theJobs.data.data.map(async (job, index) => {
+            //     if (job.skills_assessment_id) {
+            //         const scoresCalculation = await axios.get(
+            //             `${Config.API_URL}/calculate_scores/${job.skills_assessment_id}`,
+            //             {
+            //                 headers: Utils.getHeaders(),
+            //             }
+            //         );
+            //         console.log(
+            //             "scores calculation results: ",
+            //             index + 1,
+            //             ":- ",
+            //             scoresCalculation
+            //         );
+            //     }
+            // });
+
             setActiveJob(theJobs.data.data[0]);
 
             console.log("jobs: ", theJobs.data.data);
@@ -126,6 +151,10 @@ export default function () {
                             headers: Utils.getHeaders(),
                         }
                     );
+                    console.log(
+                        "scores calculation results: ",
+                        scoresCalculation
+                    );
                 }
 
                 let theApplications = await Utils.postForm(
@@ -154,6 +183,7 @@ export default function () {
 
     const onChangeActiveJob = (job) => {
         setActiveJob(job);
+        console.log("active job: ", job);
     };
 
     const showStatusIcon = (status) => {
@@ -190,7 +220,16 @@ export default function () {
 
                 updateStatusResults = updateStatusResults.data.data;
 
-                setActiveApplication(updateStatusResults);
+                if (updateStatusResults.score) {
+                    setActiveApplication(updateStatusResults);
+                } else {
+                    setActiveApplication((prevValues) => {
+                        return {
+                            ...prevValues,
+                            status: updateStatusResults.status,
+                        };
+                    });
+                }
 
                 console.log("update status results: ", updateStatusResults);
 
@@ -520,6 +559,18 @@ export default function () {
                                         return (
                                             <div
                                                 onClick={() => {
+                                                    console.log(
+                                                        "old active application: ",
+                                                        activeApplication
+                                                    );
+                                                    console.log(
+                                                        "new Active Application",
+                                                        application
+                                                    );
+                                                    console.log(
+                                                        "activeJob: ",
+                                                        activeJob
+                                                    );
                                                     setActiveApplication(
                                                         application
                                                     );

@@ -15,13 +15,13 @@ export default function AddSkillsAssessmentPopup({
         // title: "Test assessement title",
     });
     const [activeQuestion, setActiveQuestion] = useState({
-        content: "Who is the CEO for Apple?",
-        choice_a: "Steve Jobs",
-        choice_b: "Tim Cook",
-        choice_c: "Sean Kings",
-        choice_d: "Myles Stevens",
-        marks: "14",
-        correct_answer: "choice_b",
+        // content: "Who is the CEO for Apple?",
+        // choice_a: "Steve Jobs",
+        // choice_b: "Tim Cook",
+        // choice_c: "Sean Kings",
+        // choice_d: "Myles Stevens",
+        // marks: "14",
+        // correct_answer: "choice_b",
     });
     const [questions, setQuestions] = useState([]);
 

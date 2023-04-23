@@ -90,6 +90,7 @@ export default function ApplyPopup({ showPopup, onClose, jobSeekerId }) {
     }, [jobSeekerId]);
 
     async function fetchJobSeeker() {
+        setProfileLoading(true);
         try {
             console.log("fetching job seeker............", jobSeekerId);
             const url = `${Config.API_URL}/users/${jobSeekerId}`;
@@ -149,7 +150,9 @@ export default function ApplyPopup({ showPopup, onClose, jobSeekerId }) {
                 jobSeeker,
                 jobSeeker.basic_info_jobseeker
             );
+            setProfileLoading(false);
         } catch (error) {
+            setProfileLoading(false);
             console.log("jobSeeker profile Error: ", error);
         }
     }

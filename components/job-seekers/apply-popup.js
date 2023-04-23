@@ -114,12 +114,19 @@ export default function ApplyPopup({
     }, []);
 
     async function fetchJobSeeker() {
+        console.log("fetching job seeker");
         try {
+            setProfileLoading(true);
+
+            console.log("fetching job seeker after loading");
+
             const userId = localStorage.getItem("user_id");
             const url = `${Config.API_URL}/users/${userId}`;
             let jobSeeker = await axios.get(url, {
                 headers: Utils.getHeaders(),
             });
+
+            console.log("jobseeker request returned");
 
             jobSeeker = jobSeeker.data.data;
 
@@ -160,6 +167,7 @@ export default function ApplyPopup({
                     job.with_resume &&
                     job.with_resume.toLowerCase() == "yes"
                 ) {
+                    console.log("resume is required....");
                     setShowResumeRequiredPopup(true);
                 }
             }
@@ -179,8 +187,11 @@ export default function ApplyPopup({
                 setHasSkills(true);
             }
 
-            console.log("jobSeeker: ", jobSeeker);
+            console.log("jobSeeker in apply popup: ", jobSeeker);
+            setProfileLoading(false);
+            console.log("finished fetching job seeker");
         } catch (error) {
+            setProfileLoading(false);
             console.log("jobSeeker profile Error: ", error);
         }
     }

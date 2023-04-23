@@ -17,9 +17,9 @@ export default function AddExperiencePopup({ showPopup, onClose, onSuccess }) {
         // companyName: "ABC LTD.",
         // employmentType: "Type 1",
         // startYear: 2020,
-        // startMonth: "January",
-        // endYear: 2021,
-        // endMonth: "December",
+        // startMonth: "0",
+        // endYear: 2018,
+        // endMonth: "11",
         // industry: "IT Services",
         // description: "This is a description",
         // location: "Nairobi, Kenya",
@@ -44,12 +44,12 @@ export default function AddExperiencePopup({ showPopup, onClose, onSuccess }) {
             setLoading(true);
         }
 
-        // const hasErrors = validateValues();
+        const hasErrors = validateValues();
 
-        // if (hasErrors) {
-        //     setLoading(false);
-        //     return;
-        // }
+        if (hasErrors) {
+            setLoading(false);
+            return;
+        }
 
         const userId = localStorage.getItem("user_id");
 
@@ -94,9 +94,8 @@ export default function AddExperiencePopup({ showPopup, onClose, onSuccess }) {
 
                 setLoading(false);
 
-                setWorkExperience({});
-
                 onSuccess(addExperienceResults);
+                setWorkExperience({});
             } catch (error) {
                 console.log("Add Experience Error: ", error);
                 extractErrors(error);
@@ -149,6 +148,23 @@ export default function AddExperiencePopup({ showPopup, onClose, onSuccess }) {
             theErrors.endMonth = "End month is required";
         }
 
+        if (
+            (workExperience.startYear &&
+                workExperience.startMonth &&
+                workExperience.endYear &&
+                workExperience.endMonth &&
+                parseInt(workExperience.startYear) >
+                    parseInt(workExperience.endYear)) ||
+            (parseInt(workExperience.startYear) ==
+                parseInt(workExperience.endYear) &&
+                parseInt(workExperience.startMonth) >
+                    parseInt(workExperience.endMonth))
+        ) {
+            hasErrors = true;
+            theErrors.endYear =
+                "The End Period Must be Smaller than Start Period";
+        }
+
         // if (!workExperience.industry) {
         //     hasErrors = true;
         //     theErrors.industry = "Industry is required";
@@ -161,7 +177,7 @@ export default function AddExperiencePopup({ showPopup, onClose, onSuccess }) {
 
         if (!workExperience.endMonth) {
             hasErrors = true;
-            theErrors.title = "End month is required";
+            theErrors.endMonth = "End month is required";
         }
 
         setErrors(theErrors);

@@ -10,9 +10,14 @@ export default function JobsRow({ job }) {
     const [statsLoading, setStatsLoading] = useState(true);
     const [stats, setStats] = useState({});
     const [jobStatus, setJobStatus] = useState(job.job_status);
+    let loadedOnce = false;
 
     useEffect(() => {
-        getJobStats();
+        if (!loadedOnce) {
+            getJobStats();
+            calculateAssessmentScores();
+            loadedOnce = true;
+        }
     }, []);
 
     async function getJobStats(jobId) {
@@ -33,6 +38,30 @@ export default function JobsRow({ job }) {
         } catch (error) {
             setStatsLoading(false);
             console.log("get stats error: ", job.id, error);
+        }
+    }
+
+    async function calculateAssessmentScores() {
+        if (!job.skills_assessment_id) {
+            return;
+        }
+
+        try {
+            const scoresCalculation = await axios.get(
+                `${Config.API_URL}/calculate_scores/${job.skills_assessment_id}`,
+                {
+                    headers: Utils.getHeaders(),
+                }
+            );
+
+            console.log(
+                "scores calculation results: ",
+                job.skills_assessment_id,
+                ":- ",
+                scoresCalculation
+            );
+        } catch (error) {
+            console.log("score calculation error: ", job.id, error);
         }
     }
 

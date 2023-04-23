@@ -144,7 +144,7 @@ export default function RecruiterInfoEditPopup({
                                 </div>
                             </div>
 
-                            <div className=" md:grid md:grid-cols-2 md:gap-6">
+                            {/* <div className=" md:grid md:grid-cols-2 md:gap-6">
                                 <div className="form-input-container">
                                     <label
                                         className="form-label-light form-label-required"
@@ -196,7 +196,7 @@ export default function RecruiterInfoEditPopup({
                                         }}
                                     />
                                 </div>
-                            </div>
+                            </div> */}
 
                             <div className="form-input-container">
                                 <label

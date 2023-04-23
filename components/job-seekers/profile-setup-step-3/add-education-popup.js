@@ -127,6 +127,20 @@ export default function AddEducationPopup({ showPopup, onClose, onSuccess }) {
             hasErrors = true;
             theErrors.title = "End month is required";
         }
+
+        if (
+            (education.startYear &&
+                education.startMonth &&
+                education.endYear &&
+                education.endMonth &&
+                parseInt(education.startYear) > parseInt(education.endYear)) ||
+            (parseInt(education.startYear) == parseInt(education.endYear) &&
+                parseInt(education.startMonth) > parseInt(education.endMonth))
+        ) {
+            hasErrors = true;
+            theErrors.endYear =
+                "The End Period Must be Smaller than Start Period";
+        }
         setErrors(theErrors);
 
         return hasErrors;

@@ -88,9 +88,9 @@ export default function JobSeekerProfileIcon() {
                     {/* <Link className="hover:bg-primary-40 py-1 px-2" href={"/"}>
                         Update Profile Image
                     </Link> */}
-                    <Link className="hover:bg-primary-40 py-1 px-2" href={"/"}>
+                    {/* <Link className="hover:bg-primary-40 py-1 px-2" href={"/"}>
                         Reset Password
-                    </Link>
+                    </Link> */}
 
                     <Link
                         onClick={onLogout}

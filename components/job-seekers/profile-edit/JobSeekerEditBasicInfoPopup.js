@@ -217,7 +217,7 @@ export default function JobSeekerEditBasicInfoPopup({
                             </div>
 
                             <div className=" md:grid md:grid-cols-2 md:gap-6">
-                                <div className="form-input-container">
+                                {/* <div className="form-input-container">
                                     <label className="form-label-light ">
                                         Phone Number
                                     </label>
@@ -238,9 +238,9 @@ export default function JobSeekerEditBasicInfoPopup({
                                             });
                                         }}
                                     />
-                                </div>
+                                </div> */}
 
-                                <div className="form-input-container">
+                                {/* <div className="form-input-container">
                                     <label className="form-label-light ">
                                         Email
                                     </label>
@@ -260,7 +260,7 @@ export default function JobSeekerEditBasicInfoPopup({
                                             });
                                         }}
                                     />
-                                </div>
+                                </div> */}
                             </div>
 
                             <div className=" md:grid md:grid-cols-2 md:gap-6">

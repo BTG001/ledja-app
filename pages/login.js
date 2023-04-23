@@ -161,6 +161,17 @@ export default function login() {
                         Sign up
                     </Link>
                 </p>
+                <p className="text-center">
+                    {/* <span className="text-sm text-dark-50 mr-4">
+                        Forgot your password?
+                    </span> */}
+                    <Link
+                        href="/email-reset"
+                        className="text-sm text-primary-70"
+                    >
+                        Forgot your password?
+                    </Link>
+                </p>
             </div>
             <Footer />
         </>

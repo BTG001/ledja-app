@@ -146,14 +146,12 @@ export default function TakeTestPopup({
                     resultFormData
                 );
 
-                const scoresCalculation = await axios.get(
-                    `${Config.API_URL}/calculate_scores/${skillsAssessment.id}`,
-                    {
-                        headers: Utils.getHeaders(),
-                    }
-                );
-
-                console.log("scores calculation results: ", scoresCalculation);
+                // const scoresCalculation = await axios.get(
+                //     `${Config.API_URL}/calculate_scores/${skillsAssessment.id}`,
+                //     {
+                //         headers: Utils.getHeaders(),
+                //     }
+                // );
 
                 saveResultResults = saveResultResults.data.data;
 
@@ -164,6 +162,17 @@ export default function TakeTestPopup({
                 // });
 
                 if (complete) {
+                    const scoresCalculation = await axios.get(
+                        `${Config.API_URL}/calculate_scores/${skillsAssessment.id}`,
+                        {
+                            headers: Utils.getHeaders(),
+                        }
+                    );
+                    console.log(
+                        "scores calculation results: ",
+                        scoresCalculation
+                    );
+
                     onSuccess();
                     setloadingNext(false);
                     setloadingPrevious(false);

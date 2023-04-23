@@ -51,6 +51,11 @@ export default function RecruiterNavbar({
                         Dashboard
                     </Link>
                     <Link
+                        onClick={() => {
+                            location.replace(
+                                `${location.origin}/recruiter/progress-card`
+                            );
+                        }}
                         className={`text-dark-50 mx-3 p-2
                     ${
                         active == "progress-card"
