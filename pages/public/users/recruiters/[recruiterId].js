@@ -403,7 +403,8 @@ export default function Recruiter() {
                                                     {job.title}
                                                 </h2>
                                                 <p className="text-sm text-my-gray-70">
-                                                    {job.location} ({job.type})
+                                                    {job.location}
+                                                    {/* ({job.type}) */}
                                                 </p>
                                             </div>
                                         </div>

@@ -13,6 +13,7 @@ import DashboardCreditLoaderSkeleton from "../../components/skeleton-loaders/das
 import DashboardMessageCounterLoaderSkeleton from "../../components/skeleton-loaders/dashboard-messages-counter-skeleton-loader";
 import ReloadCreditPopup from "../../components/payments/reload-credit-popup";
 import ReloadSuccessPopup from "../../components/payments/reload-success-popup";
+import CreditHistory from "../../components/recuriters/credit-history";
 
 export default function RecruiterDashbaord() {
     const [jobs, setJobs] = useState();
@@ -29,6 +30,8 @@ export default function RecruiterDashbaord() {
     const [amountReloaded, setAmountReloaded] = useState(0);
     const [showReloadCreditPopup, setShowReloadCreditPopup] = useState(false);
     const [showReloadSuccessPopup, setShowReloadSuccessPopup] = useState(false);
+
+    const [showCreditHistoryPopup, setShowCreditHistoryPopup] = useState(false);
 
     let runOnce = false;
 
@@ -173,6 +176,7 @@ export default function RecruiterDashbaord() {
     const onClose = () => {
         setShowReloadCreditPopup(false);
         setShowReloadSuccessPopup(false);
+        setShowCreditHistoryPopup(false);
     };
 
     const onAfterPayment = () => {
@@ -202,6 +206,10 @@ export default function RecruiterDashbaord() {
                 onAfterPayment={onAfterPayment}
                 balance={wallet.amount}
                 amountReloaded={amountReloaded}
+            />
+            <CreditHistory
+                showPopup={showCreditHistoryPopup}
+                onClose={onClose}
             />
             <RecruiterNavbar />
             <section className="md:w-4/5 w-5/6 mx-auto my-5">
@@ -268,9 +276,14 @@ export default function RecruiterDashbaord() {
                                     >
                                         Add Credits
                                     </p>
-                                    {/* <p className="text-primary-70 border border-primary-70 border-solid hover:border-primary-60 bg-white rounded-lg py-1 px-4 m-2 cursor-pointer">
+                                    <p
+                                        onClick={() => {
+                                            setShowCreditHistoryPopup(true);
+                                        }}
+                                        className="text-primary-70 border border-primary-70 border-solid hover:border-primary-60 bg-white rounded-lg py-1 px-4 m-2 cursor-pointer"
+                                    >
                                         Credit history
-                                    </p> */}
+                                    </p>
                                 </div>
                             </>
                         )}
@@ -298,7 +311,11 @@ export default function RecruiterDashbaord() {
                                     href={"/recruiter/messages"}
                                     className="text-sm text-center"
                                 >
-                                    You have {messages.messages.length} messages
+                                    You have{" "}
+                                    {messages.messages
+                                        ? messages.messages.length
+                                        : "0"}{" "}
+                                    messages
                                 </Link>
                             </>
                         )}
@@ -393,36 +410,55 @@ export default function RecruiterDashbaord() {
                             Share your jobs on your social networks
                         </p>
                         <div className="flex flex-row flex-nowrap justify-center items-center my-3">
-                            <Image
-                                src={"/filled-fb-icon.svg"}
-                                width={18}
-                                height={20}
-                                className="m-2"
-                            />
-                            <Image
-                                src={"/filled-linkedin-icon.svg"}
-                                width={16}
-                                height={18}
-                                className="m-2"
-                            />
-                            <Image
-                                src={"/filled-telegram-icon.svg"}
-                                width={18}
-                                height={20}
-                                className="m-2"
-                            />
-                            <Image
-                                src={"/twitter.svg"}
-                                width={18}
-                                height={16}
-                                className="m-2"
-                            />
-                            <Image
-                                src={"/whatsapp-icon.svg"}
-                                width={16}
-                                height={17}
-                                className="m-2"
-                            />
+                            <Link target="_blank" href={"https://facebook.com"}>
+                                <Image
+                                    src={"/filled-fb-icon.svg"}
+                                    width={18}
+                                    height={20}
+                                    className="m-2"
+                                />
+                            </Link>
+                            <Link target="_blank" href={"https://linkedin.com"}>
+                                <Image
+                                    src={"/filled-linkedin-icon.svg"}
+                                    width={16}
+                                    height={18}
+                                    className="m-2"
+                                />
+                            </Link>
+
+                            <Link
+                                target="_blank"
+                                href={"https://web.telegram.org"}
+                            >
+                                <Image
+                                    src={"/filled-telegram-icon.svg"}
+                                    width={18}
+                                    height={20}
+                                    className="m-2"
+                                />
+                            </Link>
+
+                            <Link target="_blank" href={"https://twitter.com"}>
+                                <Image
+                                    src={"/twitter.svg"}
+                                    width={18}
+                                    height={16}
+                                    className="m-2"
+                                />
+                            </Link>
+
+                            <Link
+                                target="_blank"
+                                href={"https://web.whatsapp.com"}
+                            >
+                                <Image
+                                    src={"/whatsapp-icon.svg"}
+                                    width={16}
+                                    height={17}
+                                    className="m-2"
+                                />
+                            </Link>
                         </div>
                     </div>
                 </div>

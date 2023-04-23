@@ -525,21 +525,6 @@ export default function Profile() {
                             otherFileResults
                         );
 
-                        // if (otherFileResults.data.success) {
-                        //     setSuccesses((prevValues) => {
-                        //         return {
-                        //             ...prevValues,
-                        //             otherFiles: [
-                        //                 ...prevValues.otherFiles,
-                        //                 `${index}. File ${otherFile.name.substr(
-                        //                     0,
-                        //                     5
-                        //                 )}... Uploaded Successfully`,
-                        //             ],
-                        //         };
-                        //     });
-                        // }
-
                         if (
                             index ==
                             addOtherDocsInput.current.files.length - 1
@@ -1110,25 +1095,6 @@ export default function Profile() {
                             )}
                         </div>
 
-                        {/* <div className="form-input-container ">
-                        <label className="form-label-light">
-                            Assessment Text
-                        </label>
-                        <div
-                            className={
-                                "mt-4 px-4 py-1 border border-solid border-my-gray-70  rounded-md flex flex-row flex-nowrap justify-start items-center"
-                            }
-                        >
-                            <Image
-                                src={"/plus-icon.svg"}
-                                width={9}
-                                height={9}
-                                className="m-2"
-                            />
-                            <span className="text-xs text-primary-70">Add</span>
-                        </div>
-                    </div> */}
-
                         <div className="form-input-container ">
                             <div className="flex flex-row justify-between p-2">
                                 <label className="form-label-light">
@@ -1485,9 +1451,9 @@ export default function Profile() {
                             </p>
                         </div>
                     </div>
-                    <p className="my-5 px-3 py-2 mx-auto bg-primary-70 text-white w-4/5 rounded-10 text-center">
+                    {/* <p className="my-5 px-3 py-2 mx-auto bg-primary-70 text-white w-4/5 rounded-10 text-center">
                         Upload resume to autofill
-                    </p>
+                    </p> */}
                 </sidebar>
             </div>
             <Footer />

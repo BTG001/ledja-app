@@ -18,8 +18,13 @@ export default function Home() {
     const [jobs, setJobs] = useState();
     const [jobsLoading, setJobsLoading] = useState(true);
 
+    const [users, setUsers] = useState();
+    const [usersLoading, setUsersLoading] = useState();
+    const [activeTab, setActiveTab] = useState("jobs");
+
     useEffect(() => {
         fetchJobs();
+        fetchUsers();
     }, []);
 
     async function fetchJobs(url) {
@@ -40,6 +45,27 @@ export default function Home() {
         } catch (error) {
             setJobsLoading(false);
             console.log("Jobs request error: ", error);
+        }
+    }
+
+    async function fetchUsers(url) {
+        setUsersLoading(true);
+        if (!url) {
+            url = `${Config.API_URL}/users`;
+        }
+
+        try {
+            let theUsers = await axios.get(url);
+
+            theUsers = theUsers.data.data.data;
+
+            setUsers(theUsers);
+
+            console.log("Users: ", theUsers);
+            setUsersLoading(false);
+        } catch (error) {
+            setUsersLoading(false);
+            console.log("users request error: ", error);
         }
     }
 
@@ -255,26 +281,52 @@ export default function Home() {
                     now!
                 </p>
                 <p className="flex flex-row nowrap w-full justify-center items-center mb-8">
-                    <span className="m-3 md:mr-8 p-2 font-medium  text-center border-b-4 border-solid border-black">
+                    <span
+                        onClick={() => {
+                            setActiveTab("jobs");
+                        }}
+                        className={`cursor-pointer m-3 md:mr-8 p-2 font-medium  text-center 
+                    ${
+                        activeTab == "jobs"
+                            ? "border-b-4 border-solid border-dark-50"
+                            : ""
+                    }`}
+                    >
                         Find Jobs
                     </span>
-                    <span className="m-3 md:ml-8 p-2 font-normal text-center">
+                    <span
+                        onClick={() => {
+                            setActiveTab("users");
+                        }}
+                        className={`cursor-pointer m-3 md:ml-8 p-2 font-normal text-center
+                        ${
+                            activeTab == "users"
+                                ? "border-b-4 border-solid border-dark-50"
+                                : ""
+                        }`}
+                    >
                         Find Talents
                     </span>
                 </p>
 
-                {jobsLoading && <JobsCardsLoaderSkeleton />}
+                {jobsLoading && activeTab == "jobs" && (
+                    <JobsCardsLoaderSkeleton />
+                )}
                 {!jobsLoading &&
+                    activeTab == "jobs" &&
                     jobs &&
                     jobs.length > 0 &&
-                    jobs.map((job) => {
+                    jobs.map((job, index) => {
+                        if (index > 2) {
+                            return;
+                        }
                         return (
                             <>
-                                <Link
-                                    href={`/public/jobs/${job.id}`}
-                                    className="flex flex-col md:flex-row justify-start items-center p-2 border border-white hover:border-my-gray-50 hover:shadow-md my-3"
+                                <div
+                                    // href={`/public/jobs/${job.id}`}
+                                    className="flex flex-col md:grid md:grid-cols-10  justify-start items-center p-2 border border-white hover:border-my-gray-50 hover:shadow-md my-3"
                                 >
-                                    <p className="flex justify-center items-center row-span-3 p-2">
+                                    <p className="flex justify-center items-center row-span-3 p-2 col-span-2">
                                         {(!job.user ||
                                             !job.user.basic_info_recruiter ||
                                             !job.user.basic_info_recruiter
@@ -298,7 +350,7 @@ export default function Home() {
                                                 />
                                             )}
                                     </p>
-                                    <div>
+                                    <div className="col-span-8">
                                         <p className="text-2xl font-semibold  md:w-3/4 p-2 px-5 text-center md:text-left ">
                                             {job.title}
                                         </p>
@@ -307,7 +359,97 @@ export default function Home() {
                                             ...
                                         </p>
                                     </div>
-                                </Link>
+                                </div>
+                            </>
+                        );
+                    })}
+                {/* {usersLoading && activeTab == "users" && (
+                    <JobsCardsLoaderSkeleton />
+                )} */}
+                {!usersLoading &&
+                    activeTab == "users" &&
+                    users &&
+                    users.length > 0 &&
+                    users.map((user, index) => {
+                        if (index > 2) {
+                            return;
+                        }
+                        return (
+                            <>
+                                <div
+                                    // href={`/public/users/${user.id}`}
+                                    className="flex flex-col md:grid md:grid-cols-10  justify-start items-center p-2 border border-white hover:border-my-gray-50 hover:shadow-md my-3"
+                                >
+                                    <p className="flex justify-center items-center row-span-3 p-2 col-span-2 ">
+                                        {(!user ||
+                                            !user.basic_info_recruiter ||
+                                            !user.basic_info_recruiter
+                                                .avatar_url) &&
+                                            (!user ||
+                                                !user.basic_info_jobseeker ||
+                                                !user.basic_info_jobseeker
+                                                    .avatar_url) && (
+                                                <BsBuilding className="text-8xl text-center block" />
+                                            )}
+
+                                        {user &&
+                                            user.basic_info_recruiter &&
+                                            user.basic_info_recruiter
+                                                .avatar_url && (
+                                                <Image
+                                                    src={
+                                                        user
+                                                            .basic_info_recruiter
+                                                            .avatar_url
+                                                    }
+                                                    width={100}
+                                                    height={80}
+                                                    className="flex justify-center items-center"
+                                                />
+                                            )}
+                                        {user &&
+                                            user.basic_info_jobseeker &&
+                                            user.basic_info_jobseeker
+                                                .avatar_url && (
+                                                <Image
+                                                    src={
+                                                        user
+                                                            .basic_info_jobseeker
+                                                            .avatar_url
+                                                    }
+                                                    width={100}
+                                                    height={80}
+                                                    className="flex justify-center items-center"
+                                                />
+                                            )}
+                                    </p>
+                                    <div className="col-span-8">
+                                        <p className="text-2xl font-semibold  md:w-3/4 p-2 px-5 text-center md:text-left capitalize ">
+                                            {user.basic_info_jobseeker
+                                                ? `${user.basic_info_jobseeker.fname} ${user.basic_info_jobseeker.lname}`
+                                                : ""}
+                                            {user.about_recruiter
+                                                ? `${user.about_recruiter.fname} ${user.about_recruiter.lname}`
+                                                : ""}
+                                        </p>
+                                        <p className="text-justify md:w-3/4 p-2 px-5 capitalize">
+                                            {user.user_type.name}
+                                        </p>
+                                        <p className="text-justify md:w-3/4 p-2 px-5 capitalize text-my-gray-70">
+                                            Member Since{" "}
+                                            {
+                                                Config.MONTH_NAMES[
+                                                    new Date(
+                                                        user.created_at
+                                                    ).getMonth()
+                                                ]
+                                            }{" "}
+                                            {new Date(
+                                                user.created_at
+                                            ).getFullYear()}
+                                        </p>
+                                    </div>
+                                </div>
                             </>
                         );
                     })}

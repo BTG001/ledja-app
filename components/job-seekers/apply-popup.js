@@ -1,14 +1,15 @@
-import { useEffect, useState } from "react";
-import { BiUserCircle } from "react-icons/bi";
+import { useState, useEffect, useRef, useContext } from "react";
 import Image from "next/image";
-import { useRouter } from "next/router";
-import { AiOutlineFileText } from "react-icons/ai";
-import Link from "next/link";
-import axios from "axios";
 import Config from "../../Config";
 import Utils from "../../Utils";
+import Link from "next/link";
+import axios from "axios";
+import { BiUserCircle } from "react-icons/bi";
+import { useRouter } from "next/router";
+import { AiOutlineFileText } from "react-icons/ai";
 import { MdOutlineOpenInNew } from "react-icons/md";
-import ResumeRequiredPopup from "./resume-required-popup";
+import JobSeekerProfileLoader from "../../components/skeleton-loaders/jobseeker-profile-loader";
+import ResumeRequiredPopup from "../../components/job-seekers/resume-required-popup";
 
 export default function ApplyPopup({
     showPopup,
@@ -29,7 +30,6 @@ export default function ApplyPopup({
     const [hasProfilePic, setHasProfilePic] = useState(false);
     const [hasSocialMediaLinks, setHasSocialMediaLinks] = useState(false);
     const [hasAboutJobSeeker, setHasAboutJobSeeker] = useState(false);
-
     const [basicInfo, setBasicInfo] = useState({});
     const [links, setLinks] = useState({});
     const [aboutJobSeeker, setAboutJobSeeker] = useState({});
@@ -43,16 +43,21 @@ export default function ApplyPopup({
     const [coverLetter, setCoverLetter] = useState("");
     const [errors, setErrors] = useState({});
 
+    const [uploadJobs, setUploadJobs] = useState();
+    const [uploadJobsId, setUploadJobsId] = useState();
+
     const [loading, setLoading] = useState(false);
 
-    const [showResumeRequiredPopup, setShowResumeRequiredPopup] =
-        useState(true);
+    const [profileLoading, setProfileLoading] = useState(true);
 
-    useEffect(() => {
-        if (job && job.with_resume && job.with_resume.toLowerCase() == "yes") {
-            setShowResumeRequiredPopup(true);
-        }
-    }, [job]);
+    const [showResumeRequiredPopup, setShowResumeRequiredPopup] =
+        useState(false);
+
+    // useEffect(() => {
+    //     if (job && job.with_resume && job.with_resume.toLowerCase() == "yes" && (upload_job || !job.upload_job.resume_url)) {
+    //         setShowResumeRequiredPopup(true);
+    //     }
+    // }, [job,uploadJobs]);
 
     useEffect(() => {
         if (showPopup) {
@@ -146,15 +151,17 @@ export default function ApplyPopup({
                     setHasResume(true);
                 }
 
-                if (jobSeeker.upload_job.other_docs) {
-                    const otherDocsArray = jobSeeker.upload_job.other_docs_urls
-                        .trim()
-                        .split("|");
-                    setOtherDocs(otherDocsArray);
-                    setHasOtherDocs(true);
-                }
-
+                fetchUPloadJob(jobSeeker.upload_job.id);
                 setUploadJobsId(jobSeeker.upload_job.id);
+            } else {
+                console.log("no resume..............");
+                if (
+                    job &&
+                    job.with_resume &&
+                    job.with_resume.toLowerCase() == "yes"
+                ) {
+                    setShowResumeRequiredPopup(true);
+                }
             }
 
             if (jobSeeker.work_experiences) {
@@ -191,13 +198,9 @@ export default function ApplyPopup({
             setErrors(errorMessages);
 
             if (errors.length < 1 && error.response.data.error) {
-                // setErrorMessage(`Unknown Error:  ${error.response.data.error}`);
-                // setShowErrorPopup(true);
                 onFailure();
             }
         } catch (error) {
-            // setErrorMessage(`Unknown Error:  ${error.message}`);
-            // setShowErrorPopup(true);
             console.log("Error Generating Error Message: ", error);
         }
     };
@@ -205,6 +208,27 @@ export default function ApplyPopup({
     const onCloseResumeRequiredPopup = () => {
         setShowResumeRequiredPopup(false);
     };
+    async function fetchUPloadJob(id) {
+        setProfileLoading(true);
+        try {
+            const url = `${Config.API_URL}/upload_jobs/${id}`;
+            let theUploadJob = await axios.get(url, {
+                headers: Utils.getHeaders(),
+            });
+
+            theUploadJob = theUploadJob.data.data;
+
+            if (theUploadJob.other_documents) {
+                setOtherDocs(theUploadJob.other_documents);
+                setHasOtherDocs(true);
+            }
+
+            setProfileLoading(false);
+        } catch (error) {
+            setProfileLoading(false);
+            console.log("get upload jobs Error: ", error);
+        }
+    }
 
     return (
         showPopup && (
@@ -257,543 +281,540 @@ export default function ApplyPopup({
                             Your Profile
                         </h3>
 
-                        <div className="form-input-container ">
-                            <p className="flex flex-row flex-nowrap justify-between items-center w-full p-2">
-                                <label className="form-label-light">
-                                    About Me
-                                </label>
-                                {/* {hasBasicInfo && (
-                                    <span
-                                        onClick={() => {
-                                            setShowBasicInfoEditPopup(true);
-                                        }}
-                                        className="text-primary-70 cursor-pointer"
-                                    >
-                                        Edit
-                                    </span>
-                                )} */}
-                            </p>
-                            {hasBasicInfo && (
-                                <div
-                                    className={
-                                        "mt-4 p-5 border border-solid border-my-gray-70  rounded-10 grid grid-cols-3 gap-3 "
-                                    }
-                                >
-                                    <div className="text-dark-50 grid grid-rows-4 gap-1 justify-center items-center w-full h-full">
-                                        <p className="flex justify-center items-center row-span-4">
-                                            {!hasProfilePic && (
-                                                <BiUserCircle className="h-32 text-center block w-full" />
-                                            )}
-
-                                            {hasProfilePic && (
-                                                <Image
-                                                    src={profilePic}
-                                                    width={160}
-                                                    height={120}
-                                                    className="flex justify-center items-center"
-                                                />
-                                            )}
-                                        </p>
-
-                                        {/* <p
-                                            onClick={onWantToChangeProfileImage}
-                                            className="mx-2 cursor-pointer text-white py-1 px-2 bg-primary-70 flex flex-row flex-nowrap justify-center items-center rounded-lg"
-                                        >
-                                            <RiImageEditFill
-                                                className="text-3xl block cursor-pointer m-1"
-                                                width={10}
-                                                height={10}
-                                            />
-                                            <span>Change</span>
-                                        </p> */}
-                                    </div>
-                                    <div className="flex flex-col flex-nowrap justify-start items-start">
-                                        <h3 className="font-medium text-xl text-dark-50 my-5">
-                                            {basicInfo.fname || ""}{" "}
-                                            {basicInfo.lname || ""}
-                                        </h3>
-                                        <p className="text-sm text-dark-50">
-                                            {basicInfo.position || ""}
-                                        </p>
-                                        <p className="text-sm text-dark-50">
-                                            {basicInfo.location || ""}
-                                        </p>
-                                        <p className="flex flex-row flex-nowrap justify-between items-center mt-5 mb-2">
-                                            <Image
-                                                src={"/email.svg"}
-                                                width={15}
-                                                height={15}
-                                                className="mr-3"
-                                            />
-                                            <span>{email}</span>
-                                        </p>
-                                        <p className="flex flex-row flex-nowrap justify-between items-center">
-                                            <Image
-                                                src={"/phone.svg"}
-                                                width={15}
-                                                height={15}
-                                                className="mr-3"
-                                            />
-                                            <span>{basicInfo.phone_no}</span>
-                                        </p>
-                                    </div>
-
-                                    <div className="flex flex-row flex-nowrap justify-center items-start my-3">
-                                        <div className="flex justify-center items-center mx-2">
-                                            <Link
-                                                target={"_blank"}
-                                                href={links.linked_in || ""}
-                                                className="flex justify-center items-center w-8 h-8 rounded-full bg-my-gray-50"
-                                            >
-                                                <Image
-                                                    src={"/linkedin.svg"}
-                                                    width={14}
-                                                    height={9}
-                                                />
-                                            </Link>
-                                        </div>
-                                        <div className="flex justify-center items-center mx-2">
-                                            <Link
-                                                target={"_blank"}
-                                                href={links.twitter || ""}
-                                                className="flex justify-center items-center w-8 h-8 rounded-full bg-my-gray-50"
-                                            >
-                                                <Image
-                                                    src={"/twitter.svg"}
-                                                    width={13}
-                                                    height={11}
-                                                />
-                                            </Link>
-                                        </div>
-                                        <div className="flex justify-center items-cente mx-2">
-                                            <Link
-                                                target={"_blank"}
-                                                href={links.facebook || ""}
-                                                className="flex justify-center items-center w-8 h-8 rounded-full bg-my-gray-50"
-                                            >
-                                                <Image
-                                                    src={"/facebook.svg"}
-                                                    width={8}
-                                                    height={6}
-                                                />
-                                            </Link>
-                                        </div>
-                                    </div>
-                                </div>
-                            )}
-                            {!hasBasicInfo && (
-                                <div
-                                    className={
-                                        "mt-4 px-4 py-1 border border-solid border-my-gray-70  rounded-md flex flex-row flex-nowrap justify-start items-center "
-                                    }
-                                >
-                                    <Image
-                                        src={"/not-interested-active-icon.svg"}
-                                        width={13}
-                                        height={13}
-                                        className="m-2"
-                                    />
-                                    <span className="text-xs text-primary-70">
-                                        No About Information Added
-                                    </span>
-                                </div>
-                            )}
-                        </div>
-                        <div className="form-input-container ">
-                            <div className="flex flex-row justify-between p-2">
-                                <label className="form-label-light">
-                                    Work Experience
-                                </label>
-                                {/* {hasWorkExperience && (
-                                    <span
-                                        onClick={() => {
-                                            setShowWorkExperienceEditPopup(
-                                                true
-                                            );
-                                        }}
-                                        className="text-primary-70 cursor-pointer"
-                                    >
-                                        Edit
-                                    </span>
-                                )} */}
+                        {profileLoading && (
+                            <div className="col-span-2">
+                                <JobSeekerProfileLoader />
                             </div>
-                            {hasWorkExperience &&
-                                workExperiences &&
-                                workExperiences.length > 0 && (
-                                    <div className="mt-4 px-4 py-1 border border-solid border-my-gray-70  rounded-md">
-                                        {workExperiences.map(
-                                            (workExperience) => {
-                                                return (
-                                                    <div className="my-2">
-                                                        <p className="text-lg my-1 ">
-                                                            {
-                                                                workExperience.title
-                                                            }
-                                                        </p>
-                                                        <p className=" my-1">
-                                                            {
-                                                                workExperience.company
-                                                            }
-                                                        </p>
-                                                        <p className="my-1 text-my-gray-70 text-sm">
-                                                            {
-                                                                workExperience.duration
-                                                            }
-                                                        </p>
-                                                        {/* <p classname="text-sm">{workExperience.description}</p> */}
-                                                        <p className="text-sm">
-                                                            {
-                                                                workExperience.description
-                                                            }
-                                                        </p>
-                                                    </div>
-                                                );
-                                            }
-                                        )}
-                                    </div>
-                                )}
+                        )}
 
-                            {!hasWorkExperience ||
-                                !workExperiences ||
-                                (workExperiences.length < 1 && (
-                                    <div
-                                        className={
-                                            "mt-4 px-4 py-1 border border-solid border-my-gray-70  rounded-md flex flex-row flex-nowrap justify-start items-center "
-                                        }
-                                    >
-                                        <Image
-                                            src={
-                                                "/not-interested-active-icon.svg"
-                                            }
-                                            width={13}
-                                            height={13}
-                                            className="m-2"
-                                        />
-                                        <span className="text-xs text-primary-70">
-                                            No Work Experience
-                                        </span>
-                                    </div>
-                                ))}
-                        </div>
-
-                        <div className="form-input-container ">
-                            <div className="flex flex-row justify-between p-2">
-                                <label className="form-label-light">
-                                    Education
-                                </label>
-                                {/* {hasEducation && (
-                                    <span
-                                        onClick={() => {
-                                            setShowEducationEditPopup(true);
-                                        }}
-                                        className="text-primary-70 cursor-pointer"
-                                    >
-                                        Edit
-                                    </span>
-                                )} */}
-                            </div>
-
-                            {hasEducation &&
-                                educations &&
-                                educations.length > 0 && (
-                                    <div
-                                        className={
-                                            "mt-4 px-4 py-1 border border-solid border-my-gray-70  rounded-md "
-                                        }
-                                    >
-                                        {hasEducation &&
-                                            educations.map((education) => {
-                                                return (
-                                                    <>
-                                                        <p className="my-1 ">
-                                                            {
-                                                                education.certification
-                                                            }
-                                                        </p>
-                                                        <p className="text-sm">
-                                                            {
-                                                                education.institution
-                                                            }
-                                                        </p>
-                                                        <p className="my-1 text-my-gray-70 text-xs">
-                                                            {education.duration}
-                                                        </p>
-                                                    </>
-                                                );
-                                            })}
-                                    </div>
-                                )}
-
-                            {(!hasEducation ||
-                                !educations ||
-                                educations.length < 1) && (
-                                <div
-                                    className={
-                                        "mt-4 px-4 py-1 border border-solid border-my-gray-70  rounded-md flex flex-row flex-nowrap justify-start items-center"
-                                    }
-                                >
-                                    <Image
-                                        src={"/not-interested-active-icon.svg"}
-                                        width={13}
-                                        height={13}
-                                        className="m-2"
-                                    />
-                                    <span className="text-xs text-primary-70">
-                                        No Education Added
-                                    </span>
-                                </div>
-                            )}
-                        </div>
-
-                        <div className="form-input-container ">
-                            <div className="flex flex-row justify-between p-2">
-                                <label className="form-label-light">
-                                    Skills
-                                </label>
-                                {/* {hasSkills && (
-                                    <span
-                                        onClick={() => {
-                                            setShowSkillsEditPopup(true);
-                                        }}
-                                        className="text-primary-70 cursor-pointer"
-                                    >
-                                        Edit
-                                    </span>
-                                )} */}
-                            </div>
-                            {hasSkills && skills && skills.length > 0 && (
-                                <div
-                                    className={
-                                        "mt-4 border border-solid border-my-gray-70  rounded-md p-4 flex- flex-row justify-start items-center "
-                                    }
-                                >
-                                    {skills.map((skill) => {
-                                        return (
-                                            <span className="px-4 py-2 bg-my-gray-50 rounded-lg m-2">
-                                                {skill.name}
+                        {!profileLoading && (
+                            <section className="col-span-2">
+                                <div className="form-input-container ">
+                                    <p className="flex flex-row flex-nowrap justify-between items-center w-full p-2">
+                                        <label className="form-label-light">
+                                            About Me
+                                        </label>
+                                        {/* {hasBasicInfo && (
+                                            <span
+                                                onClick={() => {
+                                                    setShowBasicInfoEditPopup(
+                                                        true
+                                                    );
+                                                }}
+                                                className="text-primary-70 cursor-pointer"
+                                            >
+                                                Edit
                                             </span>
-                                        );
-                                    })}
-                                </div>
-                            )}
-
-                            {(!hasSkills || !skills || skills.length < 1) && (
-                                <div
-                                    className={
-                                        "mt-4 px-4 py-1 border border-solid border-my-gray-70  rounded-md flex flex-row flex-nowrap justify-start items-center cursor-pointer"
-                                    }
-                                >
-                                    <Image
-                                        src={"/not-interested-active-icon.svg"}
-                                        width={13}
-                                        height={13}
-                                        className="m-2"
-                                    />
-                                    <span className="text-xs text-primary-70">
-                                        No Skills Added
-                                    </span>
-                                </div>
-                            )}
-                        </div>
-
-                        {/* <div className="form-input-container ">
-                        <label className="form-label-light">
-                            Assessment Text
-                        </label>
-                        <div
-                            className={
-                                "mt-4 px-4 py-1 border border-solid border-my-gray-70  rounded-md flex flex-row flex-nowrap justify-start items-center"
-                            }
-                        >
-                            <Image
-                                src={"/plus-icon.svg"}
-                                width={9}
-                                height={9}
-                                className="m-2"
-                            />
-                            <span className="text-xs text-primary-70">Add</span>
-                        </div>
-                    </div> */}
-
-                        <div className="form-input-container ">
-                            <div className="flex flex-row justify-between p-2">
-                                <label className="form-label-light">
-                                    Resume
-                                </label>
-                                {/* {hasResume && (
-                                    <span
-                                        onClick={() => {
-                                            resumeInput.current.click();
-                                        }}
-                                        className="text-primary-70 cursor-pointer"
-                                    >
-                                        Edit
-                                    </span>
-                                )} */}
-                            </div>
-
-                            {hasResume && (
-                                <div
-                                    className={
-                                        "mt-4 px-4 py-1 border border-solid border-my-gray-70  rounded-md flex flex-row flex-nowrap justify-start items-center"
-                                    }
-                                >
-                                    <Link
-                                        href={resume}
-                                        target="_blank"
-                                        className="flex flex-row flex-nowrap justify-start items-center"
-                                    >
-                                        <AiOutlineFileText />
-                                        <span className="text-xs text-primary-70 p-2">
-                                            Resume_{basicInfo.fname}
-                                        </span>
-                                        <MdOutlineOpenInNew className="ml-2 text-primary-70" />
-                                    </Link>
-                                    {/* <input
-                                        ref={resumeInput}
-                                        className="hidden"
-                                        name="resume"
-                                        accept=".pdf,.doc,.docx"
-                                        type={"file"}
-                                        onChange={(e) => {
-                                            const value = e.target.files[0];
-                                            setUploadJobs((prevValues) => {
-                                                return {
-                                                    ...prevValues,
-                                                    resume: value,
-                                                };
-                                            });
-
-                                            updateResume();
-                                        }}
-                                    /> */}
-                                </div>
-                            )}
-
-                            {!hasResume && (
-                                <div>
-                                    <div
-                                        className={
-                                            "mt-4 px-4 py-1 border border-solid border-my-gray-70  rounded-md flex flex-row flex-nowrap justify-start items-center"
-                                        }
-                                    >
-                                        <Image
-                                            src={
-                                                "/not-interested-active-icon.svg"
-                                            }
-                                            width={13}
-                                            height={13}
-                                            className="m-2"
-                                        />
-                                        <span className="text-xs text-primary-70">
-                                            No Resume Added
-                                        </span>
-                                    </div>
-                                    {job.with_resume.toLowerCase() == "yes" && (
+                                        )} */}
+                                    </p>
+                                    {hasBasicInfo && (
                                         <div
                                             className={
-                                                "mt-4 px-4 py-1 rounded-md flex flex-row flex-nowrap justify-start items-end "
+                                                "mt-4 p-5 border border-solid border-my-gray-70  rounded-10 md:grid md:grid-cols-3 md:gap-3 "
+                                            }
+                                        >
+                                            <div className="text-dark-50 grid grid-rows-4 gap-1 justify-center">
+                                                <p className="flex justify-center items-center row-span-3">
+                                                    {!hasProfilePic && (
+                                                        <BiUserCircle className="h-32 text-center block w-full" />
+                                                    )}
+
+                                                    {hasProfilePic && (
+                                                        <Image
+                                                            src={profilePic}
+                                                            width={160}
+                                                            height={120}
+                                                            className="flex justify-center items-center rounded-sm"
+                                                        />
+                                                    )}
+                                                </p>
+
+                                                {/* <p
+                                                    onClick={
+                                                        onWantToChangeProfileImage
+                                                    }
+                                                    className="mx-2 cursor-pointer text-white py-1 px-2 bg-primary-70 flex flex-row flex-nowrap justify-center items-center rounded-lg"
+                                                >
+                                                    <RiImageEditFill
+                                                        className="text-3xl block cursor-pointer m-1"
+                                                        width={10}
+                                                        height={10}
+                                                    />
+                                                    <span>Change</span>
+                                                </p> */}
+                                            </div>
+                                            <div className="flex flex-col flex-nowrap justify-center items-center md:justify-start md:items-start">
+                                                <h3 className="font-medium text-xl text-dark-50 my-5">
+                                                    {basicInfo.fname || ""}{" "}
+                                                    {basicInfo.lname || ""}
+                                                </h3>
+                                                <p className="text-sm text-dark-50">
+                                                    {basicInfo.position || ""}
+                                                </p>
+                                                <p className="text-sm text-dark-50">
+                                                    {basicInfo.location || ""}
+                                                </p>
+                                                <p className="flex flex-row flex-nowrap justify-between items-center mt-5 mb-2">
+                                                    <Image
+                                                        src={"/email.svg"}
+                                                        width={15}
+                                                        height={15}
+                                                        className="mr-3"
+                                                    />
+                                                    <span>{email}</span>
+                                                </p>
+                                                <p className="flex flex-row flex-nowrap justify-between items-center">
+                                                    <Image
+                                                        src={"/phone.svg"}
+                                                        width={15}
+                                                        height={15}
+                                                        className="mr-3"
+                                                    />
+                                                    <span>
+                                                        {basicInfo.phone_no}
+                                                    </span>
+                                                </p>
+                                            </div>
+
+                                            <div className="flex flex-row flex-nowrap justify-center items-start my-3">
+                                                <div className="flex justify-center items-center mx-2">
+                                                    <Link
+                                                        target={"_blank"}
+                                                        href={
+                                                            links.linked_in ||
+                                                            ""
+                                                        }
+                                                        className="flex justify-center items-center w-8 h-8 rounded-full bg-my-gray-50"
+                                                    >
+                                                        <Image
+                                                            src={
+                                                                "/linkedin.svg"
+                                                            }
+                                                            width={14}
+                                                            height={9}
+                                                        />
+                                                    </Link>
+                                                </div>
+                                                <div className="flex justify-center items-center mx-2">
+                                                    <Link
+                                                        target={"_blank"}
+                                                        href={
+                                                            links.twitter || ""
+                                                        }
+                                                        className="flex justify-center items-center w-8 h-8 rounded-full bg-my-gray-50"
+                                                    >
+                                                        <Image
+                                                            src={"/twitter.svg"}
+                                                            width={13}
+                                                            height={11}
+                                                        />
+                                                    </Link>
+                                                </div>
+                                                <div className="flex justify-center items-cente mx-2">
+                                                    <Link
+                                                        target={"_blank"}
+                                                        href={
+                                                            links.facebook || ""
+                                                        }
+                                                        className="flex justify-center items-center w-8 h-8 rounded-full bg-my-gray-50"
+                                                    >
+                                                        <Image
+                                                            src={
+                                                                "/facebook.svg"
+                                                            }
+                                                            width={8}
+                                                            height={6}
+                                                        />
+                                                    </Link>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
+                                    {!hasBasicInfo && (
+                                        <div
+                                            className={
+                                                "mt-4 px-4 py-1 border border-solid border-my-gray-70  rounded-md flex flex-row flex-nowrap justify-start items-center cursor-pointer"
                                             }
                                         >
                                             <Image
-                                                src={"/warning-icon.svg"}
-                                                width={30}
-                                                height={30}
-                                                className="m-3 ml-0"
+                                                src={
+                                                    "/not-interested-active-icon.svg"
+                                                }
+                                                width={13}
+                                                height={13}
+                                                className="m-2"
                                             />
-                                            <span className=" text-primary-70 m-3 ml-0">
-                                                A resume is required for this
-                                                job
+                                            <span className="text-xs text-primary-70">
+                                                No Basic Infos Added
                                             </span>
                                         </div>
                                     )}
                                 </div>
-                            )}
-                        </div>
-                        <div className="form-input-container ">
-                            <div className="flex flex-row justify-between p-2">
-                                <label className="form-label-light">
-                                    Cerficates / Other Documents
-                                </label>
-                                {/* {hasOtherDocs && (
-                                    <span
-                                        onClick={() => {
-                                            otherDocsInput.current.click();
-                                        }}
-                                        className="text-primary-70 cursor-pointer"
-                                    >
-                                        Edit
-                                    </span>
-                                )} */}
-                            </div>
+                                <div className="form-input-container ">
+                                    <div className="flex flex-row justify-between p-2">
+                                        <label className="form-label-light">
+                                            Work Experience
+                                        </label>
 
-                            {hasOtherDocs && (
-                                <div
-                                    className={
-                                        "mt-4 px-4 py-1 border border-solid border-my-gray-70  rounded-md flex flex-col justify-start items-start"
-                                    }
-                                >
-                                    {otherDocs.map((otherDoc, index) => {
-                                        return (
+                                        {/* <span
+                                            onClick={() => {
+                                                setShowAddExperiencePopup(true);
+                                            }}
+                                            className="text-primary-70 test-sm cursor-pointer flex flex-row flex-nowrap justify-center items-center"
+                                        >
+                                            <Image
+                                                src={"/plus-icon.svg"}
+                                                width={12}
+                                                height={12}
+                                                className="m-2"
+                                            />
+                                            Add
+                                        </span> */}
+                                    </div>
+                                    {hasWorkExperience &&
+                                        workExperiences.length > 0 && (
+                                            <div className="mt-4 px-4 py-1 border border-solid border-my-gray-70  rounded-md">
+                                                {workExperiences.map(
+                                                    (workExperience, index) => {
+                                                        return (
+                                                            <div
+                                                                className="my-4"
+                                                                key={index}
+                                                            >
+                                                                <p className="text-lg my-1 ">
+                                                                    {
+                                                                        workExperience.title
+                                                                    }
+                                                                </p>
+                                                                <p className=" my-1">
+                                                                    {
+                                                                        workExperience.company
+                                                                    }
+                                                                </p>
+                                                                <p className="my-1 text-my-gray-70 text-sm">
+                                                                    {
+                                                                        workExperience.duration
+                                                                    }
+                                                                </p>
+                                                                {/* <p classname="text-sm">{workExperience.description}</p> */}
+                                                                <p className="text-sm">
+                                                                    {workExperience.description ||
+                                                                        ""}
+                                                                </p>
+                                                            </div>
+                                                        );
+                                                    }
+                                                )}
+                                            </div>
+                                        )}
+
+                                    {(!hasWorkExperience ||
+                                        workExperiences.length < 1) && (
+                                        <div
+                                            className={
+                                                "mt-4 px-4 py-1 border border-solid border-my-gray-70  rounded-md flex flex-row flex-nowrap justify-start items-center cursor-pointer"
+                                            }
+                                        >
+                                            <Image
+                                                src={
+                                                    "/not-interested-active-icon.svg"
+                                                }
+                                                width={13}
+                                                height={13}
+                                                className="m-2"
+                                            />
+                                            <span className="text-xs text-primary-70">
+                                                No Experience Added
+                                            </span>
+                                        </div>
+                                    )}
+                                </div>
+
+                                <div className="form-input-container ">
+                                    <div className="flex flex-row justify-between p-2">
+                                        <label className="form-label-light">
+                                            Education
+                                        </label>
+                                        {/* <span
+                                            onClick={() => {
+                                                setShowAddEducationPopup(true);
+                                            }}
+                                            className="text-primary-70 test-sm cursor-pointer flex flex-row flex-nowrap justify-center items-center"
+                                        >
+                                            <Image
+                                                src={"/plus-icon.svg"}
+                                                width={12}
+                                                height={12}
+                                                className="m-2"
+                                            />
+                                            Add
+                                        </span> */}
+                                    </div>
+
+                                    {hasEducation && educations.length > 0 && (
+                                        <div
+                                            className={
+                                                "mt-4 px-4 py-1 border border-solid border-my-gray-70  rounded-md cursor-pointer "
+                                            }
+                                        >
+                                            {hasEducation &&
+                                                educations.map(
+                                                    (education, index) => {
+                                                        return (
+                                                            <div
+                                                                key={index}
+                                                                className="my-2"
+                                                            >
+                                                                <p className="">
+                                                                    {
+                                                                        education.certification
+                                                                    }
+                                                                </p>
+                                                                <p className="text-sm">
+                                                                    {
+                                                                        education.institution
+                                                                    }
+                                                                </p>
+                                                                <p className=" text-my-gray-70 text-xs">
+                                                                    {
+                                                                        education.duration
+                                                                    }
+                                                                </p>
+                                                            </div>
+                                                        );
+                                                    }
+                                                )}
+                                        </div>
+                                    )}
+
+                                    {(!hasEducation ||
+                                        educations.length < 1) && (
+                                        <div
+                                            className={
+                                                "mt-4 px-4 py-1 border border-solid border-my-gray-70  rounded-md flex flex-row flex-nowrap justify-start items-center cursor-pointer"
+                                            }
+                                        >
+                                            <Image
+                                                src={
+                                                    "/not-interested-active-icon.svg"
+                                                }
+                                                width={13}
+                                                height={13}
+                                                className="m-2"
+                                            />
+                                            <span className="text-xs text-primary-70">
+                                                No Education Added
+                                            </span>
+                                        </div>
+                                    )}
+                                </div>
+
+                                <div className="form-input-container ">
+                                    <div className="flex flex-row justify-between p-2">
+                                        <label className="form-label-light">
+                                            Skills
+                                        </label>
+                                        {/* <span
+                                            onClick={() => {
+                                                setShowAddSkillPopup(true);
+                                            }}
+                                            className="text-primary-70 test-sm cursor-pointer flex flex-row flex-nowrap justify-center items-center"
+                                        >
+                                            <Image
+                                                src={"/plus-icon.svg"}
+                                                width={12}
+                                                height={12}
+                                                className="m-2"
+                                            />
+                                            Add
+                                        </span> */}
+                                    </div>
+                                    {hasSkills && skills.length > 0 && (
+                                        <div
+                                            className={
+                                                "mt-4 border border-solid border-my-gray-70  rounded-md p-4 flex flex-row justify-start items-center "
+                                            }
+                                        >
+                                            {skills.map((skill, index) => {
+                                                return (
+                                                    <div
+                                                        key={index}
+                                                        className="flex flex-row flex-nowrap justify-start items-center  px-4 bg-my-gray-50 rounded-lg m-2 py-2 w-max"
+                                                    >
+                                                        <span className="">
+                                                            {skill.name}
+                                                        </span>
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+                                    )}
+
+                                    {(!hasSkills || skills.length < 1) && (
+                                        <div
+                                            className={
+                                                "mt-4 px-4 py-1 border border-solid border-my-gray-70  rounded-md flex flex-row flex-nowrap justify-start items-center cursor-pointer"
+                                            }
+                                        >
+                                            <Image
+                                                src={
+                                                    "/not-interested-active-icon.svg"
+                                                }
+                                                width={13}
+                                                height={13}
+                                                className="m-2"
+                                            />
+                                            <span className="text-xs text-primary-70">
+                                                No Skill Added
+                                            </span>
+                                        </div>
+                                    )}
+                                </div>
+
+                                <div className="form-input-container ">
+                                    <div className="flex flex-row justify-between p-2">
+                                        <label className="form-label-light">
+                                            Resume
+                                        </label>
+                                        {/* {hasResume && (
+                                            <span
+                                                onClick={() => {
+                                                    resumeInput.current.click();
+                                                }}
+                                                className="text-primary-70 cursor-pointer flex justify-center items-center flex-nowrap"
+                                            >
+                                                <AiOutlineSwap className="mr-2 text-primary-70" />
+                                                Replace
+                                            </span>
+                                        )} */}
+                                    </div>
+
+                                    {hasResume && (
+                                        <div
+                                            className={
+                                                "mt-4 px-4 py-1 border border-solid border-my-gray-70  rounded-md flex flex-row flex-nowrap justify-start items-center"
+                                            }
+                                        >
                                             <Link
-                                                key={index}
-                                                href={otherDoc}
+                                                href={resume}
                                                 target="_blank"
                                                 className="flex flex-row flex-nowrap justify-start items-center"
                                             >
                                                 <AiOutlineFileText />
                                                 <span className="text-xs text-primary-70 p-2">
-                                                    Other Doc_{index + 1}
+                                                    Resume_{basicInfo.fname}
                                                 </span>
                                                 <MdOutlineOpenInNew className="ml-2 text-primary-70" />
                                             </Link>
-                                        );
-                                    })}
-                                    {/* <input
-                                        ref={otherDocsInput}
-                                        className="hidden"
-                                        name="other_docs[]"
-                                        accept=".pdf,.doc,.docx"
-                                        type={"file"}
-                                        multiple
-                                        onChange={(e) => {
-                                            const value = e.target.files;
-                                            console.log(value);
-                                            setUploadJobs((prevValues) => {
-                                                return {
-                                                    ...prevValues,
-                                                    others: value,
-                                                };
-                                            });
-                                            updateOtherDocs();
-                                        }}
-                                    /> */}
-                                </div>
-                            )}
+                                        </div>
+                                    )}
 
-                            {!hasOtherDocs && (
-                                <div
-                                    onClick={() => {
-                                        router.push(
-                                            "/job-seeker/profile-setup/step4"
-                                        );
-                                    }}
-                                    className={
-                                        "mt-4 px-4 py-1 border border-solid border-my-gray-70  rounded-md flex flex-row flex-nowrap justify-start items-center cursor-pointer"
-                                    }
-                                >
-                                    <Image
-                                        src={"/not-interested-active-icon.svg"}
-                                        width={13}
-                                        height={13}
-                                        className="m-2"
-                                    />
-                                    <span className="text-xs text-primary-70">
-                                        No Documents Added
-                                    </span>
+                                    {!hasResume && (
+                                        <div
+                                            className={
+                                                "mt-4 px-4 py-1 border border-solid border-my-gray-70  rounded-md flex flex-row flex-nowrap justify-start items-center cursor-pointer"
+                                            }
+                                        >
+                                            <Image
+                                                src={
+                                                    "/not-interested-active-icon.svg"
+                                                }
+                                                width={13}
+                                                height={13}
+                                                className="m-2"
+                                            />
+                                            <span className="text-xs text-primary-70">
+                                                No Resume Added
+                                            </span>
+                                        </div>
+                                    )}
                                 </div>
-                            )}
-                        </div>
+                                <div className="form-input-container ">
+                                    <div className="flex flex-row justify-between p-2">
+                                        <label className="form-label-light">
+                                            Cerficates / Other Documents
+                                        </label>
+                                        {/* {hasOtherDocs && (
+                                            <span
+                                                onClick={() => {
+                                                    otherDocsInput.current.click();
+                                                }}
+                                                className="text-primary-70 cursor-pointer flex flex-nowrap justify-center items-center"
+                                            >
+                                                <AiOutlineSwap className="mr-2 text-primary-70" />
+                                                Replace all
+                                            </span>
+                                        )} */}
+                                        {/* <span
+                                            onClick={() => {
+                                                addOtherDocsInput.current.click();
+                                            }}
+                                            className="text-primary-70 test-sm cursor-pointer flex flex-row flex-nowrap justify-center items-center"
+                                        >
+                                            <Image
+                                                src={"/plus-icon.svg"}
+                                                width={12}
+                                                height={12}
+                                                className="m-2"
+                                            />
+                                            Add
+                                        </span> */}
+                                    </div>
+
+                                    {hasOtherDocs && (
+                                        <div
+                                            className={
+                                                "mt-4 px-4 py-1 border border-solid border-my-gray-70  rounded-md flex flex-col justify-start items-start"
+                                            }
+                                        >
+                                            {otherDocs.map(
+                                                (otherDoc, index) => {
+                                                    return (
+                                                        <div className="flex flex-row flex-nowrap">
+                                                            <Link
+                                                                key={index}
+                                                                href={
+                                                                    otherDoc.document_url
+                                                                }
+                                                                target="_blank"
+                                                                className="flex flex-row flex-nowrap justify-start items-center"
+                                                            >
+                                                                <AiOutlineFileText />
+                                                                <span className="text-xs text-primary-70 p-2">
+                                                                    Other Doc_
+                                                                    {index + 1}
+                                                                </span>
+                                                                <MdOutlineOpenInNew className="ml-2 text-primary-70" />
+                                                            </Link>
+                                                        </div>
+                                                    );
+                                                }
+                                            )}
+                                        </div>
+                                    )}
+
+                                    {!hasOtherDocs && (
+                                        <div
+                                            className={
+                                                "mt-4 px-4 py-1 border border-solid border-my-gray-70  rounded-md flex flex-row flex-nowrap justify-start items-center cursor-pointer"
+                                            }
+                                        >
+                                            <Image
+                                                src={
+                                                    "/not-interested-active-icon.svg"
+                                                }
+                                                width={13}
+                                                height={13}
+                                                className="m-2"
+                                            />
+                                            <span className="text-xs text-primary-70">
+                                                No Documents Added
+                                            </span>
+                                        </div>
+                                    )}
+                                </div>
+                            </section>
+                        )}
                     </section>
                     <div
                         onClick={() => {
@@ -818,14 +839,8 @@ export default function ApplyPopup({
                             className="submit-btn-secondary mx-3"
                             type={"button"}
                         >
-                            {/* {loading && <span className="loader"></span>} */}
-                            {/* {!loading && <span className="">Cancel</span>} */}
                             <span className="">Cancel</span>
                         </button>
-
-                        {/* <div className="w-full flex flex-row flex-wrap justify-center items-center ">
-                            
-                        </div> */}
                     </div>
                 </div>
             </>
