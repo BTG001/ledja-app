@@ -51,12 +51,7 @@ export default function ApplyPopup({ showPopup, onClose, jobSeekerId }) {
         }
     }, [showPopup]);
 
-    useEffect(() => {
-        clear();
-    }, [jobSeekerId]);
-
     const whenClosed = () => {
-        clear();
         onClose();
     };
 
@@ -84,6 +79,7 @@ export default function ApplyPopup({ showPopup, onClose, jobSeekerId }) {
     };
 
     useEffect(() => {
+        clear();
         if (jobSeekerId) {
             fetchJobSeeker();
         }

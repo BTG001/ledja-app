@@ -261,6 +261,14 @@ export default function PaymentOptions({
             theErrors.phone_number = "Phone number is required";
         }
 
+        if (
+            mpesaDetails.phone_number &&
+            mpesaDetails.phone_number.length != 9
+        ) {
+            hasErrors = true;
+            theErrors.phone_number = "Invalid phone number";
+        }
+
         if (!amount) {
             hasErrors = true;
             theErrors.amount = "Amount is Required";

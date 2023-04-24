@@ -169,6 +169,11 @@ export default function JobSeekerProfileSetupStep1() {
             theErrors.phoneNumber = "Phone Number is Required";
         }
 
+        if (basicInfos.phoneNumber && basicInfos.phoneNumber.length != 12) {
+            hasErrors = true;
+            theErrors.phoneNumber = "Invalid Phone Number";
+        }
+
         // if (!basicInfos.email) {
         //     hasErrors = true;
         //     theErrors.email = "Email is Required";
@@ -319,7 +324,7 @@ export default function JobSeekerProfileSetupStep1() {
                         <input
                             className="form-input"
                             type={"text"}
-                            placeholder="000-000-0000"
+                            placeholder="254712345678"
                             required
                             value={basicInfos.phoneNumber}
                             onChange={(e) => {

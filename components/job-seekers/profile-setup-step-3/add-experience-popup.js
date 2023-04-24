@@ -563,7 +563,7 @@ export default function AddExperiencePopup({ showPopup, onClose, onSuccess }) {
                                     });
                                 }}
                             ></textarea>
-                            <p className="text-right w-full text-sm">0/2,000</p>
+                            {/* <p className="text-right w-full text-sm">0/2,000</p> */}
                             <p className="text-red-500 text-left  ">
                                 {errors.description || ""}
                             </p>

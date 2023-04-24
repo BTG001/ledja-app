@@ -36,6 +36,15 @@ export default function RecruiterProfileSetupStep4() {
 
         R_Step4FormData.append("user_id", userId);
 
+        const phoneNo = R_Step4FormData.get("phone_no");
+
+        if (!phoneNo || phoneNo.length != 12) {
+            setErrorMessage("Invalid Phone Number");
+            setShowErrorPopup(true);
+            setLoadingNext(false);
+            return;
+        }
+
         Utils.makeRequest(async () => {
             try {
                 const results = await Utils.postForm(
@@ -73,6 +82,14 @@ export default function RecruiterProfileSetupStep4() {
         const R_Step4FormData = new FormData(R_Step4Form.current);
 
         R_Step4FormData.append("user_id", userId);
+        const phoneNo = R_Step4FormData.get("phone_no");
+
+        if (!phoneNo || phoneNo.length != 12) {
+            setErrorMessage("Invalid Phone Number");
+            setShowErrorPopup(true);
+            setLoadingExit(false);
+            return;
+        }
 
         Utils.makeRequest(async () => {
             try {
@@ -215,7 +232,7 @@ export default function RecruiterProfileSetupStep4() {
                         <input
                             className="form-input"
                             type={"text"}
-                            placeholder="000-000-0000"
+                            placeholder="254712345678"
                             name="phone_no"
                             required
                         />

@@ -1,7 +1,6 @@
 import { useContext, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Footer from "../../../../components/Footer";
-import RecruiterNavbar from "../../../../components/navbars/RecruiterNavbar";
 import SecondaryBtn from "../../../../components/buttons/SecondaryBtn";
 import Utils from "../../../../Utils";
 import Config from "../../../../Config";
@@ -13,9 +12,10 @@ import { useRouter } from "next/router";
 import { RiImageEditFill } from "react-icons/ri";
 import { AuthContext } from "../../../_app";
 import RecruiterProfileLoader from "../../../../components/skeleton-loaders/recruiter-profile-loader";
-
+import GuestNavbar from "../../../../components/navbars/GuestNavbar";
 export default function Recruiter() {
     const router = useRouter();
+
     const [basicInfo, setBasicInfo] = useState({});
     const [links, setLinks] = useState({});
     const [aboutRecruiter, setAboutRecruiter] = useState({});
@@ -30,8 +30,6 @@ export default function Recruiter() {
     const [hasCompanyCulture, setHasCompanyCulture] = useState(false);
     const [hasSocialMediaLinks, setHasSocialMediaLinks] = useState(false);
 
-    const auth = useContext(AuthContext);
-
     const [hasRecruiterAvatar, setHasRecruiterAvatar] = useState(false);
     const [hasCompanyAvatar, setHasCompanyAvatar] = useState(false);
 
@@ -41,15 +39,16 @@ export default function Recruiter() {
     const [profileLoading, setProfileLoading] = useState(false);
 
     useEffect(() => {
+        if (!router.isReady) return;
         fetchRecruiter();
         fetchJobs();
-    }, []);
+    }, [router.isReady]);
 
     async function fetchRecruiter() {
         setProfileLoading(true);
         try {
-            const userId = localStorage.getItem("user_id");
-            const url = `${Config.API_URL}/users/${userId}`;
+            const { recruiterId } = router.query;
+            const url = `${Config.API_URL}/users/${recruiterId}`;
             let recruiter = await axios.get(url);
 
             recruiter = recruiter.data.data;
@@ -134,8 +133,8 @@ export default function Recruiter() {
 
     async function fetchJobs(url) {
         if (!url) {
-            const userId = localStorage.getItem("user_id");
-            url = `${Config.API_URL}/get_user_jobs/${userId}`;
+            const { recruiterId } = router.query;
+            url = `${Config.API_URL}/get_user_jobs/${recruiterId}`;
         }
 
         try {
@@ -153,7 +152,7 @@ export default function Recruiter() {
 
     return (
         <>
-            <RecruiterNavbar icon={"user"} dashboardLinks={false} />
+            <GuestNavbar />
             <div className="w-4/5 md:grid grid-cols-3 md:gap-4  mt-5 mb-32 mx-auto md:grid-flow-dense md:dire ">
                 {profileLoading && (
                     <section className="col-span-2">
@@ -403,8 +402,25 @@ export default function Recruiter() {
                                                     {job.title}
                                                 </h2>
                                                 <p className="text-sm text-my-gray-70">
-                                                    {job.location}
-                                                    {/* ({job.type}) */}
+                                                    <span className="pr-1">
+                                                        {job.location}
+                                                    </span>{" "}
+                                                    (
+                                                    {job.job_types.map(
+                                                        (type, index) => {
+                                                            if (
+                                                                index ==
+                                                                job.job_types
+                                                                    .length -
+                                                                    1
+                                                            ) {
+                                                                return type.title;
+                                                            } else {
+                                                                return `${type.title} | `;
+                                                            }
+                                                        }
+                                                    )}
+                                                    )
                                                 </p>
                                             </div>
                                         </div>
