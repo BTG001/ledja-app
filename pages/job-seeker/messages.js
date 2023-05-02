@@ -27,6 +27,8 @@ export default function JobSeekerMessages() {
                 headers: Utils.getHeaders(),
             });
 
+            console.log("raw user messages", userMessages);
+
             userMessages = userMessages.data.data.messages;
             console.log("jobseeker messages: ", userMessages);
 

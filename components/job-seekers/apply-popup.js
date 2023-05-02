@@ -279,10 +279,22 @@ export default function ApplyPopup({
                                 onChange={(e) => {
                                     const value = e.target.value;
 
+                                    if (value.length > 2000) {
+                                        return;
+                                    }
+
                                     setCoverLetter(value);
                                 }}
                             ></textarea>
-                            <p className="text-right w-full text-sm">0/2,000</p>
+                            <p
+                                className={`text-right p-2  ${
+                                    coverLetter.length >= 2000
+                                        ? "text-red-400"
+                                        : "text-my-gray-70"
+                                }`}
+                            >
+                                {coverLetter.length}/2000
+                            </p>
                             <p className="text-red-500 text-left  ">
                                 {errors.cover_letter || ""}
                             </p>

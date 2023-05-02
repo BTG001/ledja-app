@@ -233,8 +233,13 @@ export default function RecruiterProfileSetupStep1() {
                                 name="industry"
                                 required
                             >
-                                <option value={"Banking"}>Banking</option>
-                                <option value={"Industry2"}>Industry2</option>
+                                {Config.ALL_INDUSTRIES.map((industry) => {
+                                    return (
+                                        <option value={industry}>
+                                            {industry}
+                                        </option>
+                                    );
+                                })}
                             </select>
                             <p className="text-red-500">{errors.industry}</p>
                         </div>
@@ -311,7 +316,7 @@ export default function RecruiterProfileSetupStep1() {
                             />
                             <p className="text-red-500">{errors.founded_on}</p>
                         </div>
-
+                        {/* 
                         <div className="form-input-container">
                             <label className="form-label-light " for="revenue">
                                 CEO
@@ -324,7 +329,7 @@ export default function RecruiterProfileSetupStep1() {
                                 // value={"Frank Jessy"}
                             />
                             <p className="text-red-500">{errors.ceo}</p>
-                        </div>
+                        </div> */}
                     </div>
 
                     <div className="md:grid md:grid-cols-2 md:gap-1 justify-center items-center ">

@@ -9,6 +9,7 @@ import Config from "../Config";
 import Utils from "../Utils";
 import ErrorPopup from "../components/errorPopup";
 import { AuthContext } from "./_app";
+import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
 
 export default function login() {
     const router = useRouter();
@@ -18,6 +19,8 @@ export default function login() {
     const [showErrorPopup, setShowErrorPopup] = useState(false);
     const [errorMessage, setErrorMessage] = useState("An Error Occured");
     const auth = useContext(AuthContext);
+    const [passwordVisible, setPasswordVisible] = useState(false);
+    const [passwordInputActive, setPasswordInputActive] = useState(false);
 
     const onLoginSubmit = async (e) => {
         e.preventDefault();
@@ -136,13 +139,46 @@ export default function login() {
 
                     <div className="form-input-container" required>
                         <label className="form-label">Password</label>
-                        <input
-                            className="form-input"
-                            type={"password"}
-                            name="password"
-                            placeholder="6 characters minimum"
-                            required
-                        />
+                        <div
+                            className={` flex justify-between items-center border border-solid px-4 text-dark-50 w-full  py-1 placeholder:text-my-gray-70 placeholder:text-sm rounded-sm mt-3
+                        ${
+                            passwordInputActive
+                                ? "border-primary-70"
+                                : "border-my-gray-70"
+                        }`}
+                        >
+                            <input
+                                className="outline-none active:outline-none flex-grow"
+                                type={!passwordVisible ? "password" : "text"}
+                                onFocus={() => {
+                                    console.log("input active.......");
+                                    setPasswordInputActive(true);
+                                }}
+                                onBlur={() => {
+                                    setPasswordInputActive(false);
+                                }}
+                                name="password"
+                                placeholder="6 characters minimum"
+                                required
+                            />
+
+                            {passwordVisible && (
+                                <AiOutlineEye
+                                    onClick={() => {
+                                        setPasswordVisible(false);
+                                    }}
+                                    className="text-2xl p-1"
+                                />
+                            )}
+                            {!passwordVisible && (
+                                <AiOutlineEyeInvisible
+                                    onClick={() => {
+                                        setPasswordVisible(true);
+                                    }}
+                                    className="text-2xl p-1"
+                                />
+                            )}
+                        </div>
                     </div>
 
                     <button className={`submit-btn `} type={"submit"}>

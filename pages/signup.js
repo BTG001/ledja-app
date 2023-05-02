@@ -10,6 +10,7 @@ import { useState } from "react";
 import ErrorPopup from "../components/errorPopup";
 import Utils from "../Utils";
 import { AuthContext } from "./_app";
+import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
 
 export default function login() {
     const router = useRouter();
@@ -20,6 +21,14 @@ export default function login() {
     const [showErrorPopup, setShowErrorPopup] = useState(false);
     const [errorMessage, setErrorMessage] = useState("An Error Occured");
     const [errors, setErrors] = useState({});
+    const [passwordVisible, setPasswordVisible] = useState(false);
+    const [passwordInputActive, setPasswordInputActive] = useState(false);
+    const [passwordConfirmationVisible, setPasswordConfirmationVisible] =
+        useState(false);
+    const [
+        passwordConfirmationInputActive,
+        setPasswordConfirmationInputActive,
+    ] = useState(false);
 
     const { role } = router.query;
     const auth = useContext(AuthContext);
@@ -167,28 +176,101 @@ export default function login() {
                         </p>
                     </div>
 
-                    <div className="form-input-container">
+                    <div className="form-input-container" required>
                         <label className="form-label">Password</label>
-                        <input
-                            className="form-input"
-                            type={"password"}
-                            placeholder="6 characters minimum"
-                            name="password"
-                            // required
-                        />
+                        <div
+                            className={` flex justify-between items-center border border-solid px-4 text-dark-50 w-full  py-1 placeholder:text-my-gray-70 placeholder:text-sm rounded-sm mt-3
+                        ${
+                            passwordInputActive
+                                ? "border-primary-70"
+                                : "border-my-gray-70"
+                        }`}
+                        >
+                            <input
+                                className="outline-none active:outline-none flex-grow"
+                                type={!passwordVisible ? "password" : "text"}
+                                onFocus={() => {
+                                    console.log("input active.......");
+                                    setPasswordInputActive(true);
+                                }}
+                                onBlur={() => {
+                                    setPasswordInputActive(false);
+                                }}
+                                name="password"
+                                placeholder="6 characters minimum"
+                                required
+                            />
+
+                            {passwordVisible && (
+                                <AiOutlineEye
+                                    onClick={() => {
+                                        setPasswordVisible(false);
+                                    }}
+                                    className="text-2xl p-1"
+                                />
+                            )}
+                            {!passwordVisible && (
+                                <AiOutlineEyeInvisible
+                                    onClick={() => {
+                                        setPasswordVisible(true);
+                                    }}
+                                    className="text-2xl p-1"
+                                />
+                            )}
+                        </div>
                         <p className="text-red-500 my-1 py-1">
                             {errors.password || ""}
                         </p>
                     </div>
-                    <div className="form-input-container">
-                        <label className="form-label">Confirm Password</label>
-                        <input
-                            className="form-input"
-                            type={"password"}
-                            placeholder="Password should match"
-                            name="c_password"
-                            // required
-                        />
+
+                    <div className="form-input-container" required>
+                        <label className="form-label">
+                            Password Confirmation
+                        </label>
+                        <div
+                            className={` flex justify-between items-center border border-solid px-4 text-dark-50 w-full  py-1 placeholder:text-my-gray-70 placeholder:text-sm rounded-sm mt-3
+                        ${
+                            passwordConfirmationInputActive
+                                ? "border-primary-70"
+                                : "border-my-gray-70"
+                        }`}
+                        >
+                            <input
+                                className="outline-none active:outline-none flex-grow"
+                                type={
+                                    !passwordConfirmationVisible
+                                        ? "password"
+                                        : "text"
+                                }
+                                onFocus={() => {
+                                    console.log("input active.......");
+                                    setPasswordConfirmationInputActive(true);
+                                }}
+                                onBlur={() => {
+                                    setPasswordConfirmationInputActive(false);
+                                }}
+                                name="c_password"
+                                placeholder="6 characters minimum"
+                                required
+                            />
+
+                            {passwordConfirmationVisible && (
+                                <AiOutlineEye
+                                    onClick={() => {
+                                        setPasswordConfirmationVisible(false);
+                                    }}
+                                    className="text-2xl p-1"
+                                />
+                            )}
+                            {!passwordConfirmationVisible && (
+                                <AiOutlineEyeInvisible
+                                    onClick={() => {
+                                        setPasswordConfirmationVisible(true);
+                                    }}
+                                    className="text-2xl p-1"
+                                />
+                            )}
+                        </div>
                         <p className="text-red-500 my-1 py-1">
                             {errors.c_password || ""}
                         </p>

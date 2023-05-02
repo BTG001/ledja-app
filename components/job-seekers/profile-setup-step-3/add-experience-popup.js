@@ -21,7 +21,7 @@ export default function AddExperiencePopup({ showPopup, onClose, onSuccess }) {
         // endYear: 2018,
         // endMonth: "11",
         // industry: "IT Services",
-        // description: "This is a description",
+        description: "",
         // location: "Nairobi, Kenya",
     });
 
@@ -555,6 +555,10 @@ export default function AddExperiencePopup({ showPopup, onClose, onSuccess }) {
                                 onChange={(e) => {
                                     const value = e.target.value;
 
+                                    if (value.length > 2000) {
+                                        return;
+                                    }
+
                                     setWorkExperience((prevValues) => {
                                         return {
                                             ...prevValues,
@@ -563,7 +567,15 @@ export default function AddExperiencePopup({ showPopup, onClose, onSuccess }) {
                                     });
                                 }}
                             ></textarea>
-                            {/* <p className="text-right w-full text-sm">0/2,000</p> */}
+                            <p
+                                className={`text-right p-2  ${
+                                    workExperience.description.length >= 2000
+                                        ? "text-red-400"
+                                        : "text-my-gray-70"
+                                }`}
+                            >
+                                {workExperience.description.length}/2000
+                            </p>
                             <p className="text-red-500 text-left  ">
                                 {errors.description || ""}
                             </p>

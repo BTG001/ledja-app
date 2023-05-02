@@ -18,6 +18,9 @@ export default function RecruiterProfileSetupStep3() {
     const [showErrorPopup, setShowErrorPopup] = useState(false);
     const [errorMessage, setErrorMessage] = useState("An Error Occured");
 
+    const [companyCulture, setCompanyCulture] = useState("");
+    const [companyIntroduction, setCompanyIntroduction] = useState("");
+
     const [errors, setErrors] = useState({});
 
     const onNext = async (e) => {
@@ -174,10 +177,27 @@ export default function RecruiterProfileSetupStep3() {
                             className="form-input"
                             rows={3}
                             name="company_intro"
+                            value={companyIntroduction}
                             placeholder="Hi everyone! I’m a recruiter at ABC company...."
+                            onChange={(e) => {
+                                const value = e.target.value;
+
+                                if (value.length > 2000) {
+                                    return;
+                                }
+
+                                setCompanyIntroduction(value);
+                            }}
+                        ></textarea>
+                        <p
+                            className={`text-right p-2  ${
+                                companyIntroduction.length >= 2000
+                                    ? "text-red-400"
+                                    : "text-my-gray-70"
+                            }`}
                         >
-                            {/* Hi everyone! I’m a recruiter at ABC company.... */}
-                        </textarea>
+                            {companyIntroduction.length}/2000
+                        </p>
                         <p className="text-red-500">{errors.company_intro}</p>
                     </div>
 
@@ -190,10 +210,26 @@ export default function RecruiterProfileSetupStep3() {
                             className="form-input"
                             rows={3}
                             name="company_culture"
+                            value={companyCulture}
                             placeholder="We offer a collaborative work environment..."
+                            onChange={(e) => {
+                                if (value.length > 2000) {
+                                    return;
+                                }
+                                const value = e.target.value;
+
+                                setCompanyCulture(value);
+                            }}
+                        ></textarea>
+                        <p
+                            className={`text-right p-2  ${
+                                companyCulture.length >= 2000
+                                    ? "text-red-400"
+                                    : "text-my-gray-70"
+                            }`}
                         >
-                            {/* We offer a collaborative work environment... */}
-                        </textarea>
+                            {companyCulture.length}/2000
+                        </p>
                         <p className="text-red-500">{errors.company_culture}</p>
                     </div>
 

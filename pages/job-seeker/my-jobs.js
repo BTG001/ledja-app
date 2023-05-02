@@ -10,14 +10,14 @@ import ApplySuccessPopup from "../../components/job-seekers/apply-success-popup"
 import Config from "../../Config";
 import Utils from "../../Utils";
 import axios from "axios";
-import { BsBuilding } from "react-icons/bs";
+import { BsBuilding, BsHourglassSplit } from "react-icons/bs";
 import ErrorPopup from "../../components/errorPopup";
 import SearchJobsJobsSkeletonLoader from "../../components/skeleton-loaders/search-jobs-jobs-loader";
 import HasAssessmentPopup from "../../components/job-seekers/has-assessment-popup";
 import ComingSoon from "../../components/coming-soon-popup";
 import TakeTestPopup from "../../components/job-seekers/take-test-popup";
 import MyJobsApplicationsSkeleton from "../../components/skeleton-loaders/my-jobs-applications-skeleton-loader";
-
+import { MdWorkOutline } from "react-icons/md";
 export default function MyJobs() {
     const [showApplyPopup, setShowApplyPopup] = useState(false);
     const [showSuccessPopup, setShowSuccessPopup] = useState(false);
@@ -102,6 +102,7 @@ export default function MyJobs() {
 
     const onTestAssessmentSuccess = () => {
         setShowTakeTestPopup(false);
+        filterActiveJobApplications();
         // setShowSuccessPopup(true);
     };
 
@@ -210,6 +211,19 @@ export default function MyJobs() {
             }
         });
     };
+
+    function checkHasTakenAssessment(assessmentTestObj) {
+        let hasTakenAssessment = false;
+        const userId = localStorage.getItem("user_id");
+        assessmentTestObj.scores.map((score) => {
+            if (score.user_id == userId) {
+                hasTakenAssessment = true;
+            }
+        });
+
+        console.log("has taken assessment: ", hasTakenAssessment);
+        return hasTakenAssessment;
+    }
 
     return (
         <>
@@ -369,21 +383,27 @@ export default function MyJobs() {
                                             </div>
                                         </div>
                                         <p className="">{application.status}</p>
-                                        {application.job
-                                            .skills_assessment_id && (
-                                            <p
-                                                onClick={() => {
-                                                    setActiveAssessmentId(
-                                                        application.job
-                                                            .skills_assessment_id
-                                                    );
-                                                    setShowTakeTestPopup(true);
-                                                }}
-                                                className="cursor-pointer text-primary-70 underline"
-                                            >
-                                                Take test
-                                            </p>
-                                        )}
+                                        {application.job.skills_assessment_id &&
+                                            application.assessment_tests &&
+                                            application.assessment_tests[0] &&
+                                            !checkHasTakenAssessment(
+                                                application.assessment_tests[0]
+                                            ) && (
+                                                <p
+                                                    onClick={() => {
+                                                        setActiveAssessmentId(
+                                                            application.job
+                                                                .skills_assessment_id
+                                                        );
+                                                        setShowTakeTestPopup(
+                                                            true
+                                                        );
+                                                    }}
+                                                    className="cursor-pointer text-primary-70 underline"
+                                                >
+                                                    Take test
+                                                </p>
+                                            )}
                                     </div>
                                 );
                             })}
@@ -500,7 +520,21 @@ export default function MyJobs() {
                                                 />
                                                 <span>
                                                     {activeJob.location || ""} •{" "}
-                                                    {activeJob.type || ""}
+                                                    {/* {activeJob.job_types.map(
+                                                        (type, index) => {
+                                                            if (
+                                                                index ==
+                                                                activeJob
+                                                                    .job_types
+                                                                    .length -
+                                                                    1
+                                                            ) {
+                                                                return type.title;
+                                                            } else {
+                                                                return `${type.title} | `;
+                                                            }
+                                                        }
+                                                    )} */}
                                                 </span>
                                             </p>
                                             <p className="text-sm text-my-gray-70 flex flex-row flex-nowrap justify-start items-center">
@@ -512,6 +546,21 @@ export default function MyJobs() {
                                                 />
                                                 <span>
                                                     {activeJob.salary || ""}{" "}
+                                                </span>
+                                                <BsHourglassSplit className="pl-2 text-lg text-primary-70" />
+                                                <span className="pl-1 text-primary-70">
+                                                    Posted{" "}
+                                                    {Utils.calculateTimeLapse(
+                                                        activeJob.created_at
+                                                    )}{" "}
+                                                    ago
+                                                </span>
+                                            </p>
+                                            <p className="text-sm text-my-gray-70 flex flex-row flex-nowrap justify-start items-center">
+                                                <MdWorkOutline className=" text-lg text-primary-70" />
+                                                <span className="pl-1 text-primary-70">
+                                                    {activeJob.experience_level}{" "}
+                                                    years experience required
                                                 </span>
                                             </p>
 

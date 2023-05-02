@@ -528,13 +528,13 @@ export default function () {
                                     />
                                 </div> */}
 
-                                <div className="form-input-container  rounded-md  ">
+                                {/* <div className="form-input-container  rounded-md  ">
                                     <select className="form-input  py-3 mr-2">
                                         <option>
                                             Sort by: Score high to low
                                         </option>
                                     </select>
-                                </div>
+                                </div> */}
                             </div>
                         </div>
                     </form>

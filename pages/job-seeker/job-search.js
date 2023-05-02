@@ -10,12 +10,13 @@ import ApplySuccessPopup from "../../components/job-seekers/apply-success-popup"
 import Config from "../../Config";
 import Utils from "../../Utils";
 import axios from "axios";
-import { BsBuilding } from "react-icons/bs";
+import { BsBuilding, BsHourglassSplit } from "react-icons/bs";
 import ErrorPopup from "../../components/errorPopup";
 import SearchJobsJobsSkeletonLoader from "../../components/skeleton-loaders/search-jobs-jobs-loader";
 import HasAssessmentPopup from "../../components/job-seekers/has-assessment-popup";
 import ComingSoon from "../../components/coming-soon-popup";
 import TakeTestPopup from "../../components/job-seekers/take-test-popup";
+import { MdWorkOutline } from "react-icons/md";
 
 export default function JobSearch() {
     const [showApplyPopup, setShowApplyPopup] = useState(false);
@@ -65,7 +66,7 @@ export default function JobSearch() {
         const filterFormData = new FormData();
         filterFormData.append("title", filters.title || "");
         filterFormData.append("location", filters.location || "");
-        filterFormData.append("type", filters.jobType || "");
+        filterFormData.append("job_types", [filters.jobType] || []);
         filterFormData.append("salary", filters.salary || "");
         filterFormData.append(
             "experience_level",
@@ -265,7 +266,11 @@ export default function JobSearch() {
                             <LeftIconLocationInput
                                 placeholder={"Location"}
                                 value={filters.location}
-                                onChange={(value) => {
+                                onTextChange={(value) => {
+                                    console.log(
+                                        "location changed to : ",
+                                        value
+                                    );
                                     setFilters((prevValues) => {
                                         return {
                                             ...prevValues,
@@ -447,7 +452,7 @@ export default function JobSearch() {
                                                         : ""}
                                                 </p>
                                                 <p className="text-sm">
-                                                    {job.location}
+                                                    {job.location || ""}
                                                 </p>
                                             </div>
                                         </div>
@@ -473,7 +478,19 @@ export default function JobSearch() {
                                     />
                                     <span>
                                         {activeJob.location || ""} •{" "}
-                                        {activeJob.type || ""}
+                                        {activeJob.job_types.map(
+                                            (type, index) => {
+                                                if (
+                                                    index ==
+                                                    activeJob.job_types.length -
+                                                        1
+                                                ) {
+                                                    return type.title;
+                                                } else {
+                                                    return `${type.title} | `;
+                                                }
+                                            }
+                                        )}
                                     </span>
                                 </p>
                                 <p className="text-sm text-my-gray-70 flex flex-row flex-nowrap justify-start items-center">
@@ -484,6 +501,21 @@ export default function JobSearch() {
                                         height={11}
                                     />
                                     <span>{activeJob.salary || ""} </span>
+                                    <BsHourglassSplit className="pl-2 text-lg text-primary-70" />
+                                    <span className="pl-1 text-primary-70">
+                                        Posted{" "}
+                                        {Utils.calculateTimeLapse(
+                                            activeJob.created_at
+                                        )}{" "}
+                                        ago
+                                    </span>
+                                </p>
+                                <p className="text-sm text-my-gray-70 flex flex-row flex-nowrap justify-start items-center">
+                                    <MdWorkOutline className=" text-lg text-primary-70" />
+                                    <span className="pl-1 text-primary-70">
+                                        {activeJob.experience_level} years
+                                        experience required
+                                    </span>
                                 </p>
 
                                 <div className="flex flex-row flex-wrap justify-start items-center my-3">

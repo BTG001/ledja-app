@@ -19,7 +19,7 @@ export default function ({ jobCategories }) {
     const [companySubIndustry, setcompanySubIndustry] = useState();
     const [jobTitle, setJobTitle] = useState();
     const [jobLocation, setJobLocation] = useState();
-    const [jobDescription, setJobDescription] = useState();
+    const [jobDescription, setJobDescription] = useState("");
     const [showErrorPopup, setShowErrorPopup] = useState();
     const [errorMessage, setErrorMessage] = useState(" an Error Occured");
     const [errors, setErrors] = useState({});
@@ -43,7 +43,7 @@ export default function ({ jobCategories }) {
         }
         setJobTitle(theLocalJobPost.title);
         setJobLocation(theLocalJobPost.location);
-        setJobDescription(theLocalJobPost.description);
+        setJobDescription(theLocalJobPost.description || "");
     }, []);
 
     const onChangeJobCategory = (newJobCategoryId) => {
@@ -59,13 +59,13 @@ export default function ({ jobCategories }) {
 
         setErrors({});
 
-        // const hasErrors = handleErrors();
+        const hasErrors = handleErrors();
 
-        // if (hasErrors) {
-        //     setErrorMessage("Please resolve the errors");
-        //     setShowErrorPopup(true);
-        //     return;
-        // }
+        if (hasErrors) {
+            setErrorMessage("Please resolve the errors");
+            setShowErrorPopup(true);
+            return;
+        }
 
         localJobPost.job_category_id = activeJobCategoryId;
         localJobPost.company_industry = companyIndustry;
@@ -274,7 +274,7 @@ export default function ({ jobCategories }) {
                         <label className="form-label-light" for="industry">
                             Job location
                         </label>
-                        <select
+                        {/* <select
                             value={jobLocation || emptySelectString}
                             onChange={(e) => {
                                 const value = e.target.value;
@@ -302,7 +302,23 @@ export default function ({ jobCategories }) {
                                     </option>
                                 );
                             })}
-                        </select>
+                        </select> */}
+                        <input
+                            value={jobLocation || ""}
+                            onChange={(e) => {
+                                const value = e.target.value;
+                                if (value == emptySelectString) {
+                                    setJobLocation(null);
+                                    return;
+                                }
+                                setJobLocation(value);
+                            }}
+                            className="form-input"
+                            name="location"
+                            type="text"
+                            placeholder="Nairobi, Kenya"
+                            required
+                        />
                         <p className="text-red-500 text-left py-2 ">
                             {errors.jobLocation}
                         </p>
@@ -320,12 +336,24 @@ export default function ({ jobCategories }) {
                             name="description"
                             rows={8}
                             value={jobDescription}
+                            placeholder="I need a software developer to..."
                             onChange={(e) => {
-                                setJobDescription(e.target.value);
+                                const value = e.target.value;
+                                if (value.length > 2000) {
+                                    return;
+                                }
+                                setJobDescription(value);
                             }}
+                        ></textarea>
+                        <p
+                            className={`text-right p-2  ${
+                                jobDescription.length >= 2000
+                                    ? "text-red-400"
+                                    : "text-my-gray-70"
+                            }`}
                         >
-                            {jobDescription}
-                        </textarea>
+                            {jobDescription.length}/2000
+                        </p>
                         <p className="text-red-500 text-left py-2 ">
                             {errors.jobDescription}
                         </p>

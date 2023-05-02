@@ -2,7 +2,11 @@ import Image from "next/image";
 
 import { useState } from "react";
 
-export default function LeftIconLocationInput({ value, placeholder }) {
+export default function LeftIconLocationInput({
+    value,
+    placeholder,
+    onTextChange,
+}) {
     const [locationFocus, setLocationFocus] = useState(false);
     return (
         <>
@@ -26,6 +30,10 @@ export default function LeftIconLocationInput({ value, placeholder }) {
                         onBlur={() => setLocationFocus(false)}
                         className="w-full block outline-none border-none focus:outline-none focus:border-none pr-4 py-1 m-2 placeholder:text-dark-50"
                         type={"text"}
+                        onChange={(e) => {
+                            const value = e.target.value;
+                            onTextChange(value);
+                        }}
                         placeholder={placeholder}
                     />
                 </div>
