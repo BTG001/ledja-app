@@ -47,6 +47,7 @@ export default class Utils {
             with_assessment: null,
             skills_assessment_id: null,
             apply_method: null,
+            category: null,
         };
 
         let jobPost = localStorage.getItem("job_post");

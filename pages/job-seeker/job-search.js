@@ -17,6 +17,7 @@ import HasAssessmentPopup from "../../components/job-seekers/has-assessment-popu
 import ComingSoon from "../../components/coming-soon-popup";
 import TakeTestPopup from "../../components/job-seekers/take-test-popup";
 import { MdWorkOutline } from "react-icons/md";
+import Pagination from "../../components/pagination";
 
 export default function JobSearch() {
     const [showApplyPopup, setShowApplyPopup] = useState(false);
@@ -38,6 +39,7 @@ export default function JobSearch() {
 
     const [activeAssessmentId, setActiveAssessmentId] = useState();
     const [saveLoading, setSaveLoading] = useState(false);
+    const [paginationData, setPaginationData] = useState({});
 
     useEffect(() => {
         fetchJobs();
@@ -55,7 +57,15 @@ export default function JobSearch() {
         setShowApplyPopup(true);
     };
 
-    const onSearch = () => {
+    const onChangePage = (newPageURL) => {
+        if (newPageURL.search("filter") != -1) {
+            onSearch(newPageURL);
+        } else {
+            fetchJobs(newPageURL);
+        }
+    };
+
+    const onSearch = (pageUrl) => {
         setJobsLoading(true);
         if (jobsLoading) {
             return;
@@ -76,13 +86,22 @@ export default function JobSearch() {
 
         Utils.makeRequest(async () => {
             try {
-                const filterURL = `${Config.API_URL}/filter_jobs`;
+                let filterURL = pageUrl;
+
+                if (!pageUrl) {
+                    filterURL = `${Config.API_URL}/filter_jobs`;
+                }
+
                 let filterResults = await Utils.postForm(
                     filterURL,
                     filterFormData
                 );
 
-                filterResults = filterResults.data.data;
+                console.log("pagination data: ", filterResults.data.data);
+
+                setPaginationData(filterResults.data.data);
+
+                filterResults = filterResults.data.data.data;
 
                 setJobs(filterResults);
 
@@ -112,6 +131,10 @@ export default function JobSearch() {
             let theJobs = await axios.get(url, {
                 headers: Utils.getHeaders(),
             });
+
+            console.log("pagination data: ", theJobs.data.data);
+
+            setPaginationData(theJobs.data.data);
 
             theJobs = theJobs.data.data.data;
 
@@ -545,6 +568,10 @@ export default function JobSearch() {
                                 </p>
                             </section>
                         </div>
+                        <Pagination
+                            data={paginationData}
+                            onChangePage={onChangePage}
+                        />
                     </>
                 )}
             </div>

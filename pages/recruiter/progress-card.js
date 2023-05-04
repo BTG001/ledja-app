@@ -97,7 +97,9 @@ export default function () {
                 headers: Utils.getHeaders(),
             });
 
-            setJobs(theJobs.data.data);
+            console.log("the jobs: ", theJobs);
+
+            setJobs(theJobs.data.data.data);
 
             // theJobs.data.data.map(async (job, index) => {
             //     if (job.skills_assessment_id) {
@@ -116,7 +118,7 @@ export default function () {
             //     }
             // });
 
-            setActiveJob(theJobs.data.data[0]);
+            setActiveJob(theJobs.data.data.data[0]);
 
             console.log("jobs: ", theJobs.data.data);
             setJobsLoading(false);
@@ -162,7 +164,7 @@ export default function () {
                     filterApplicationsFormData
                 );
 
-                theApplications = theApplications.data.data;
+                theApplications = theApplications.data.data.data;
                 setApplications(theApplications);
                 if (theApplications && theApplications.length > 0) {
                     setActiveApplication(theApplications[0]);
@@ -201,7 +203,7 @@ export default function () {
         const statusFormData = new FormData();
         statusFormData.append("status", status);
 
-        if (status == "contacting") {
+        if (status == "shortlisted") {
             if (loadingInterviewing) {
                 return;
             } else {
@@ -233,12 +235,12 @@ export default function () {
 
                 console.log("update status results: ", updateStatusResults);
 
-                if (status == "contacting") {
+                if (status == "shortlisted") {
                     setShowInterviewingStartedPopup(true);
                     setLoadingInterviewing(false);
                 }
             } catch (error) {
-                if (status == "contacting") {
+                if (status == "shortlisted") {
                     setLoadingInterviewing(false);
                 }
                 console.log("updateStatus: ", error);
@@ -247,7 +249,7 @@ export default function () {
     };
 
     const onStartInterview = () => {
-        updateStatus("contacting", activeApplication.id);
+        updateStatus("shortlisted", activeApplication.id);
     };
 
     const onClose = () => {
@@ -319,6 +321,7 @@ export default function () {
                     {jobsLoading && <DashboardJobsLoaderSkeleton />}
 
                     {jobs &&
+                        jobs.length > 0 &&
                         !jobsLoading &&
                         jobs.map((job, index) => {
                             return (
@@ -447,17 +450,17 @@ export default function () {
                             setFilters((prevValues) => {
                                 return {
                                     ...prevValues,
-                                    status: "contacting",
+                                    status: "shortlisted",
                                 };
                             });
                         }}
                         className={`hover:text-dark-50 pr-4 py-2 cursor-pointer ${
-                            filters.status == "contacting"
+                            filters.status == "shortlisted"
                                 ? "text-dark-50"
                                 : "text-my-gray-70"
                         }`}
                     >
-                        Contacting
+                        shortlisted
                     </span>
                 </div>
                 <div className="w-full">
@@ -644,28 +647,32 @@ export default function () {
                                                     ? `${activeApplication.jobseeker_basic_info.fname} ${activeApplication.jobseeker_basic_info.lname}`
                                                     : ""}
                                             </h3>
-                                            <h3 className="font-semibold flex flex-row flex-nowrap justify-center items-center">
-                                                <Image
-                                                    src={"/star-full-icon.svg"}
-                                                    width={12}
-                                                    height={12}
-                                                    className="mr-3"
-                                                />
-                                                <span className="text-2xl m-2">
-                                                    {activeApplication.score
-                                                        ? activeApplication
-                                                              .score.score
-                                                        : ""}
-                                                </span>
-                                                <span className="text-sm">
-                                                    {" "}
-                                                    out of{" "}
-                                                    {activeApplication.score
-                                                        ? activeApplication
-                                                              .score.out_of
-                                                        : ""}
-                                                </span>
-                                            </h3>
+                                            {activeApplication.score && (
+                                                <h3 className="font-semibold flex flex-row flex-nowrap justify-center items-center">
+                                                    <Image
+                                                        src={
+                                                            "/star-full-icon.svg"
+                                                        }
+                                                        width={12}
+                                                        height={12}
+                                                        className="mr-3"
+                                                    />
+                                                    <span className="text-2xl m-2">
+                                                        {activeApplication.score
+                                                            ? activeApplication
+                                                                  .score.score
+                                                            : ""}
+                                                    </span>
+                                                    <span className="text-sm">
+                                                        {" "}
+                                                        out of{" "}
+                                                        {activeApplication.score
+                                                            ? activeApplication
+                                                                  .score.out_of
+                                                            : ""}
+                                                    </span>
+                                                </h3>
+                                            )}
                                         </div>
 
                                         <div className="flex flex-row flex-nowrap justify-between items-center">
@@ -684,7 +691,9 @@ export default function () {
                                                 </span>
                                             </p>
                                             <p className="text-right">
-                                                #{" "}
+                                                {activeApplication.score && (
+                                                    <span># </span>
+                                                )}
                                                 {activeApplication.score
                                                     ? activeApplication.score
                                                           .rank
@@ -704,13 +713,16 @@ export default function () {
                                                     activeApplication.created_at
                                                 ).getDate()}`}
                                             </p>
-                                            <p className=" flex flex-row flex-nowrap justify-end items-center my-2 ">
-                                                <AiOutlineInfoCircle />
-                                                <span className="text-xs m-1">
-                                                    Rank is calculated based on
-                                                    assessment scores
-                                                </span>
-                                            </p>
+
+                                            {activeApplication.score && (
+                                                <p className=" flex flex-row flex-nowrap justify-end items-center my-2 ">
+                                                    <AiOutlineInfoCircle />
+                                                    <span className="text-xs m-1">
+                                                        Rank is calculated based
+                                                        on assessment scores
+                                                    </span>
+                                                </p>
+                                            )}
                                         </div>
                                         <div className="my-3 flex flex-row flex-wrap justify-between items-center min-h-10-screen ">
                                             <div
@@ -758,7 +770,7 @@ export default function () {
                                                             activeApplication.status ==
                                                                 "saved" ||
                                                             activeApplication.status ==
-                                                                "contacting"
+                                                                "shortlisted"
                                                         ) {
                                                             updateStatus(
                                                                 "reviewed",
@@ -775,7 +787,7 @@ export default function () {
                                                         activeApplication.status ==
                                                             "saved" ||
                                                         activeApplication.status ==
-                                                            "contacting"
+                                                            "shortlisted"
                                                             ? "/love-fill-icon.svg"
                                                             : "/love-icon.svg"
                                                     }

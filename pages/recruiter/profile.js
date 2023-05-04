@@ -188,7 +188,7 @@ export default function Profile() {
                 headers: Utils.getHeaders(),
             });
 
-            theJobs = theJobs.data.data;
+            theJobs = theJobs.data.data.data;
 
             setJobs(theJobs);
 
@@ -675,6 +675,7 @@ export default function Profile() {
                         </div>
                         <div className="form-input-container border border-solid rounded-md border-my-gray-70 py-2 px-4 my-3">
                             {jobs &&
+                                jobs.length > 0 &&
                                 jobs.map((job, index) => {
                                     return (
                                         <div

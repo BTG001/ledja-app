@@ -31,7 +31,7 @@ export default function CreditHistory({ showPopup, onClose }) {
                 headers: Utils.getHeaders(),
             });
 
-            transactions = transactions.data.data;
+            transactions = transactions.data.data.data;
 
             setTransactions(transactions);
 

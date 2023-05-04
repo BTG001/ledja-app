@@ -244,7 +244,8 @@ export default function ReloadCreditPopup({
                         </div>
 
                         <p className="text-dark-50 text-normal text-left my-3">
-                            2. Select a Payment method
+                            {/* 2. Select a Payment method */}
+                            2. Enter Payment Details
                         </p>
                         <PaymentOptions
                             selectedPaymentMethod={selectedPaymentMethod}

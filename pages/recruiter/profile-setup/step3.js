@@ -213,10 +213,10 @@ export default function RecruiterProfileSetupStep3() {
                             value={companyCulture}
                             placeholder="We offer a collaborative work environment..."
                             onChange={(e) => {
+                                const value = e.target.value;
                                 if (value.length > 2000) {
                                     return;
                                 }
-                                const value = e.target.value;
 
                                 setCompanyCulture(value);
                             }}

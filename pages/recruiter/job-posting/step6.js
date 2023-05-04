@@ -48,6 +48,15 @@ export default function () {
         }
     }, []);
 
+    useEffect(() => {
+        if (!router.isReady) {
+            return;
+        }
+
+        console.log("query: ", router.query);
+        onVerifyPayment(router.query.transaction_id);
+    }, [router.isReady]);
+
     const onBack = (e) => {
         e.preventDefault();
         router.back();
@@ -87,7 +96,8 @@ export default function () {
 
         const JobFormData = new FormData();
         JobFormData.append("job_category_id", localJobPost.job_category_id);
-        JobFormData.append("user_id", localJobPost.user_id);
+        const userId = localStorage.getItem("user_id");
+        JobFormData.append("user_id", userId);
         JobFormData.append("company_industry", localJobPost.company_industry);
         JobFormData.append(
             "company_sub_industry",
@@ -111,7 +121,8 @@ export default function () {
         );
 
         JobFormData.append("experience_level", localJobPost.experience_level);
-        JobFormData.append("salary", localJobPost.salary);
+
+        JobFormData.append("salary", localJobPost.salary || "");
         JobFormData.append("send_to_email", localJobPost.send_to_email);
 
         JobFormData.append(
@@ -120,6 +131,8 @@ export default function () {
         );
 
         JobFormData.append("job_type_ids", localJobPost.job_type_ids);
+
+        JobFormData.append("category", localJobPost.category);
 
         // console.log("file: ", fileInput.current.files[0]);
 
@@ -419,11 +432,11 @@ export default function () {
                                 </p>
                                 <p className="flex flex-col flex-nowrap justify-start items-start my-3">
                                     <span className="text-dark-50">
-                                        Work type
+                                        Work types
                                     </span>
                                     <span className="flex flex-row flex-nowrap justify-start items-center">
                                         <span className="text-my-gray-70">
-                                            {localJobPost.type || ""}
+                                            {localJobPost.job_type_ids || ""}
                                         </span>
                                         <Image
                                             onClick={onNavigateToStep2}

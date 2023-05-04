@@ -163,7 +163,7 @@ export default function MyJobs() {
 
             console.log("the jobs: ", theJobs);
 
-            theJobs = theJobs.data.data;
+            theJobs = theJobs.data.data.data;
 
             if (theJobs.length > 0) {
                 setActiveJob(theJobs[0].the_job);
@@ -520,7 +520,7 @@ export default function MyJobs() {
                                                 />
                                                 <span>
                                                     {activeJob.location || ""} •{" "}
-                                                    {/* {activeJob.job_types.map(
+                                                    {activeJob.job_types.map(
                                                         (type, index) => {
                                                             if (
                                                                 index ==
@@ -534,7 +534,7 @@ export default function MyJobs() {
                                                                 return `${type.title} | `;
                                                             }
                                                         }
-                                                    )} */}
+                                                    )}
                                                 </span>
                                             </p>
                                             <p className="text-sm text-my-gray-70 flex flex-row flex-nowrap justify-start items-center">

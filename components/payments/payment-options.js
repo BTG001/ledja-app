@@ -21,6 +21,8 @@ export default function PaymentOptions({
 
     const [paymentLoading, setPaymentLoading] = useState(false);
 
+    const [paymentDetails, setPaymentDetails] = useState({});
+
     const [OTPCode, setOTPCode] = useState(null);
     const [paymentInitiated, setPaymentInitiated] = useState(false);
     const OTPContainer = useRef();
@@ -50,7 +52,75 @@ export default function PaymentOptions({
             setEnterMpesaDetails(false);
             setEnterCardDetails(false);
         }
-    }, [selectedPaymentMethod]);
+
+        if (recruiter && recruiter.about_recruiter) {
+            const name = `${recruiter.about_recruiter.fname} ${recruiter.about_recruiter.lname}`;
+            setPaymentDetails((prevValues) => {
+                return {
+                    ...prevValues,
+                    name: name,
+                    phonenumber: recruiter.about_recruiter.phone_no,
+                    email: recruiter.email,
+                };
+            });
+        }
+    }, [selectedPaymentMethod, recruiter]);
+
+    const onCreatePayment = () => {
+        // if (!selectedPaymentMethod) {
+        //     return;
+        // }
+
+        if (paymentLoading) {
+            return;
+        } else {
+            setPaymentLoading(true);
+        }
+
+        const hasErrors = verifyPaymentDetails();
+
+        if (hasErrors) {
+            setPaymentLoading(false);
+            return;
+        }
+
+        document.body.style.overflowY = "visible";
+
+        const url = `${Config.API_URL}/create_payment`;
+
+        const values = {
+            phone_number: `254${mpesaDetails.phone_number}`,
+            amount: amount,
+            currency: "KES",
+            email: recruiter.email,
+            customer: {
+                name: paymentDetails.name,
+                phonenumber: paymentDetails.phonenumber,
+                email: paymentDetails.email,
+            },
+            payment_mode: "card",
+            redirect_url: location.origin + location.pathname,
+        };
+
+        console.log("values: ", values);
+
+        Utils.makeRequest(async () => {
+            try {
+                let transaction = await axios.post(url, values, {
+                    headers: Utils.getHeaders(),
+                });
+
+                transaction = transaction.data.data.data;
+
+                console.log("transaction results: ", transaction);
+
+                setPaymentLoading(false);
+                location.replace(transaction.link);
+            } catch (error) {
+                console.log("transaction Error: ", error);
+            }
+        });
+    };
 
     const onReloadCreditWithCard = () => {
         if (!selectedPaymentMethod) {
@@ -252,6 +322,37 @@ export default function PaymentOptions({
         });
     };
 
+    function verifyPaymentDetails() {
+        const theErrors = {};
+        let hasErrors = false;
+
+        if (!paymentDetails.phonenumber) {
+            hasErrors = true;
+            theErrors.phonenumber = "Phone number is required";
+        }
+
+        if (
+            paymentDetails.phonenumber &&
+            paymentDetails.phonenumber.length != 12
+        ) {
+            hasErrors = true;
+            theErrors.phonenumber = "Invalid phone number";
+        }
+
+        if (!paymentDetails.email) {
+            hasErrors = true;
+            theErrors.email = "Email is required";
+        }
+
+        if (!amount) {
+            hasErrors = true;
+            theErrors.amount = "Amount is Required";
+        }
+
+        setErrors(theErrors);
+        return hasErrors;
+    }
+
     function verifyMpesaDetails() {
         const theErrors = {};
         let hasErrors = false;
@@ -307,6 +408,90 @@ export default function PaymentOptions({
     }
     return (
         <>
+            <div>
+                <div className="flex flex-row flex-nowrap justify-start items-enter m-2 ml-0 rounded-md">
+                    <p className="text-dark-50 p-2 border border-solid border-r-0 border-my-gray-70  rounded-tl-md rounded-bl-md">
+                        Name{" "}
+                    </p>
+                    <input
+                        value={paymentDetails.name}
+                        onChange={(e) => {
+                            const value = e.target.value;
+
+                            setPaymentDetails((prevValues) => {
+                                return {
+                                    ...prevValues,
+                                    name: value,
+                                };
+                            });
+                        }}
+                        placeholder="e.g. Jane Doe"
+                        className="py-2 px-4 border-solid border border-my-gray-70 outline-none placeholder:text-my-gray-70 placeholder:text-sm focus:border-primary-70 rounded-tr-md rounded-br-md w-1/2"
+                    />
+                </div>
+                <p className="text-red-500 text-left">{errors.name || ""}</p>
+                <div className="flex flex-row flex-nowrap justify-start items-enter m-2 ml-0 rounded-md">
+                    <p className="text-dark-50 p-2 border border-solid border-r-0 border-my-gray-70  rounded-tl-md rounded-bl-md">
+                        Phone
+                    </p>
+                    <input
+                        value={paymentDetails.phonenumber}
+                        onChange={(e) => {
+                            const value = e.target.value;
+
+                            setPaymentDetails((prevValues) => {
+                                return {
+                                    ...prevValues,
+                                    phonenumber: value,
+                                };
+                            });
+                        }}
+                        placeholder="e.g. 254712345678"
+                        className="py-2 px-4 border-solid border border-my-gray-70 outline-none placeholder:text-my-gray-70 placeholder:text-sm focus:border-primary-70 rounded-tr-md rounded-br-md w-1/2"
+                    />
+                </div>
+                <p className="text-red-500 text-left">
+                    {errors.phonenumber || ""}
+                </p>
+                <div className="flex flex-row flex-nowrap justify-start items-enter m-2 ml-0 rounded-md">
+                    <p className="text-dark-50 p-2 border border-solid border-r-0 border-my-gray-70  rounded-tl-md rounded-bl-md">
+                        Email
+                    </p>
+                    <input
+                        type="email"
+                        value={paymentDetails.email || ""}
+                        onChange={(e) => {
+                            const value = e.target.value;
+
+                            setPaymentDetails((prevValues) => {
+                                return {
+                                    ...prevValues,
+                                    email: value,
+                                };
+                            });
+                        }}
+                        placeholder="eg. example@ledja.com"
+                        className="py-2 px-4 border-solid border border-my-gray-70 outline-none placeholder:text-my-gray-70 placeholder:text-sm focus:border-primary-70 rounded-tr-md rounded-br-md w-1/2"
+                    />
+                </div>
+                <p className="text-red-500 text-left">{errors.email || ""}</p>
+
+                <p className="text-dark-50 text-sm text-left my-3">
+                    Total Amount
+                </p>
+                <div className="flex flex-row flex-nowrap justify-start items-enter m-2 ml-0">
+                    <p className="text-dark-50 p-2 pl-4 border border-r-0 border-solid border-my-gray-70 rounded-tl-md rounded-bl-md">
+                        KSh
+                    </p>
+                    <input
+                        disabled
+                        placeholder="e.g Ksh 10,000"
+                        value={amount}
+                        className="py-2 px-4 border-solid border border-my-gray-70 outline-none placeholder:text-my-gray-70 placeholder:text-sm focus:outline-primary-70 rounded-tr-md rounded-br-md w-1/2"
+                    />
+                </div>
+            </div>
+
             {enterMpesaDetails && (
                 <div>
                     <p className="text-dark-50 text-normal text-left my-3">
@@ -535,7 +720,7 @@ export default function PaymentOptions({
                 </div>
             )}
 
-            {!enterMpesaDetails && !enterCardDetails && (
+            {/* {!enterMpesaDetails && !enterCardDetails && (
                 <div>
                     <p className="text-dark-50 text-normal text-left my-3">
                         Mobile money
@@ -573,7 +758,7 @@ export default function PaymentOptions({
                         />
                     </div>
                 </div>
-            )}
+            )} */}
 
             <div className="flex flex-row flex-wrap justify-center items-center my-10 mx-auto">
                 <p
@@ -583,21 +768,24 @@ export default function PaymentOptions({
                     Back
                 </p>
                 <p
-                    className={`w-max my-2 mx-4 py-2 px-5 ${
-                        selectedPaymentMethod
+                    className={`w-max my-2 mx-4 py-2 px-5 
+                    ${
+                        !selectedPaymentMethod
                             ? "bg-primary-70 text-white"
                             : "bg-my-gray-60 text-my-gray-70"
-                    } rounded-10 cursor-pointer`}
+                    }
+                     rounded-10 cursor-pointer`}
                     onClick={() => {
-                        if (paymentInitiated) {
-                            onAuthorizePayment(OTPCode);
-                        } else {
-                            if (selectedPaymentMethod == "mpesa") {
-                                onReloadCreditWithMPesa();
-                            } else if (selectedPaymentMethod == "card") {
-                                onReloadCreditWithCard();
-                            }
-                        }
+                        onCreatePayment();
+                        // if (paymentInitiated) {
+                        //     onAuthorizePayment(OTPCode);
+                        // } else {
+                        //     if (selectedPaymentMethod == "mpesa") {
+                        //         onReloadCreditWithMPesa();
+                        //     } else if (selectedPaymentMethod == "card") {
+                        //         onReloadCreditWithCard();
+                        //     }
+                        // }
                     }}
                 >
                     {paymentLoading && <span className="loader"></span>}

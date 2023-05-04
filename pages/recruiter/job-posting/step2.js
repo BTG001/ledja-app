@@ -74,7 +74,7 @@ export default function () {
 
         localJobPost.no_of_hires = noOfHires;
         localJobPost.hiring_speed = hireSpeed;
-        localJobPost.salary = salary;
+        localJobPost.salary = salary || null;
         localJobPost.experience_level = experienceLevel;
         localJobPost.job_type_ids = selectedJobType.join(",");
 
@@ -128,12 +128,12 @@ export default function () {
             });
         }
 
-        if (!salary) {
-            hasErrors = true;
-            setErrors((prevValues) => {
-                return { ...prevValues, salary: "salary is required" };
-            });
-        }
+        // if (!salary) {
+        //     hasErrors = true;
+        //     setErrors((prevValues) => {
+        //         return { ...prevValues, salary: "salary is required" };
+        //     });
+        // }
 
         if (!experienceLevel) {
             hasErrors = true;

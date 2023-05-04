@@ -140,7 +140,7 @@ export default function Recruiter() {
         try {
             let theJobs = await axios.get(url);
 
-            theJobs = theJobs.data.data;
+            theJobs = theJobs.data.data.data;
 
             setJobs(theJobs);
 

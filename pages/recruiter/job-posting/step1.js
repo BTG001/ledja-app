@@ -20,6 +20,7 @@ export default function ({ jobCategories }) {
     const [jobTitle, setJobTitle] = useState();
     const [jobLocation, setJobLocation] = useState();
     const [jobDescription, setJobDescription] = useState("");
+    const [category, setCategory] = useState();
     const [showErrorPopup, setShowErrorPopup] = useState();
     const [errorMessage, setErrorMessage] = useState(" an Error Occured");
     const [errors, setErrors] = useState({});
@@ -44,6 +45,9 @@ export default function ({ jobCategories }) {
         setJobTitle(theLocalJobPost.title);
         setJobLocation(theLocalJobPost.location);
         setJobDescription(theLocalJobPost.description || "");
+        if (theLocalJobPost.category) {
+            setCategory(theLocalJobPost.category);
+        }
     }, []);
 
     const onChangeJobCategory = (newJobCategoryId) => {
@@ -73,6 +77,7 @@ export default function ({ jobCategories }) {
         localJobPost.title = jobTitle;
         localJobPost.location = jobLocation;
         localJobPost.description = jobDescription;
+        localJobPost.category = category;
 
         console.log(localJobPost);
 
@@ -135,6 +140,16 @@ export default function ({ jobCategories }) {
                 return {
                     ...previousValues,
                     jobDescription: "Job description is required",
+                };
+            });
+        }
+
+        if (!category) {
+            hasErrors = true;
+            setErrors((previousValues) => {
+                return {
+                    ...previousValues,
+                    category: "Category is required",
                 };
             });
         }
@@ -323,6 +338,46 @@ export default function ({ jobCategories }) {
                             {errors.jobLocation}
                         </p>
                     </div>
+                    <div className="form-input-container my-5">
+                        <label className="form-label-light" for="industry">
+                            Category
+                        </label>
+                        <select
+                            value={category || emptySelectString}
+                            onChange={(e) => {
+                                if (e.target.value == emptySelectString) {
+                                    setCategory(null);
+                                    return;
+                                }
+
+                                setCategory(e.target.value);
+                            }}
+                            className="form-input"
+                            name="category"
+                            required
+                        >
+                            <option value={emptySelectString}>
+                                {emptySelectString}
+                            </option>
+
+                            <option
+                                className="text-sm text-my-gray-70 capitalize"
+                                value={"Skilled"}
+                            >
+                                Skilled
+                            </option>
+                            <option
+                                className="text-sm text-my-gray-70 capitalize"
+                                value={"Unskilled"}
+                            >
+                                Unskilled
+                            </option>
+                        </select>
+                        <p className="text-red-500 text-left py-2 ">
+                            {errors.category}
+                        </p>
+                    </div>
+
                     <div className="form-input-container my-5">
                         <label className="form-label-light" for="company-name">
                             Job description

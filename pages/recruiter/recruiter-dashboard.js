@@ -14,8 +14,10 @@ import DashboardMessageCounterLoaderSkeleton from "../../components/skeleton-loa
 import ReloadCreditPopup from "../../components/payments/reload-credit-popup";
 import ReloadSuccessPopup from "../../components/payments/reload-success-popup";
 import CreditHistory from "../../components/recuriters/credit-history";
+import { useRouter } from "next/router";
 
 export default function RecruiterDashbaord() {
+    const router = useRouter();
     const [jobs, setJobs] = useState();
     const [fname, setFname] = useState("");
     const [wallet, setWallet] = useState({});
@@ -45,6 +47,15 @@ export default function RecruiterDashbaord() {
         }
     }, []);
 
+    useEffect(() => {
+        if (!router.isReady) {
+            return;
+        }
+
+        console.log("query: ", router.query);
+        onVerifyPayment(router.query.transaction_id);
+    }, [router.isReady]);
+
     async function getJobs() {
         setJobsLoading(true);
         const userId = localStorage.getItem("user_id");
@@ -55,7 +66,7 @@ export default function RecruiterDashbaord() {
                 headers: Utils.getHeaders(),
             });
 
-            theJobs = theJobs.data.data;
+            theJobs = theJobs.data.data.data;
 
             if (theJobs && theJobs.length > 0) {
                 setJobs(theJobs);
