@@ -13,6 +13,7 @@ import { RiImageEditFill } from "react-icons/ri";
 import { AuthContext } from "../../../_app";
 import RecruiterProfileLoader from "../../../../components/skeleton-loaders/recruiter-profile-loader";
 import GuestNavbar from "../../../../components/navbars/GuestNavbar";
+import Pagination from "../../../../components/pagination";
 export default function Recruiter() {
     const router = useRouter();
 
@@ -37,6 +38,7 @@ export default function Recruiter() {
     const [companyAvatar, setCompanyAvatar] = useState();
 
     const [profileLoading, setProfileLoading] = useState(false);
+    const [paginationData, setPaginationData] = useState({});
 
     useEffect(() => {
         if (!router.isReady) return;
@@ -131,6 +133,10 @@ export default function Recruiter() {
         }
     }
 
+    const onChangePage = (newPageURL) => {
+        fetchJobs(newPageURL);
+    };
+
     async function fetchJobs(url) {
         if (!url) {
             const { recruiterId } = router.query;
@@ -139,6 +145,10 @@ export default function Recruiter() {
 
         try {
             let theJobs = await axios.get(url);
+
+            console.log("pagination data: ", theJobs.data.data);
+
+            setPaginationData(theJobs.data.data);
 
             theJobs = theJobs.data.data.data;
 
@@ -377,6 +387,10 @@ export default function Recruiter() {
                             </p>
                             {/* <span className="text-primary-70">Edit</span> */}
                         </div>
+                        <Pagination
+                            data={paginationData}
+                            onChangePage={onChangePage}
+                        />
                         <div className="form-input-container border border-solid rounded-md border-my-gray-70 py-2 px-4 my-3">
                             {jobs &&
                                 jobs.map((job, index) => {
@@ -433,6 +447,10 @@ export default function Recruiter() {
                                     </p>
                                 ))}
                         </div>
+                        <Pagination
+                            data={paginationData}
+                            onChangePage={onChangePage}
+                        />
                         <div className="form-input-container ">
                             <p className="flex flex-row flex-nowrap justify-between items-center w-full p-2">
                                 <label className=" font-medium text-my-gray-70">

@@ -15,6 +15,7 @@ import ProgressCardApplicationsLoaderSkeleton from "../../components/skeleton-lo
 import JobSeekerProfilePopup from "../../components/recuriters/applicant-profile-popup";
 import InterviewStartedPopup from "../../components/recuriters/interviewing-started-popup";
 import { useRouter } from "next/router";
+import Pagination from "../../components/pagination";
 
 export default function () {
     const router = useRouter();
@@ -47,6 +48,10 @@ export default function () {
 
     let hasLoadedOnce = false;
 
+    const [jobsPaginationData, setJobsPaginationData] = useState({});
+    const [applicationsPaginationData, setApplicationsPaginationData] =
+        useState({});
+
     useEffect(() => {
         if (!hasLoadedOnce) {
             getJobs();
@@ -68,6 +73,14 @@ export default function () {
         }
     }, [filters, activeJob]);
 
+    const onChangeJobsPage = (newPageURL) => {
+        getJobs(newPageURL);
+    };
+
+    const onChangeApplicationsPage = (newPageURL) => {
+        filterActiveJobApplications(newPageURL);
+    };
+
     const onJobsContainerMouseMove = (e) => {
         if (!jobsContainerMouseDown) {
             return;
@@ -87,17 +100,23 @@ export default function () {
         setScrollLeft(jobsContainer.current.scrollLeft);
     };
 
-    async function getJobs() {
+    async function getJobs(newPageURL) {
         setJobsLoading(true);
         const userId = localStorage.getItem("user_id");
-        const url = `${Config.API_URL}/get_user_jobs/${userId}`;
+
+        let url = newPageURL;
+
+        if (!url) {
+            url = `${Config.API_URL}/get_user_jobs/${userId}`;
+        }
 
         try {
             const theJobs = await axios.get(url, {
                 headers: Utils.getHeaders(),
             });
 
-            console.log("the jobs: ", theJobs);
+            console.log("jobs pagination data: ", theJobs);
+            setJobsPaginationData(theJobs.data.data);
 
             setJobs(theJobs.data.data.data);
 
@@ -128,16 +147,19 @@ export default function () {
         }
     }
 
-    async function filterActiveJobApplications() {
+    async function filterActiveJobApplications(newPageURL) {
         setApplicationsLoading(true);
         const userId = localStorage.getItem("user_id");
-        const url = `${Config.API_URL}/applications/job/${activeJob.id}`;
+
+        let url = newPageURL;
+        if (!url) {
+            url = `${Config.API_URL}/applications/job/${activeJob.id}`;
+        }
 
         const filterApplicationsFormData = new FormData();
 
         if (filters.name && filters.name.trim() != "") {
-            filterApplicationsFormData.append("fname", filters.name);
-            filterApplicationsFormData.append("lname", filters.name);
+            filterApplicationsFormData.append("name", filters.name);
         }
 
         if (filters.status) {
@@ -163,6 +185,12 @@ export default function () {
                     url,
                     filterApplicationsFormData
                 );
+
+                console.log(
+                    "applications pagination data: ",
+                    theApplications.data.data
+                );
+                setApplicationsPaginationData(theApplications.data.data);
 
                 theApplications = theApplications.data.data.data;
                 setApplications(theApplications);
@@ -203,7 +231,7 @@ export default function () {
         const statusFormData = new FormData();
         statusFormData.append("status", status);
 
-        if (status == "shortlisted") {
+        if (status == "contacting") {
             if (loadingInterviewing) {
                 return;
             } else {
@@ -235,12 +263,12 @@ export default function () {
 
                 console.log("update status results: ", updateStatusResults);
 
-                if (status == "shortlisted") {
+                if (status == "contacting") {
                     setShowInterviewingStartedPopup(true);
                     setLoadingInterviewing(false);
                 }
             } catch (error) {
-                if (status == "shortlisted") {
+                if (status == "contacting") {
                     setLoadingInterviewing(false);
                 }
                 console.log("updateStatus: ", error);
@@ -249,7 +277,7 @@ export default function () {
     };
 
     const onStartInterview = () => {
-        updateStatus("shortlisted", activeApplication.id);
+        updateStatus("contacting", activeApplication.id);
     };
 
     const onClose = () => {
@@ -358,6 +386,10 @@ export default function () {
                             );
                         })}
                 </div>
+                <Pagination
+                    data={jobsPaginationData}
+                    onChangePage={onChangeJobsPage}
+                />
                 <label className="form-label-light" for="websites">
                     Candidate
                 </label>
@@ -450,17 +482,17 @@ export default function () {
                             setFilters((prevValues) => {
                                 return {
                                     ...prevValues,
-                                    status: "shortlisted",
+                                    status: "contacting",
                                 };
                             });
                         }}
                         className={`hover:text-dark-50 pr-4 py-2 cursor-pointer ${
-                            filters.status == "shortlisted"
+                            filters.status == "contacting"
                                 ? "text-dark-50"
                                 : "text-my-gray-70"
                         }`}
                     >
-                        shortlisted
+                        contacting
                     </span>
                 </div>
                 <div className="w-full">
@@ -555,89 +587,101 @@ export default function () {
                     applications &&
                     applications.length > 0 && (
                         <div className="md:grid md:grid-cols-3 gap-4 mt-5 mb-16">
-                            <sidebar className="flex flex-row flex-nowrap overflow-x-auto md:block cursor-grab md:cursor-context-menu">
-                                {applications &&
-                                    applications.length > 0 &&
-                                    applications.map((application) => {
-                                        return (
-                                            <div
-                                                onClick={() => {
-                                                    console.log(
-                                                        "old active application: ",
-                                                        activeApplication
-                                                    );
-                                                    console.log(
-                                                        "new Active Application",
-                                                        application
-                                                    );
-                                                    console.log(
-                                                        "activeJob: ",
-                                                        activeJob
-                                                    );
-                                                    setActiveApplication(
-                                                        application
-                                                    );
-                                                    if (
-                                                        application.status ==
-                                                        "awaiting"
-                                                    ) {
-                                                        updateStatus(
-                                                            "reviewed",
-                                                            application.id
+                            <div>
+                                <Pagination
+                                    data={applicationsPaginationData}
+                                    onChangePage={onChangeApplicationsPage}
+                                />
+                                <sidebar className=" flex flex-row flex-nowrap overflow-x-auto md:block cursor-grab md:cursor-context-menu">
+                                    {applications &&
+                                        applications.length > 0 &&
+                                        applications.map((application) => {
+                                            return (
+                                                <div
+                                                    onClick={() => {
+                                                        console.log(
+                                                            "old active application: ",
+                                                            activeApplication
                                                         );
-                                                    }
-                                                }}
-                                                className={`cursor-pointer w-full p-3 md:mx-auto my-3 mx-1 min-w-60-screen sm:min-w-40-screen md:min-w-10-screen  border border-my-gray-50 border-solid rounded-10  
+                                                        console.log(
+                                                            "new Active Application",
+                                                            application
+                                                        );
+                                                        console.log(
+                                                            "activeJob: ",
+                                                            activeJob
+                                                        );
+                                                        setActiveApplication(
+                                                            application
+                                                        );
+                                                        if (
+                                                            application.status ==
+                                                            "awaiting"
+                                                        ) {
+                                                            updateStatus(
+                                                                "reviewed",
+                                                                application.id
+                                                            );
+                                                        }
+                                                    }}
+                                                    className={`cursor-pointer w-full p-3 md:mx-auto my-3 mx-1 min-w-60-screen sm:min-w-40-screen md:min-w-10-screen  border border-my-gray-50 border-solid rounded-10  
                                     ${
                                         activeApplication.id == application.id
                                             ? "bg-my-gray-50 "
                                             : "bg-white"
                                     }`}
-                                            >
-                                                <div className="flex flex-row flex-nowrap justify-between items-center">
-                                                    <h3 className="font-semibold text-xl my-1">
-                                                        {application.jobseeker_basic_info
-                                                            ? `${application.jobseeker_basic_info.fname} ${application.jobseeker_basic_info.lname}`
-                                                            : ""}
-                                                    </h3>
-                                                    <h3 className="flex flex-row flex-nowrap justify-center items-center">
-                                                        <Image
-                                                            src={
-                                                                "/star-full-icon.svg"
-                                                            }
-                                                            width={17}
-                                                            height={16}
-                                                            className="m-1"
-                                                        />
-                                                        <span className="font-semibold text-xl m-1">
-                                                            {application.score
-                                                                ? application
-                                                                      .score
-                                                                      .score
-                                                                : "N/A"}
+                                                >
+                                                    <div className="flex flex-row flex-nowrap justify-between items-center">
+                                                        <h3 className="font-semibold text-xl my-1">
+                                                            {application.jobseeker_basic_info
+                                                                ? `${application.jobseeker_basic_info.fname} ${application.jobseeker_basic_info.lname}`
+                                                                : ""}
+                                                        </h3>
+                                                        <h3 className="flex flex-row flex-nowrap justify-center items-center">
+                                                            <Image
+                                                                src={
+                                                                    "/star-full-icon.svg"
+                                                                }
+                                                                width={17}
+                                                                height={16}
+                                                                className="m-1"
+                                                            />
+                                                            <span className="font-semibold text-xl m-1">
+                                                                {application.score
+                                                                    ? application
+                                                                          .score
+                                                                          .score
+                                                                    : "N/A"}
+                                                            </span>
+                                                        </h3>
+                                                    </div>
+                                                    <p className="text-dark-50 flex flex-row flex-nowrap justify-start items-center">
+                                                        {showStatusIcon(
+                                                            application.status
+                                                        )}
+                                                        <span>
+                                                            {application.status ||
+                                                                ""}
                                                         </span>
-                                                    </h3>
+                                                    </p>
+                                                    <p className="text-my-gray-80 mt-2 mb-1">
+                                                        Reviewed{" "}
+                                                        {Utils.calculateTimeLapse(
+                                                            application.updated_at
+                                                        )}{" "}
+                                                        ago
+                                                    </p>
                                                 </div>
-                                                <p className="text-dark-50 flex flex-row flex-nowrap justify-start items-center">
-                                                    {showStatusIcon(
-                                                        application.status
-                                                    )}
-                                                    <span>
-                                                        {application.status ||
-                                                            ""}
-                                                    </span>
-                                                </p>
-                                                <p className="text-my-gray-80 mt-2 mb-1">
-                                                    Reviewed{" "}
-                                                    {Utils.calculateTimeLapse(
-                                                        application.updated_at
-                                                    )}{" "}
-                                                    ago
-                                                </p>
-                                            </div>
-                                        );
-                                    })}
-                            </sidebar>
+                                            );
+                                        })}
+                                </sidebar>
+                                {applications.length > 2 && (
+                                    <Pagination
+                                        data={applicationsPaginationData}
+                                        onChangePage={onChangeApplicationsPage}
+                                    />
+                                )}
+                            </div>
                             {activeApplication && activeApplication.id && (
                                 <section className="col-span-2 ">
                                     <div className="bg-my-gray-50 p-5 my-5 rounded-10">
@@ -770,7 +814,7 @@ export default function () {
                                                             activeApplication.status ==
                                                                 "saved" ||
                                                             activeApplication.status ==
-                                                                "shortlisted"
+                                                                "contacting"
                                                         ) {
                                                             updateStatus(
                                                                 "reviewed",
@@ -787,7 +831,7 @@ export default function () {
                                                         activeApplication.status ==
                                                             "saved" ||
                                                         activeApplication.status ==
-                                                            "shortlisted"
+                                                            "contacting"
                                                             ? "/love-fill-icon.svg"
                                                             : "/love-icon.svg"
                                                     }

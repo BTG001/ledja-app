@@ -27,7 +27,7 @@ export default function Pagination({ data, onChangePage }) {
                         }
                         onChangePage(data.first_page_url);
                     }}
-                    className={`text-4xl  p-2 m-1  rounded-full text-my-gray-70 flex justify-center items-center
+                    className={`text-4xl  p-2 m-1  rounded-full  flex justify-center items-center
                     ${
                         !data.first_page_url || data.current_page == 1
                             ? "text-my-gray-50 cursor-not-allowed"
@@ -44,7 +44,7 @@ export default function Pagination({ data, onChangePage }) {
 
                         onChangePage(data.prev_page_url);
                     }}
-                    className={`text-4xl  p-2 m-1  rounded-full text-my-gray-70 flex justify-center items-center
+                    className={`text-4xl  p-2 m-1  rounded-full  flex justify-center items-center
                     ${
                         !data.prev_page_url
                             ? "text-my-gray-50 cursor-not-allowed"
@@ -144,7 +144,7 @@ export default function Pagination({ data, onChangePage }) {
                         }
                         onChangePage(data.next_page_url);
                     }}
-                    className={`text-4xl  p-2 m-1  rounded-full text-my-gray-70 flex justify-center items-center
+                    className={`text-4xl  p-2 m-1  rounded-full  flex justify-center items-center
                     ${
                         !data.next_page_url
                             ? "text-my-gray-50 cursor-not-allowed"
@@ -160,7 +160,7 @@ export default function Pagination({ data, onChangePage }) {
 
                         onChangePage(data.last_page_url);
                     }}
-                    className={`text-4xl  p-2 m-1  rounded-full text-my-gray-70 flex justify-center items-center
+                    className={`text-4xl  p-2 m-1  rounded-full  flex justify-center items-center
                     ${
                         !data.last_page_url ||
                         data.current_page == data.last_page

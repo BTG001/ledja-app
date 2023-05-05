@@ -18,6 +18,8 @@ import ComingSoon from "../../components/coming-soon-popup";
 import TakeTestPopup from "../../components/job-seekers/take-test-popup";
 import MyJobsApplicationsSkeleton from "../../components/skeleton-loaders/my-jobs-applications-skeleton-loader";
 import { MdWorkOutline } from "react-icons/md";
+import Pagination from "../../components/pagination";
+
 export default function MyJobs() {
     const [showApplyPopup, setShowApplyPopup] = useState(false);
     const [showSuccessPopup, setShowSuccessPopup] = useState(false);
@@ -44,6 +46,9 @@ export default function MyJobs() {
 
     const [activeAssessmentId, setActiveAssessmentId] = useState();
     const [activeTab, setActiveTab] = useState("applied");
+
+    const [paginationData, setPaginationData] = useState({});
+    const [appliedPaginationData, setAppliedPaginationData] = useState({});
 
     const [unSaveLoading, setUnSaveLoading] = useState(false);
 
@@ -106,16 +111,29 @@ export default function MyJobs() {
         // setShowSuccessPopup(true);
     };
 
+    const onChangePage = (newPageURL) => {
+        fetchSavedJobs(newPageURL);
+    };
+
+    const onChangeAppliedJobsPage = (newPageURL) => {
+        filterActiveJobApplications(newPageURL);
+    };
+
     const onClose = () => {
         setShowTakeTestPopup(false);
         setShowHasAssessmentPopup(false);
         setShowComingSoonPopup(false);
     };
 
-    async function filterActiveJobApplications() {
+    async function filterActiveJobApplications(newPageURL) {
         setApplicationsLoading(true);
         const userId = localStorage.getItem("user_id");
-        const url = `${Config.API_URL}/applications/jobseeker/${userId}`;
+
+        let url = newPageURL;
+
+        if (!url) {
+            url = `${Config.API_URL}/applications/jobseeker/${userId}`;
+        }
 
         const filterApplicationsFormData = new FormData();
 
@@ -137,6 +155,10 @@ export default function MyJobs() {
                     filterApplicationsFormData
                 );
 
+                console.log("applied pagination data: ", theApplications.data);
+
+                setAppliedPaginationData(theApplications.data);
+
                 theApplications = theApplications.data.data;
                 setApplications(theApplications);
 
@@ -149,19 +171,24 @@ export default function MyJobs() {
         });
     }
 
-    async function fetchSavedJobs() {
+    async function fetchSavedJobs(newPageUrl) {
         setJobsLoading(true);
 
         const userId = localStorage.getItem("user_id");
 
-        const url = `${Config.API_URL}/get_user_saved_jobs/user/${userId}`;
+        let url = newPageUrl;
+
+        if (!url) {
+            url = `${Config.API_URL}/get_user_saved_jobs/user/${userId}`;
+        }
 
         try {
             let theJobs = await axios.get(url, {
                 headers: Utils.getHeaders(),
             });
 
-            console.log("the jobs: ", theJobs);
+            console.log("Pagintion data: ", theJobs.data.data);
+            setPaginationData(theJobs.data.data);
 
             theJobs = theJobs.data.data.data;
 
@@ -596,6 +623,10 @@ export default function MyJobs() {
                                             </p>
                                         </section>
                                     </div>
+                                    <Pagination
+                                        data={paginationData}
+                                        onChangePage={onChangePage}
+                                    />
                                 </>
                             )}
                         </div>

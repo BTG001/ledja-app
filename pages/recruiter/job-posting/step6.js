@@ -276,6 +276,11 @@ export default function () {
         setShowReloadSuccessPopup(false);
         localStorage.removeItem("payment_authorization_id");
         localStorage.removeItem("payment_method");
+        history.pushState(
+            { search: "" },
+            "",
+            location.origin + location.pathname
+        );
         onNext();
     };
 

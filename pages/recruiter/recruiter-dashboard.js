@@ -15,6 +15,7 @@ import ReloadCreditPopup from "../../components/payments/reload-credit-popup";
 import ReloadSuccessPopup from "../../components/payments/reload-success-popup";
 import CreditHistory from "../../components/recuriters/credit-history";
 import { useRouter } from "next/router";
+import Pagination from "../../components/pagination";
 
 export default function RecruiterDashbaord() {
     const router = useRouter();
@@ -35,6 +36,8 @@ export default function RecruiterDashbaord() {
 
     const [showCreditHistoryPopup, setShowCreditHistoryPopup] = useState(false);
 
+    const [paginationData, setPaginationData] = useState({});
+
     let runOnce = false;
 
     useEffect(() => {
@@ -52,19 +55,32 @@ export default function RecruiterDashbaord() {
             return;
         }
 
-        console.log("query: ", router.query);
-        onVerifyPayment(router.query.transaction_id);
+        // console.log("query: ", router.query);
+        if (router.query.transaction_id) {
+            onVerifyPayment(router.query.transaction_id);
+        }
     }, [router.isReady]);
 
-    async function getJobs() {
+    const onChangePage = (newPageURL) => {
+        getJobs(newPageURL);
+    };
+
+    async function getJobs(newPageURL) {
         setJobsLoading(true);
         const userId = localStorage.getItem("user_id");
-        const url = `${Config.API_URL}/get_user_jobs/${userId}`;
+        let url = newPageURL;
+        if (!newPageURL) {
+            url = `${Config.API_URL}/get_user_jobs/${userId}`;
+        }
 
         try {
             let theJobs = await axios.get(url, {
                 headers: Utils.getHeaders(),
             });
+
+            console.log("Pagination data: ", theJobs.data.data);
+
+            setPaginationData(theJobs.data.data);
 
             theJobs = theJobs.data.data.data;
 
@@ -92,13 +108,13 @@ export default function RecruiterDashbaord() {
                 "payment_authorization_id"
             );
 
-            console.log(
-                "when payment------",
-                "Payment Authorization ID: ",
-                whenPaymentTheAuthorizationId,
-                "Amount: ",
-                whenPaymentTheAmount
-            );
+            // console.log(
+            //     "when payment------",
+            //     "Payment Authorization ID: ",
+            //     whenPaymentTheAuthorizationId,
+            //     "Amount: ",
+            //     whenPaymentTheAmount
+            // );
 
             const userId = localStorage.getItem("user_id");
 
@@ -119,9 +135,9 @@ export default function RecruiterDashbaord() {
 
             if (recruiter.wallet) {
                 setWallet(recruiter.wallet);
-                if (whenPaymentTheAmount && whenPaymentTheAuthorizationId) {
-                    onVerifyPayment(whenPaymentTheAuthorizationId);
-                }
+                // if (whenPaymentTheAmount && whenPaymentTheAuthorizationId) {
+                //     onVerifyPayment(whenPaymentTheAuthorizationId);
+                // }
             }
 
             setRecruiterLoading(false);
@@ -195,6 +211,11 @@ export default function RecruiterDashbaord() {
         setShowReloadSuccessPopup(false);
         localStorage.removeItem("payment_authorization_id");
         localStorage.removeItem("payment_method");
+        history.pushState(
+            { search: "" },
+            "",
+            location.origin + location.pathname
+        );
     };
     const onReloaded = (wallet, theAmountReloaded) => {
         setWallet(wallet);
@@ -244,7 +265,18 @@ export default function RecruiterDashbaord() {
                 <div className="shadow-md my-3 p-3 rounded-10 min-h-40-screen flex flex-col justify-center items-center border border-solid border-my-gray-40">
                     {jobsLoading && <DashboardJobsLoaderSkeleton />}
                     {!jobsLoading && jobs && (
-                        <JobsTable jobs={jobs} jobsLoading={jobsLoading} />
+                        <>
+                            <Pagination
+                                data={paginationData}
+                                onChangePage={onChangePage}
+                            />
+                            <JobsTable jobs={jobs} jobsLoading={jobsLoading} />
+
+                            <Pagination
+                                data={paginationData}
+                                onChangePage={onChangePage}
+                            />
+                        </>
                     )}
 
                     {!jobs && !jobsLoading && (

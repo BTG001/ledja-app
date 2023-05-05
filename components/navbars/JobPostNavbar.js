@@ -21,7 +21,7 @@ export default function RecruiterNavbar({ currentStepText }) {
                 className="px-12 py-4 bg-my-gray-50
             flex
             flex-row
-            flex-nowrap
+            flex-wrap
             justify-between
             items-center border-b border-solid border-my-gray-70"
             >
@@ -29,15 +29,17 @@ export default function RecruiterNavbar({ currentStepText }) {
                     <Image src="/Logo.svg" width={117} height={64} />
                 </Link>
 
-                <p className="text-xl  text-dark-50">{currentStepText}</p>
+                <p className="hidden md:block text-xl  text-dark-50">
+                    {currentStepText}
+                </p>
 
                 <div className="flex flex-row flex-wrap justify-center items-center">
-                    <Link
+                    {/* <Link
                         className="cursor-pointer w-max mx-4 px-4 py-2 bg-my-gray-50 text-primary-70 border border-solid border-primary-70 rounded-md"
                         href={"/recruiter/job-posting/step1"}
                     >
                         Post a job
-                    </Link>
+                    </Link> */}
 
                     <div className="flex flex-row flex-nowrap justify-center items-center rounded-full w-12 h-12">
                         {/* <Image
@@ -49,6 +51,9 @@ export default function RecruiterNavbar({ currentStepText }) {
                         <RecruiterProfileIcon icon={"user"} />
                     </div>
                 </div>
+                <p className="block md:hidden text-xl font-medium text-dark-50 w-full text-center py-2">
+                    {currentStepText}
+                </p>
             </div>
         </>
     );

@@ -16,6 +16,7 @@ export default function ReloadSuccessPopup({
             document.body.style.overflowY = "visible";
         }
     }, [showPopup]);
+
     return (
         showPopup && (
             <>

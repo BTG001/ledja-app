@@ -14,7 +14,6 @@ export default function RecruiterNavbar({
                 className="px-12 py-4 bg-my-gray-50
             flex
             flex-row
-            flex-nowrap
             justify-between
             items-center"
             >

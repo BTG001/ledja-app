@@ -6,6 +6,7 @@ import axios from "axios";
 import userMessagesLoaderSkeleton from "../../components/skeleton-loaders/recruiter-messages-skeleton-loader";
 import JobSeekerNavbar from "../../components/navbars/JobSeekerNavbar";
 import Image from "next/image";
+import Pagination from "../../components/pagination";
 
 export default function JobSeekerMessages() {
     const [messages, setMessages] = useState({});
@@ -13,10 +14,15 @@ export default function JobSeekerMessages() {
     const [messagesLoading, setMessagesLoading] = useState(true);
 
     const [activeTab, setActiveTab] = useState("unread");
+    const [paginationData, setPaginationData] = useState({});
 
     useEffect(() => {
         fetchUserMessages();
     }, []);
+
+    const onChangePage = (newPageURL) => {
+        fetchUserMessages(newPageURL);
+    };
 
     async function fetchUserMessages() {
         setMessagesLoading(true);
@@ -27,9 +33,11 @@ export default function JobSeekerMessages() {
                 headers: Utils.getHeaders(),
             });
 
-            console.log("raw user messages", userMessages);
+            console.log("pagination data", userMessages.data.data);
 
-            userMessages = userMessages.data.data.messages;
+            setPaginationData(userMessages.data.data);
+
+            userMessages = userMessages.data.data.data.messages;
             console.log("jobseeker messages: ", userMessages);
 
             setMessages(userMessages);
@@ -87,6 +95,14 @@ export default function JobSeekerMessages() {
                         Read
                     </span>
                 </p>
+
+                {messages && messages.length > 0 && (
+                    <Pagination
+                        data={paginationData}
+                        onChangePage={onChangePage}
+                    />
+                )}
+
                 {!messagesLoading && (!messages || messages.length < 1) && (
                     <p className="text-center">No Messages</p>
                 )}
@@ -152,6 +168,9 @@ export default function JobSeekerMessages() {
                         );
                     })}
             </section>
+            {messages && messages.length > 0 && (
+                <Pagination data={paginationData} onChangePage={onChangePage} />
+            )}
         </>
     );
 }

@@ -5,27 +5,46 @@ import Utils from "../../Utils";
 import axios from "axios";
 import RecruiterMessagesLoaderSkeleton from "../../components/skeleton-loaders/recruiter-messages-skeleton-loader";
 import Image from "next/image";
+import Pagination from "../../components/pagination";
 
 export default function RecruiterMessages() {
     const [messages, setMessages] = useState({});
 
     const [messagesLoading, setMessagesLoading] = useState(true);
     const [activeTab, setActiveTab] = useState("unread");
+    const [paginationData, setPaginationData] = useState({});
 
     useEffect(() => {
         fetchRecruiterMessages();
     }, []);
 
-    async function fetchRecruiterMessages() {
+    const onChangePage = (newPageURL) => {
+        fetchRecruiterMessages(newPageURL);
+    };
+
+    async function fetchRecruiterMessages(newPageURL) {
         setMessagesLoading(true);
         try {
             const userId = localStorage.getItem("user_id");
-            const url = `${Config.API_URL}/messages/user/${userId}`;
+
+            let url = newPageURL;
+
+            if (!url) {
+                url = `${Config.API_URL}/messages/user/${userId}`;
+            }
+
             let recruiterMessages = await axios.get(url, {
                 headers: Utils.getHeaders(),
             });
 
-            recruiterMessages = recruiterMessages.data.data.messages;
+            console.log(
+                "messages pagination data: ",
+                recruiterMessages.data.data
+            );
+
+            setPaginationData(recruiterMessages.data.data);
+
+            recruiterMessages = recruiterMessages.data.data.data.messages;
 
             setMessages(recruiterMessages);
 
@@ -83,6 +102,7 @@ export default function RecruiterMessages() {
                         Read
                     </span>
                 </p>
+                <Pagination data={paginationData} onChangePage={onChangePage} />
                 {messagesLoading && <RecruiterMessagesLoaderSkeleton />}
                 {messages &&
                     !messagesLoading &&
@@ -145,6 +165,7 @@ export default function RecruiterMessages() {
                         );
                     })}
             </section>
+            <Pagination data={paginationData} onChangePage={onChangePage} />
         </>
     );
 }

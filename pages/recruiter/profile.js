@@ -20,6 +20,7 @@ import RecruiterInfoEditPopup from "../../components/recuriters/profile-edit/rec
 import { RiImageEditFill } from "react-icons/ri";
 import { AuthContext } from "../_app";
 import RecruiterProfileLoader from "../../components/skeleton-loaders/recruiter-profile-loader";
+import Pagination from "../../components/pagination";
 
 export default function Profile() {
     const router = useRouter();
@@ -74,6 +75,8 @@ export default function Profile() {
     const [companyAvatar, setCompanyAvatar] = useState();
 
     const [profileLoading, setProfileLoading] = useState(false);
+
+    const [paginationData, setPaginationData] = useState({});
 
     useEffect(() => {
         if (basicInfoUpdateSuccess && linksUpdateSuccess) {
@@ -177,6 +180,10 @@ export default function Profile() {
         }
     }
 
+    const onChangePage = (newPageURL) => {
+        fetchJobs(newPageURL);
+    };
+
     async function fetchJobs(url) {
         if (!url) {
             const userId = localStorage.getItem("user_id");
@@ -187,6 +194,10 @@ export default function Profile() {
             let theJobs = await axios.get(url, {
                 headers: Utils.getHeaders(),
             });
+
+            console.log("pagination data: ", theJobs.data.data);
+
+            setPaginationData(theJobs.data.data);
 
             theJobs = theJobs.data.data.data;
 
@@ -673,6 +684,10 @@ export default function Profile() {
                             </p>
                             {/* <span className="text-primary-70">Edit</span> */}
                         </div>
+                        <Pagination
+                            data={paginationData}
+                            onChangePage={onChangePage}
+                        />
                         <div className="form-input-container border border-solid rounded-md border-my-gray-70 py-2 px-4 my-3">
                             {jobs &&
                                 jobs.length > 0 &&
@@ -749,6 +764,10 @@ export default function Profile() {
                                 </span>
                             </div>
                         </div>
+                        <Pagination
+                            data={paginationData}
+                            onChangePage={onChangePage}
+                        />
                         <div className="form-input-container ">
                             <p className="flex flex-row flex-nowrap justify-between items-center w-full p-2">
                                 <label className=" font-medium text-my-gray-70">
