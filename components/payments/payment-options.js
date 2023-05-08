@@ -86,6 +86,8 @@ export default function PaymentOptions({
 
         document.body.style.overflowY = "visible";
 
+        localStorage.setItem("payment_amount", amount);
+
         const url = `${Config.API_URL}/create_payment`;
 
         const values = {

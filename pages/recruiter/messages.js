@@ -111,6 +111,7 @@ export default function RecruiterMessages() {
 
                 {messagesLoading && <RecruiterMessagesLoaderSkeleton />}
                 {messages &&
+                    messages.length > 0 &&
                     !messagesLoading &&
                     messages.map((message) => {
                         if (

@@ -57,7 +57,8 @@ export default function RecruiterDashbaord() {
 
         // console.log("query: ", router.query);
         if (router.query.transaction_id) {
-            onVerifyPayment(router.query.transaction_id);
+            // onVerifyPayment(router.query.transaction_id);
+            getUserWallet();
         }
     }, [router.isReady]);
 
@@ -104,9 +105,9 @@ export default function RecruiterDashbaord() {
 
             setAmountReloaded(whenPaymentTheAmount);
 
-            const whenPaymentTheAuthorizationId = localStorage.getItem(
-                "payment_authorization_id"
-            );
+            // const whenPaymentTheAuthorizationId = localStorage.getItem(
+            //     "payment_authorization_id"
+            // );
 
             // console.log(
             //     "when payment------",
@@ -179,6 +180,26 @@ export default function RecruiterDashbaord() {
         });
     };
 
+    async function getUserWallet() {
+        Utils.makeRequest(async () => {
+            try {
+                const userId = localStorage.getItem("user_id");
+                const url = `${Config.API_URL}/wallets/user/${userId}`;
+
+                let wallet = await axios.get(url, {
+                    headers: Utils.getHeaders(),
+                });
+
+                wallet = wallet.data.data[0];
+                console.log("wallet: ", wallet);
+                setWallet(wallet);
+                setShowReloadSuccessPopup(true);
+            } catch (error) {
+                console.log("wallet fetch Error: ", error);
+            }
+        });
+    }
+
     async function fetchRecruiterMessages() {
         setMessagesLoading(true);
         try {
@@ -211,6 +232,7 @@ export default function RecruiterDashbaord() {
         setShowReloadSuccessPopup(false);
         localStorage.removeItem("payment_authorization_id");
         localStorage.removeItem("payment_method");
+        localStorage.removeItem("payment_amount");
         history.pushState(
             { search: "" },
             "",

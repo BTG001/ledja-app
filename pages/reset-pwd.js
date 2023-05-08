@@ -93,6 +93,11 @@ export default function ResetPassword() {
             hasErrors = true;
         }
 
+        if (!resetValues.code) {
+            theErrors.code = "The Verification code is required";
+            hasErrors = true;
+        }
+
         setErrors(theErrors);
         return hasErrors;
     };
@@ -190,6 +195,30 @@ export default function ResetPassword() {
                         />
                         <p className="text-red-500 text-left  ">
                             {errors.confirm_password || ""}
+                        </p>
+                    </div>
+
+                    <div className="form-input-container" required>
+                        <label className="form-label">Verification Code</label>
+                        <input
+                            onChange={(e) => {
+                                const value = e.target.value;
+                                setResetValues((prevValues) => {
+                                    return {
+                                        ...prevValues,
+                                        code: value,
+                                    };
+                                });
+                            }}
+                            value={resetValues.code || ""}
+                            className="form-input"
+                            type={"number"}
+                            name="code"
+                            placeholder="eg. 52738729"
+                            required
+                        />
+                        <p className="text-red-500 text-left  ">
+                            {errors.code || ""}
                         </p>
                     </div>
 
