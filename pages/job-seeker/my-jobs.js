@@ -157,9 +157,9 @@ export default function MyJobs() {
 
                 console.log("applied pagination data: ", theApplications.data);
 
-                setAppliedPaginationData(theApplications.data);
+                setAppliedPaginationData(theApplications.data.data);
 
-                theApplications = theApplications.data.data;
+                theApplications = theApplications.data.data.data;
                 setApplications(theApplications);
 
                 console.log("Applications: ", theApplications);
@@ -329,7 +329,13 @@ export default function MyJobs() {
                     (!applications || applications.length < 1) && (
                         <p className="text-center">No Applications</p>
                     )}
-
+                {(activeTab == "applied" || activeTab == "interview") &&
+                    !applicationsLoading > 0 && (
+                        <Pagination
+                            data={appliedPaginationData}
+                            onChangePage={onChangeAppliedJobsPage}
+                        />
+                    )}
                 {(activeTab == "applied" || activeTab == "interview") &&
                     !applicationsLoading &&
                     applications &&
@@ -435,6 +441,13 @@ export default function MyJobs() {
                                 );
                             })}
                         </div>
+                    )}
+                {(activeTab == "applied" || activeTab == "interview") &&
+                    !applicationsLoading > 0 && (
+                        <Pagination
+                            data={appliedPaginationData}
+                            onChangePage={onChangeAppliedJobsPage}
+                        />
                     )}
 
                 {activeTab == "saved" && (

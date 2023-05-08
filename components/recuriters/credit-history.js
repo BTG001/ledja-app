@@ -5,6 +5,7 @@ import Utils from "../../Utils";
 import Config from "../../Config";
 import Image from "next/image";
 import TransactionsSkeletonLoader from "../skeleton-loaders/transactions-skeleton-loader";
+import Pagination from "../../components/pagination";
 
 export default function CreditHistory({ showPopup, onClose }) {
     useEffect(() => {
@@ -21,15 +22,28 @@ export default function CreditHistory({ showPopup, onClose }) {
 
     const [transactions, setTransactions] = useState();
     const [transactionsLoading, setTransactionsLoading] = useState(true);
+    const [paginationData, setPaginationData] = useState({});
 
-    async function fetchTransactions(id) {
+    const onChangePage = (newPageURL) => {
+        fetchTransactions(newPageURL);
+    };
+
+    async function fetchTransactions(url) {
         setTransactionsLoading(true);
         try {
             const userId = localStorage.getItem("user_id");
-            const url = `${Config.API_URL}/transactions/user/${userId}`;
+
+            if (!url) {
+                url = `${Config.API_URL}/transactions/user/${userId}`;
+            }
+
             let transactions = await axios.get(url, {
                 headers: Utils.getHeaders(),
             });
+
+            console.log("pagination transaction data", transactions.data.data);
+
+            setPaginationData(transactions.data.data);
 
             transactions = transactions.data.data.data;
 
@@ -62,7 +76,16 @@ export default function CreditHistory({ showPopup, onClose }) {
                         />
                     </p>
 
-                    <div className="col-span-2 h-max max-h-60-screen min-h-60-screen   overflow-y-auto pl-6 pr-6 my-1">
+                    {!transactionsLoading &&
+                        transactions &&
+                        transactions.length > 0 && (
+                            <Pagination
+                                data={paginationData}
+                                onChangePage={onChangePage}
+                            />
+                        )}
+
+                    <div className="col-span-2 h-max max-h-50-screen min-h-50-screen   overflow-y-auto pl-6 pr-6 my-5">
                         {transactionsLoading && <TransactionsSkeletonLoader />}
                         {!transactionsLoading &&
                             transactions &&
@@ -103,6 +126,15 @@ export default function CreditHistory({ showPopup, onClose }) {
                                 );
                             })}
                     </div>
+
+                    {!transactionsLoading &&
+                        transactions &&
+                        transactions.length > 0 && (
+                            <Pagination
+                                data={paginationData}
+                                onChangePage={onChangePage}
+                            />
+                        )}
 
                     <div
                         onClick={() => {

@@ -168,7 +168,7 @@ export default function RecruiterDashbaord() {
                 console.log("Verification: ", verification);
 
                 if (!verification.wallet) {
-                    setFailedMessage(verification);
+                    // setFailedMessage(verification);
                 } else {
                     setWallet(verification.wallet);
                     setShowReloadSuccessPopup(true);

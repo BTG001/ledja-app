@@ -19,7 +19,7 @@ export default function Pagination({ data, onChangePage }) {
 
     return (
         <>
-            <div className="flex flex-row justify-center items-center">
+            <div className="flex flex-row justify-center items-center py-2">
                 <FaAngleDoubleLeft
                     onClick={() => {
                         if (!data.first_page_url) {

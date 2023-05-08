@@ -102,7 +102,13 @@ export default function RecruiterMessages() {
                         Read
                     </span>
                 </p>
-                <Pagination data={paginationData} onChangePage={onChangePage} />
+                {!messagesLoading && messages && messages.length > 0 && (
+                    <Pagination
+                        data={paginationData}
+                        onChangePage={onChangePage}
+                    />
+                )}
+
                 {messagesLoading && <RecruiterMessagesLoaderSkeleton />}
                 {messages &&
                     !messagesLoading &&
@@ -165,7 +171,9 @@ export default function RecruiterMessages() {
                         );
                     })}
             </section>
-            <Pagination data={paginationData} onChangePage={onChangePage} />
+            {!messagesLoading && messages && messages.length > 0 && (
+                <Pagination data={paginationData} onChangePage={onChangePage} />
+            )}
         </>
     );
 }
