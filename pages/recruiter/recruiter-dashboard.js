@@ -204,7 +204,7 @@ export default function RecruiterDashbaord() {
         setMessagesLoading(true);
         try {
             const userId = localStorage.getItem("user_id");
-            const url = `${Config.API_URL}/messages/user/${userId}`;
+            const url = `${Config.API_URL}/messages/user/${userId}?page=1`;
             let recruiterMessages = await axios.get(url, {
                 headers: Utils.getHeaders(),
             });
@@ -364,7 +364,13 @@ export default function RecruiterDashbaord() {
                                     href={"/recruiter/messages"}
                                     className="font-medium text-center"
                                 >
-                                    Unread messages ({messages.unread_messages})
+                                    Unread messages (
+                                    {messages.data
+                                        ? messages.data[
+                                              messages.data.length - 3
+                                          ]
+                                        : "0"}
+                                    )
                                 </Link>
                                 <Image
                                     src={"/message-icon.svg"}
@@ -376,10 +382,7 @@ export default function RecruiterDashbaord() {
                                     href={"/recruiter/messages"}
                                     className="text-sm text-center"
                                 >
-                                    You have{" "}
-                                    {messages.messages
-                                        ? messages.messages.length
-                                        : "0"}{" "}
+                                    You have {messages ? messages.total : "0"}{" "}
                                     messages
                                 </Link>
                             </>
