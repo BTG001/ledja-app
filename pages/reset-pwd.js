@@ -8,6 +8,7 @@ import axios from "axios";
 import Config from "../Config";
 import Utils from "../Utils";
 import ErrorPopup from "../components/errorPopup";
+import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
 export default function ResetPassword() {
     const router = useRouter();
 
@@ -23,6 +24,17 @@ export default function ResetPassword() {
         // confirm_password: "secret",
     });
 
+    const [returnMessage, setReturnMessage] = useState("");
+
+    const [passwordVisible, setPasswordVisible] = useState(false);
+    const [passwordInputActive, setPasswordInputActive] = useState(false);
+    const [passwordConfirmationVisible, setPasswordConfirmationVisible] =
+        useState(false);
+    const [
+        passwordConfirmationInputActive,
+        setPasswordConfirmationInputActive,
+    ] = useState(false);
+
     const onResetSubmit = async (e) => {
         e.preventDefault();
 
@@ -37,6 +49,7 @@ export default function ResetPassword() {
             setLoading(false);
             return;
         }
+
         const passwordResetFormData = new FormData();
         passwordResetFormData.append("email", resetValues.email);
         passwordResetFormData.append("password", resetValues.password);
@@ -44,6 +57,7 @@ export default function ResetPassword() {
             "confirm_password",
             resetValues.confirm_password
         );
+        passwordResetFormData.append("code", resetValues.code);
 
         Utils.makeRequest(async () => {
             try {
@@ -55,8 +69,12 @@ export default function ResetPassword() {
                 console.log("reset results: ", results);
 
                 setLoading(false);
-                setResetValues({});
-                router.push("/login");
+
+                if (results.data.success) {
+                    router.push("/login");
+                    setResetValues({});
+                }
+                setReturnMessage(results.data.message);
             } catch (error) {
                 console.log("reset error: ", error);
                 setErrorMessage("An Error Occurred While Resetting Password");
@@ -126,6 +144,9 @@ export default function ResetPassword() {
                 <h3 className="form-title">Reset Your Password</h3>
                 <form className="form" onSubmit={onResetSubmit}>
                     <div className="form-input-container">
+                        <p className="text-red-500 text-left  ">
+                            {returnMessage || ""}
+                        </p>
                         <label className="form-label">Email Address</label>
                         <input
                             onChange={(e) => {
@@ -149,7 +170,7 @@ export default function ResetPassword() {
                         </p>
                     </div>
 
-                    <div className="form-input-container" required>
+                    {/* <div className="form-input-container" required>
                         <label className="form-label">New Password</label>
                         <input
                             onChange={(e) => {
@@ -171,8 +192,8 @@ export default function ResetPassword() {
                         <p className="text-red-500 text-left  ">
                             {errors.password || ""}
                         </p>
-                    </div>
-                    <div className="form-input-container" required>
+                    </div> */}
+                    {/* <div className="form-input-container" required>
                         <label className="form-label">
                             Confirm New Password
                         </label>
@@ -193,6 +214,129 @@ export default function ResetPassword() {
                             placeholder="6 characters minimum"
                             required
                         />
+                        <p className="text-red-500 text-left  ">
+                            {errors.confirm_password || ""}
+                        </p>
+                    </div> */}
+
+                    <div className="form-input-container" required>
+                        <label className="form-label">Password</label>
+                        <div
+                            className={` flex justify-between items-center border border-solid px-4 text-dark-50 w-full  py-1 placeholder:text-my-gray-70 placeholder:text-sm rounded-sm mt-3
+                        ${
+                            passwordInputActive
+                                ? "border-primary-70"
+                                : "border-my-gray-70"
+                        }`}
+                        >
+                            <input
+                                onChange={(e) => {
+                                    const value = e.target.value;
+                                    setResetValues((prevValues) => {
+                                        return {
+                                            ...prevValues,
+                                            password: value,
+                                        };
+                                    });
+                                }}
+                                value={resetValues.password || ""}
+                                className="outline-none active:outline-none flex-grow"
+                                type={!passwordVisible ? "password" : "text"}
+                                onFocus={() => {
+                                    console.log("input active.......");
+                                    setPasswordInputActive(true);
+                                }}
+                                onBlur={() => {
+                                    setPasswordInputActive(false);
+                                }}
+                                name="password"
+                                placeholder="6 characters minimum"
+                                required
+                            />
+
+                            {passwordVisible && (
+                                <AiOutlineEye
+                                    onClick={() => {
+                                        setPasswordVisible(false);
+                                    }}
+                                    className="text-2xl p-1"
+                                />
+                            )}
+                            {!passwordVisible && (
+                                <AiOutlineEyeInvisible
+                                    onClick={() => {
+                                        setPasswordVisible(true);
+                                    }}
+                                    className="text-2xl p-1"
+                                />
+                            )}
+                        </div>
+                        <p className="text-red-500 my-1 py-1">
+                            {errors.password || ""}
+                        </p>
+                    </div>
+
+                    <div className="form-input-container" required>
+                        <label className="form-label">
+                            Password Confirmation
+                        </label>
+                        <div
+                            className={` flex justify-between items-center border border-solid px-4 text-dark-50 w-full  py-1 placeholder:text-my-gray-70 placeholder:text-sm rounded-sm mt-3
+                        ${
+                            passwordConfirmationInputActive
+                                ? "border-primary-70"
+                                : "border-my-gray-70"
+                        }`}
+                        >
+                            <input
+                                onChange={(e) => {
+                                    const value = e.target.value;
+                                    setResetValues((prevValues) => {
+                                        return {
+                                            ...prevValues,
+                                            confirm_password: value,
+                                        };
+                                    });
+                                }}
+                                value={resetValues.confirm_password || ""}
+                                className="outline-none active:outline-none flex-grow"
+                                type={
+                                    !passwordConfirmationVisible
+                                        ? "password"
+                                        : "text"
+                                }
+                                onFocus={() => {
+                                    console.log("input active.......");
+                                    setPasswordConfirmationInputActive(true);
+                                }}
+                                onBlur={() => {
+                                    setPasswordConfirmationInputActive(false);
+                                }}
+                                name="c_password"
+                                placeholder="6 characters minimum"
+                                required
+                            />
+
+                            {passwordConfirmationVisible && (
+                                <AiOutlineEye
+                                    onClick={() => {
+                                        setPasswordConfirmationVisible(false);
+                                    }}
+                                    className="text-2xl p-1"
+                                />
+                            )}
+                            {!passwordConfirmationVisible && (
+                                <AiOutlineEyeInvisible
+                                    onClick={() => {
+                                        setPasswordConfirmationVisible(true);
+                                    }}
+                                    className="text-2xl p-1"
+                                />
+                            )}
+                        </div>
+                        {/* <p className="text-red-500 my-1 py-1">
+                            {errors.c_password || ""}
+                        </p> */}
                         <p className="text-red-500 text-left  ">
                             {errors.confirm_password || ""}
                         </p>
