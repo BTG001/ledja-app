@@ -18,6 +18,10 @@ export default function RecruiterMessages() {
         fetchRecruiterMessages();
     }, []);
 
+    useEffect(() => {
+        console.log("messages changed: ", messages);
+    }, [messages]);
+
     const onChangePage = (newPageURL) => {
         fetchRecruiterMessages(newPageURL);
     };
@@ -28,9 +32,11 @@ export default function RecruiterMessages() {
             const userId = localStorage.getItem("user_id");
 
             let url = newPageURL;
+            let isFirstPage = false;
 
             if (!url) {
-                url = `${Config.API_URL}/messages/user/${userId}`;
+                isFirstPage = true;
+                url = `${Config.API_URL}/messages/user/${userId}?page=1`;
             }
 
             let recruiterMessages = await axios.get(url, {
@@ -44,7 +50,13 @@ export default function RecruiterMessages() {
 
             setPaginationData(recruiterMessages.data.data);
 
-            recruiterMessages = recruiterMessages.data.data.data.messages;
+            if (!isFirstPage) {
+                recruiterMessages = Object.values(
+                    recruiterMessages.data.data.data
+                );
+            } else {
+                recruiterMessages = recruiterMessages.data.data.data;
+            }
 
             setMessages(recruiterMessages);
 
@@ -80,6 +92,12 @@ export default function RecruiterMessages() {
         <>
             <RecruiterNavbar active="message" />
             <section className="md:w-4/5 w-5/6 mx-auto my-5">
+                {!messagesLoading && messages && messages.length > 0 && (
+                    <Pagination
+                        data={paginationData}
+                        onChangePage={onChangePage}
+                    />
+                )}
                 <p className="flex flex-row justify-center items-center p-2">
                     <span
                         onClick={() => {
@@ -102,18 +120,13 @@ export default function RecruiterMessages() {
                         Read
                     </span>
                 </p>
-                {!messagesLoading && messages && messages.length > 0 && (
-                    <Pagination
-                        data={paginationData}
-                        onChangePage={onChangePage}
-                    />
-                )}
 
                 {messagesLoading && <RecruiterMessagesLoaderSkeleton />}
                 {messages &&
+                    activeTab == "read" &&
                     messages.length > 0 &&
                     !messagesLoading &&
-                    messages.map((message) => {
+                    messages.map((message, index) => {
                         if (
                             activeTab == "unread" &&
                             message.has_recruiter_read
@@ -126,8 +139,89 @@ export default function RecruiterMessages() {
                         ) {
                             return <></>;
                         }
+
+                        if (!message.id) {
+                            console.log("has id index:------ ", index, message);
+                            return <></>;
+                        }
+
                         return (
-                            <div className="my-2 bg-my-gray-50 p-2 rounded-sm">
+                            <div
+                                key={index}
+                                className="my-2 bg-my-gray-50 p-2 rounded-sm"
+                            >
+                                {activeTab != "read" && (
+                                    <p
+                                        className="flex justify-end "
+                                        title="dismiss"
+                                    >
+                                        <Image
+                                            onClick={() => {
+                                                dismissMessage(message);
+                                            }}
+                                            src={"/x-icon.svg"}
+                                            className="cursor-pointer p-1 bg-white text-red-500 rounded-full"
+                                            width={20}
+                                            height={20}
+                                        />
+                                    </p>
+                                )}
+                                <p className="flex flex-cols justify-start md:grid md:grid-cols-5">
+                                    <span className="text-lg font-medium text-dark p-2 mr-3">
+                                        Job
+                                    </span>
+                                    <span className="p-2 text-my-gray-70 col-span-4">
+                                        {message.application.job.title}
+                                    </span>
+                                </p>
+                                <p className="flex flex-cols justify-start md:grid md:grid-cols-5">
+                                    <span className="text-lg font-medium text-dark p-2 mr-3">
+                                        Applicant
+                                    </span>
+                                    <span className="p-2 text-my-gray-70 col-span-4">
+                                        {message.application.user.email}
+                                    </span>
+                                </p>
+                                <p className="flex flex-cols justify-start md:grid md:grid-cols-5">
+                                    <span className="text-lg font-medium text-dark p-2 mr-3">
+                                        Message
+                                    </span>
+                                    <span className="p-2 text-my-gray-70 col-span-4">
+                                        {message.recruiter_message}
+                                    </span>
+                                </p>
+                            </div>
+                        );
+                    })}
+
+                {messages &&
+                    activeTab == "unread" &&
+                    messages.length > 0 &&
+                    !messagesLoading &&
+                    messages.map((message, index) => {
+                        if (
+                            activeTab == "unread" &&
+                            message.has_recruiter_read
+                        ) {
+                            return <></>;
+                        }
+                        if (
+                            activeTab == "read" &&
+                            !message.has_recruiter_read
+                        ) {
+                            return <></>;
+                        }
+
+                        if (!message.id) {
+                            console.log("has id index:------ ", index, message);
+                            return <></>;
+                        }
+
+                        return (
+                            <div
+                                key={index}
+                                className="my-2 bg-my-gray-50 p-2 rounded-sm"
+                            >
                                 {activeTab != "read" && (
                                     <p
                                         className="flex justify-end "
