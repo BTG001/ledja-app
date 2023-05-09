@@ -24,11 +24,19 @@ export default function JobSeekerMessages() {
         fetchUserMessages(newPageURL);
     };
 
-    async function fetchUserMessages() {
+    async function fetchUserMessages(newPageURL) {
         setMessagesLoading(true);
         try {
             const userId = localStorage.getItem("user_id");
-            const url = `${Config.API_URL}/messages/user/${userId}`;
+
+            let url = newPageURL;
+            let isFirstPage = false;
+
+            if (!url) {
+                isFirstPage = true;
+                url = `${Config.API_URL}/messages/user/${userId}?page=1`;
+            }
+
             let userMessages = await axios.get(url, {
                 headers: Utils.getHeaders(),
             });
@@ -37,7 +45,12 @@ export default function JobSeekerMessages() {
 
             setPaginationData(userMessages.data.data);
 
-            userMessages = userMessages.data.data.data.messages;
+            if (!isFirstPage) {
+                userMessages = Object.values(userMessages.data.data.data);
+            } else {
+                userMessages = userMessages.data.data.data;
+            }
+
             console.log("jobseeker messages: ", userMessages);
 
             setMessages(userMessages);
@@ -73,6 +86,12 @@ export default function JobSeekerMessages() {
         <>
             <JobSeekerNavbar active={"message"} />
             <section className="md:w-4/5 w-5/6 mx-auto my-5">
+                {messages && messages.length > 0 && (
+                    <Pagination
+                        data={paginationData}
+                        onChangePage={onChangePage}
+                    />
+                )}
                 <p className="flex flex-row justify-center items-center p-2">
                     <span
                         onClick={() => {
@@ -96,18 +115,13 @@ export default function JobSeekerMessages() {
                     </span>
                 </p>
 
-                {messages && messages.length > 0 && (
-                    <Pagination
-                        data={paginationData}
-                        onChangePage={onChangePage}
-                    />
-                )}
-
                 {!messagesLoading && (!messages || messages.length < 1) && (
                     <p className="text-center">No Messages</p>
                 )}
                 {messagesLoading && <userMessagesLoaderSkeleton />}
                 {messages &&
+                    activeTab == "unread" &&
+                    messages.length > 0 &&
                     !messagesLoading &&
                     messages.map((message) => {
                         if (
@@ -120,6 +134,77 @@ export default function JobSeekerMessages() {
                             activeTab == "read" &&
                             !message.has_jobseeker_read
                         ) {
+                            return <></>;
+                        }
+
+                        if (!message.id) {
+                            return <></>;
+                        }
+                        return (
+                            <div className="my-3 bg-my-gray-50 p-2 rounded-lg">
+                                {activeTab != "read" && (
+                                    <p
+                                        className="flex justify-end "
+                                        title="dismiss"
+                                    >
+                                        <Image
+                                            onClick={() => {
+                                                dismissMessage(message);
+                                            }}
+                                            src={"/x-icon.svg"}
+                                            className="cursor-pointer p-1 bg-white text-red-500 rounded-full"
+                                            width={20}
+                                            height={20}
+                                        />
+                                    </p>
+                                )}
+                                <p className="flex flex-cols justify-start md:grid md:grid-cols-5">
+                                    <span className="text-lg font-medium text-dark p-2 mr-3">
+                                        Job
+                                    </span>
+                                    <span className="p-2 text-my-gray-70 col-span-4">
+                                        {message.application.job.title}
+                                    </span>
+                                </p>
+                                <p className="flex flex-cols justify-start md:grid md:grid-cols-5">
+                                    <span className="text-lg font-medium text-dark p-2 mr-3">
+                                        Applicant
+                                    </span>
+                                    <span className="p-2 text-my-gray-70 col-span-4">
+                                        {message.application.user.email}
+                                    </span>
+                                </p>
+                                <p className="flex flex-cols justify-start md:grid md:grid-cols-5">
+                                    <span className="text-lg font-medium text-dark p-2 mr-3">
+                                        Message
+                                    </span>
+                                    <span className="p-2 text-my-gray-70 col-span-4">
+                                        {message.jobseeker_message}
+                                    </span>
+                                </p>
+                            </div>
+                        );
+                    })}
+
+                {messages &&
+                    activeTab == "read" &&
+                    messages.length > 0 &&
+                    !messagesLoading &&
+                    messages.map((message) => {
+                        if (
+                            activeTab == "unread" &&
+                            message.has_jobseeker_read
+                        ) {
+                            return <></>;
+                        }
+                        if (
+                            activeTab == "read" &&
+                            !message.has_jobseeker_read
+                        ) {
+                            return <></>;
+                        }
+
+                        if (!message.id) {
                             return <></>;
                         }
                         return (
