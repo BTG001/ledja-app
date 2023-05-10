@@ -70,7 +70,10 @@ export default function ResetPassword() {
 
                 setLoading(false);
 
-                if (results.data.success) {
+                if (
+                    results.data.success &&
+                    results.data.message.search("Successfull") != -1
+                ) {
                     router.push("/login");
                     setResetValues({});
                 }
